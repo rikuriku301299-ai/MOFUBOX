@@ -562,6 +562,7 @@ input, textarea { font-family: inherit; }
   height: 150px;
 }
 .step-card__shot .emoji { font-size: 46px; }
+.steps-4 { grid-template-columns: repeat(4, 1fr); }
 
 .split {
   display: grid;
@@ -1085,6 +1086,7 @@ table tbody tr:hover { background: var(--cream); }
 
 @media (max-width: 1080px) {
   .features-grid { grid-template-columns: repeat(2, 1fr); }
+  .steps-4 { grid-template-columns: repeat(2, 1fr); }
   .stat-grid { grid-template-columns: repeat(2, 1fr); }
   .grid-2 { grid-template-columns: 1fr; }
   .cat-grid { grid-template-columns: repeat(2, 1fr); }
@@ -1103,7 +1105,7 @@ table tbody tr:hover { background: var(--cream); }
   .lp-nav__links, .lp-nav__cta .btn-outline { display: none; }
   .split, .split.reverse { grid-template-columns: 1fr; }
   .split.reverse .split__media { order: 0; }
-  .steps, .testimonials { grid-template-columns: 1fr; }
+  .steps, .steps-4, .testimonials { grid-template-columns: 1fr; }
   .lp-footer__top { grid-template-columns: 1fr 1fr; gap: 30px; }
   .cta-band { flex-direction: column; text-align: center; padding: 48px 28px; }
 }
