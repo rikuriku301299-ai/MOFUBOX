@@ -1,0 +1,538 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ブリーダー管理画面 | MOFUBOX</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&family=Zen+Maru+Gothic:wght@400;500;700;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/style.css">
+</head>
+<body class="dash-body">
+
+<div class="dash">
+
+  <aside class="dash-sidebar">
+    <a href="index.html" class="logo">
+      <span class="logo__mark">
+        <svg class="icon" viewBox="0 0 24 24" width="20" height="20" fill="currentColor" stroke="none">
+          <circle cx="5.5" cy="9" r="2.1"/><circle cx="9.7" cy="5.3" r="2.1"/><circle cx="14.3" cy="5.3" r="2.1"/><circle cx="18.5" cy="9" r="2.1"/>
+          <path d="M12 11c3.4 0 6.4 2.2 6.4 5.1 0 2.4-2 3.9-4.4 3.9-1 0-1.5-.4-2-.4s-1 .4-2 .4c-2.4 0-4.4-1.5-4.4-3.9C5.6 13.2 8.6 11 12 11z"/>
+        </svg>
+      </span>
+      <span>MOFUBOX</span>
+    </a>
+
+    <nav class="dash-nav">
+      <div class="dash-nav__label">ブリーダー管理</div>
+      <a href="#" data-view-link="view-dashboard" data-title="ダッシュボード" data-sub="本日の活動状況をひと目で確認できます" class="active">
+        <svg class="icon" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="9" rx="1.5"/><rect x="14" y="3" width="7" height="5" rx="1.5"/><rect x="14" y="12" width="7" height="9" rx="1.5"/><rect x="3" y="16" width="7" height="5" rx="1.5"/></svg>
+        <span>ダッシュボード</span>
+      </a>
+      <a href="#" data-view-link="view-reels" data-title="リール管理" data-sub="投稿したリールの一覧と反響を確認できます">
+        <svg class="icon" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="3"/><polygon points="10 8 16 12 10 16 10 8" fill="currentColor" stroke="none"/></svg>
+        <span>リール管理</span><span class="count">24</span>
+      </a>
+      <a href="#" data-view-link="view-cats" data-title="子猫一覧" data-sub="募集中の子猫プロフィールを管理します">
+        <svg class="icon" viewBox="0 0 24 24"><circle cx="5.5" cy="9" r="1.6"/><circle cx="9.5" cy="5.3" r="1.6"/><circle cx="14.5" cy="5.3" r="1.6"/><circle cx="18.5" cy="9" r="1.6"/><path d="M12 11c3.4 0 6.4 2.2 6.4 5.1 0 2.4-2 3.9-4.4 3.9-1 0-1.5-.4-2-.4s-1 .4-2 .4c-2.4 0-4.4-1.5-4.4-3.9C5.6 13.2 8.6 11 12 11z"/></svg>
+        <span>子猫一覧</span><span class="count">8</span>
+      </a>
+      <a href="#" data-view-link="view-messages" data-title="メッセージ" data-sub="お客様からのお問い合わせに対応します">
+        <svg class="icon" viewBox="0 0 24 24"><path d="M21 11.5a8.4 8.4 0 0 1-1.1 4.2L21 20l-4.4-1.2a8.4 8.4 0 1 1 4.4-7.3z"/></svg>
+        <span>メッセージ</span><span class="count">5</span>
+      </a>
+      <a href="#" data-view-link="view-stats" data-title="売上・統計" data-sub="売上や成約状況の推移を確認できます">
+        <svg class="icon" viewBox="0 0 24 24"><path d="M3 3v18h18"/><path d="M7 14l4-4 3 3 5-6"/></svg>
+        <span>売上・統計</span>
+      </a>
+      <div class="dash-nav__label">設定</div>
+      <a href="#" data-view-link="view-profile" data-title="プロフィール設定" data-sub="キャッテリー情報や審査ステータスを管理します">
+        <svg class="icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.9l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.9-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.6 1.7 1.7 0 0 0-1.9.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.9 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.6-1.1 1.7 1.7 0 0 0-.3-1.9l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.9.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.9-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.9V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg>
+        <span>プロフィール設定</span>
+      </a>
+    </nav>
+
+    <div class="dash-sidebar__user">
+      <div class="avatar avatar-sm coral" style="width:38px;height:38px;font-size:14px;">も</div>
+      <div>
+        <strong>もふもふ・キャッテリー</strong>
+        <span>ブリーダー</span>
+      </div>
+      <button aria-label="ログアウト"><svg class="icon" viewBox="0 0 24 24" width="18" height="18"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg></button>
+    </div>
+  </aside>
+
+  <main class="dash-main">
+
+    <div class="dash-topbar">
+      <div>
+        <h1 data-view-title>ダッシュボード</h1>
+        <div class="sub" data-view-sub>本日の活動状況をひと目で確認できます</div>
+      </div>
+      <div class="dash-topbar__right">
+        <div class="search-box">
+          <svg class="icon" viewBox="0 0 24 24" width="16" height="16"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.6" y2="16.6"/></svg>
+          <input type="text" placeholder="子猫・リールを検索">
+        </div>
+        <button class="icon-btn" aria-label="通知"><svg class="icon" viewBox="0 0 24 24" width="18" height="18"><path d="M18 8a6 6 0 1 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.7 21a2 2 0 0 1-3.4 0"/></svg><span class="dot"></span></button>
+        <a href="#" data-view-link="view-reels" data-title="リール管理" data-sub="投稿したリールの一覧と反響を確認できます" class="btn btn-coral btn-sm">
+          <svg class="icon" viewBox="0 0 24 24" width="15" height="15" stroke-width="2.6"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+          新規リール投稿
+        </a>
+        <div class="avatar avatar-md coral">も</div>
+      </div>
+    </div>
+
+    <!-- ===================== VIEW: ダッシュボード ===================== -->
+    <section id="view-dashboard" class="view active">
+      <div class="stat-grid">
+        <div class="stat-card">
+          <div class="stat-card__top">
+            <div class="stat-card__icon mint"><svg class="icon" viewBox="0 0 24 24" width="18" height="18"><polygon points="6 4 20 12 6 20 6 4" fill="currentColor" stroke="none"/></svg></div>
+            <span class="stat-card__change up"><svg class="icon" viewBox="0 0 24 24" width="12" height="12"><polyline points="3 17 9 11 13 15 21 7"/></svg>+18.2%</span>
+          </div>
+          <div class="stat-card__value">128.4K</div>
+          <div class="stat-card__label">総視聴回数</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-card__top">
+            <div class="stat-card__icon coral"><svg class="icon" viewBox="0 0 24 24" width="18" height="18" fill="currentColor" stroke="none"><path d="M12 21s-6.7-4.3-9.4-8.3C.8 9.7 1.9 6 5.2 5 7.4 4.3 9.6 5.2 12 7.6 14.4 5.2 16.6 4.3 18.8 5c3.3 1 4.4 4.7 2.6 7.7C18.7 16.7 12 21 12 21z"/></svg></div>
+            <span class="stat-card__change up"><svg class="icon" viewBox="0 0 24 24" width="12" height="12"><polyline points="3 17 9 11 13 15 21 7"/></svg>+9.6%</span>
+          </div>
+          <div class="stat-card__value">12.3K</div>
+          <div class="stat-card__label">いいね数</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-card__top">
+            <div class="stat-card__icon mint"><svg class="icon" viewBox="0 0 24 24" width="18" height="18"><path d="M21 11.5a8.4 8.4 0 0 1-1.1 4.2L21 20l-4.4-1.2a8.4 8.4 0 1 1 4.4-7.3z"/></svg></div>
+            <span class="stat-card__change up"><svg class="icon" viewBox="0 0 24 24" width="12" height="12"><polyline points="3 17 9 11 13 15 21 7"/></svg>+24件</span>
+          </div>
+          <div class="stat-card__value">248</div>
+          <div class="stat-card__label">お問い合わせ数</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-card__top">
+            <div class="stat-card__icon coral"><svg class="icon" viewBox="0 0 24 24" width="18" height="18"><path d="M12 2 4 5v6c0 5 3.4 8.4 8 11 4.6-2.6 8-6 8-11V5l-8-3z"/></svg></div>
+            <span class="stat-card__change up"><svg class="icon" viewBox="0 0 24 24" width="12" height="12"><polyline points="3 17 9 11 13 15 21 7"/></svg>+3件</span>
+          </div>
+          <div class="stat-card__value">12件</div>
+          <div class="stat-card__label">今月の成約数</div>
+        </div>
+      </div>
+
+      <div class="grid-2">
+        <div class="panel">
+          <div class="panel-head">
+            <h3>視聴回数の推移</h3>
+            <span class="link">過去6ヶ月</span>
+          </div>
+          <div class="chart-wrap">
+            <svg viewBox="0 0 600 200" width="100%" height="100%" preserveAspectRatio="none">
+              <defs>
+                <linearGradient id="gradMint" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stop-color="#3FADA8" stop-opacity="0.32"/>
+                  <stop offset="100%" stop-color="#3FADA8" stop-opacity="0"/>
+                </linearGradient>
+              </defs>
+              <polyline points="0,160 120,142 240,150 360,98 480,108 600,52" fill="none" stroke="#3FADA8" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+              <polygon points="0,160 120,142 240,150 360,98 480,108 600,52 600,200 0,200" fill="url(#gradMint)"/>
+            </svg>
+          </div>
+          <div class="chart-legend" style="justify-content:space-between;">
+            <span>1月</span><span>2月</span><span>3月</span><span>4月</span><span>5月</span><span>6月</span>
+          </div>
+        </div>
+
+        <div class="panel">
+          <div class="panel-head"><h3>子猫ステータス</h3></div>
+          <div class="donut-wrap">
+            <div style="width:130px;height:130px;border-radius:50%;background:conic-gradient(var(--mint) 0% 50%, var(--coral) 50% 75%, var(--ink-faint) 75% 100%);display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+              <div style="width:84px;height:84px;border-radius:50%;background:var(--white);display:flex;flex-direction:column;align-items:center;justify-content:center;">
+                <strong class="font-en" style="font-size:20px;">24</strong>
+                <span style="font-size:10.5px;color:var(--ink-soft);">頭</span>
+              </div>
+            </div>
+            <ul class="donut-legend">
+              <li><i style="background:var(--mint)"></i>販売中 <b>12</b></li>
+              <li><i style="background:var(--coral)"></i>商談中 <b>6</b></li>
+              <li><i style="background:var(--ink-faint)"></i>成約済み <b>6</b></li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <div class="grid-2">
+        <div class="panel">
+          <div class="panel-head">
+            <h3>人気リールランキング</h3>
+            <a href="#" data-view-link="view-reels" data-title="リール管理" data-sub="投稿したリールの一覧と反響を確認できます" class="link">すべて見る</a>
+          </div>
+          <table>
+            <thead><tr><th>#</th><th>リール</th><th>視聴</th><th>いいね</th><th>お問い合わせ</th></tr></thead>
+            <tbody>
+              <tr>
+                <td class="t-num">1</td>
+                <td><div class="t-row-title"><div class="t-thumb illus-coral">🐱</div><div><strong>ふくちゃんのお昼寝タイム</strong><span>スコティッシュフォールド</span></div></div></td>
+                <td class="t-num">42.1K</td><td class="t-num">5,204</td><td class="t-num">38</td>
+              </tr>
+              <tr>
+                <td class="t-num">2</td>
+                <td><div class="t-row-title"><div class="t-thumb illus-mint">🐈</div><div><strong>ももの初めてのおもちゃ遊び</strong><span>マンチカン</span></div></div></td>
+                <td class="t-num">31.8K</td><td class="t-num">3,920</td><td class="t-num">29</td>
+              </tr>
+              <tr>
+                <td class="t-num">3</td>
+                <td><div class="t-row-title"><div class="t-thumb illus-gold">🐈‍⬛</div><div><strong>兄弟猫のじゃれあい</strong><span>アメリカンショートヘア</span></div></div></td>
+                <td class="t-num">18.4K</td><td class="t-num">2,115</td><td class="t-num">17</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="panel">
+          <div class="panel-head">
+            <h3>最近のお問い合わせ</h3>
+            <a href="#" data-view-link="view-messages" data-title="メッセージ" data-sub="お客様からのお問い合わせに対応します" class="link">すべて見る</a>
+          </div>
+          <div class="inquiry-list">
+            <div class="inquiry-item">
+              <div class="avatar avatar-sm mint" style="width:40px;height:40px;font-size:14px;">田</div>
+              <div class="inquiry-item__body">
+                <div class="inquiry-item__top"><strong>田中 様</strong><time>12分前</time></div>
+                <p>ふくちゃんはまだ募集していますか？見学は可能でしょうか…</p>
+              </div>
+            </div>
+            <div class="inquiry-item">
+              <div class="avatar avatar-sm coral" style="width:40px;height:40px;font-size:14px;">佐</div>
+              <div class="inquiry-item__body">
+                <div class="inquiry-item__top"><strong>佐藤 様</strong><time>1時間前</time></div>
+                <p>ワクチン接種の証明書は受け渡し時にいただけますか？</p>
+              </div>
+            </div>
+            <div class="inquiry-item">
+              <div class="avatar avatar-sm gold" style="width:40px;height:40px;font-size:14px;">鈴</div>
+              <div class="inquiry-item__body">
+                <div class="inquiry-item__top"><strong>鈴木 様</strong><time>3時間前</time></div>
+                <p>来週末に伺いたいのですが、ご都合いかがでしょうか。</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===================== VIEW: リール管理 ===================== -->
+    <section id="view-reels" class="view">
+      <div class="panel">
+        <div class="panel-head"><h3>新規リール投稿</h3></div>
+        <div class="upload-box">
+          <svg class="icon" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+          <div style="font-weight:700;color:var(--ink);margin-bottom:4px;">動画をドラッグ&ドロップ、またはクリックして選択</div>
+          <div style="font-size:12.5px;">MP4 / MOV・最大3分・縦型推奨（9:16）</div>
+        </div>
+        <div class="form-grid" style="margin-top:20px;">
+          <div class="field"><label>タイトル</label><input type="text" placeholder="例）ふくちゃんのお昼寝タイム"></div>
+          <div class="field"><label>対象の子猫</label><select><option>ふく（スコティッシュフォールド）</option><option>もも（マンチカン）</option><option>トラ（アメリカンショートヘア）</option></select></div>
+          <div class="field full"><label>キャプション・タグ</label><textarea rows="2" placeholder="#スコティッシュフォールド #子猫 #東京"></textarea></div>
+        </div>
+        <div style="display:flex;align-items:center;justify-content:space-between;">
+          <label style="display:flex;align-items:center;gap:10px;font-size:13.5px;font-weight:700;color:var(--ink-soft);">
+            <span class="toggle"><input type="checkbox" checked><span class="track"></span><span class="thumb"></span></span>
+            公開する
+          </label>
+          <button type="button" class="btn btn-coral">投稿する</button>
+        </div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-head">
+          <h3>投稿済みリール一覧（24件）</h3>
+          <div class="seg" data-seg-group="reels-filter">
+            <button class="active" data-seg-value="all">すべて</button>
+            <button data-seg-value="public">公開中</button>
+            <button data-seg-value="draft">非公開</button>
+          </div>
+        </div>
+        <table>
+          <thead><tr><th>リール</th><th>投稿日</th><th>視聴</th><th>いいね</th><th>お問い合わせ</th><th>状態</th><th>操作</th></tr></thead>
+          <tbody>
+            <tr>
+              <td><div class="t-row-title"><div class="t-thumb illus-coral">🐱</div><div><strong>ふくちゃんのお昼寝タイム</strong><span>スコティッシュフォールド・ふく</span></div></div></td>
+              <td>2026/06/18</td><td class="t-num">42.1K</td><td class="t-num">5,204</td><td class="t-num">38</td>
+              <td><span class="status-dot ok">公開中</span></td>
+              <td><div class="row-actions"><button aria-label="編集"><svg class="icon" viewBox="0 0 24 24" width="15" height="15"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z"/></svg></button><button aria-label="削除" class="reject"><svg class="icon" viewBox="0 0 24 24" width="15" height="15"><polyline points="3 6 5 6 21 6"/><path d="M8 6V4h8v2M19 6l-1 14H6L5 6"/></svg></button></div></td>
+            </tr>
+            <tr>
+              <td><div class="t-row-title"><div class="t-thumb illus-mint">🐈</div><div><strong>ももの初めてのおもちゃ遊び</strong><span>マンチカン・もも</span></div></div></td>
+              <td>2026/06/14</td><td class="t-num">31.8K</td><td class="t-num">3,920</td><td class="t-num">29</td>
+              <td><span class="status-dot ok">公開中</span></td>
+              <td><div class="row-actions"><button aria-label="編集"><svg class="icon" viewBox="0 0 24 24" width="15" height="15"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z"/></svg></button><button aria-label="削除" class="reject"><svg class="icon" viewBox="0 0 24 24" width="15" height="15"><polyline points="3 6 5 6 21 6"/><path d="M8 6V4h8v2M19 6l-1 14H6L5 6"/></svg></button></div></td>
+            </tr>
+            <tr>
+              <td><div class="t-row-title"><div class="t-thumb illus-gold">🐈‍⬛</div><div><strong>兄弟猫のじゃれあい</strong><span>アメリカンショートヘア・トラ</span></div></div></td>
+              <td>2026/06/09</td><td class="t-num">18.4K</td><td class="t-num">2,115</td><td class="t-num">17</td>
+              <td><span class="status-dot ok">公開中</span></td>
+              <td><div class="row-actions"><button aria-label="編集"><svg class="icon" viewBox="0 0 24 24" width="15" height="15"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z"/></svg></button><button aria-label="削除" class="reject"><svg class="icon" viewBox="0 0 24 24" width="15" height="15"><polyline points="3 6 5 6 21 6"/><path d="M8 6V4h8v2M19 6l-1 14H6L5 6"/></svg></button></div></td>
+            </tr>
+            <tr>
+              <td><div class="t-row-title"><div class="t-thumb illus-rose">🐾</div><div><strong>新入りの子猫を紹介します</strong><span>ラグドール・ルナ</span></div></div></td>
+              <td>2026/06/02</td><td class="t-num">6.7K</td><td class="t-num">540</td><td class="t-num">4</td>
+              <td><span class="status-dot pending">審査中</span></td>
+              <td><div class="row-actions"><button aria-label="編集"><svg class="icon" viewBox="0 0 24 24" width="15" height="15"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z"/></svg></button><button aria-label="削除" class="reject"><svg class="icon" viewBox="0 0 24 24" width="15" height="15"><polyline points="3 6 5 6 21 6"/><path d="M8 6V4h8v2M19 6l-1 14H6L5 6"/></svg></button></div></td>
+            </tr>
+            <tr>
+              <td><div class="t-row-title"><div class="t-thumb illus-dark">🎬</div><div><strong>キャッテリーの様子（撮影中）</strong><span>下書き</span></div></div></td>
+              <td>2026/05/28</td><td class="t-num">—</td><td class="t-num">—</td><td class="t-num">—</td>
+              <td><span class="status-dot muted">非公開</span></td>
+              <td><div class="row-actions"><button aria-label="編集"><svg class="icon" viewBox="0 0 24 24" width="15" height="15"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z"/></svg></button><button aria-label="削除" class="reject"><svg class="icon" viewBox="0 0 24 24" width="15" height="15"><polyline points="3 6 5 6 21 6"/><path d="M8 6V4h8v2M19 6l-1 14H6L5 6"/></svg></button></div></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- ===================== VIEW: 子猫一覧 ===================== -->
+    <section id="view-cats" class="view">
+      <div class="panel">
+        <div class="panel-head">
+          <h3>子猫一覧（8頭）</h3>
+          <div style="display:flex;gap:12px;align-items:center;">
+            <div class="seg" data-seg-group="cats-filter">
+              <button class="active" data-seg-value="all">すべて</button>
+              <button data-seg-value="selling">販売中</button>
+              <button data-seg-value="negotiating">商談中</button>
+              <button data-seg-value="sold">成約済み</button>
+            </div>
+            <button type="button" class="btn btn-mint btn-sm">
+              <svg class="icon" viewBox="0 0 24 24" width="14" height="14" stroke-width="2.6"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+              新規子猫登録
+            </button>
+          </div>
+        </div>
+        <div class="cat-grid">
+          <div class="cat-card">
+            <div class="cat-card__img illus illus-coral"><span class="pill pill-mint">販売中</span><span class="emoji">🐱</span></div>
+            <div class="cat-card__body"><strong>ふく</strong><p>スコティッシュフォールド・生後10週・オス</p><span class="price">¥180,000</span></div>
+          </div>
+          <div class="cat-card">
+            <div class="cat-card__img illus illus-mint"><span class="pill pill-coral">商談中</span><span class="emoji">🐈</span></div>
+            <div class="cat-card__body"><strong>もも</strong><p>マンチカン・生後8週・メス</p><span class="price">¥220,000</span></div>
+          </div>
+          <div class="cat-card">
+            <div class="cat-card__img illus illus-gold"><span class="pill pill-gray">成約済み</span><span class="emoji">🐈‍⬛</span></div>
+            <div class="cat-card__body"><strong>トラ</strong><p>アメリカンショートヘア・生後9週・オス</p><span class="price">¥150,000</span></div>
+          </div>
+          <div class="cat-card">
+            <div class="cat-card__img illus illus-rose"><span class="pill pill-mint">販売中</span><span class="emoji">🐾</span></div>
+            <div class="cat-card__body"><strong>ルナ</strong><p>ラグドール・生後11週・メス</p><span class="price">¥260,000</span></div>
+          </div>
+          <div class="cat-card">
+            <div class="cat-card__img illus illus-dark"><span class="pill pill-mint">販売中</span><span class="emoji">🐱</span></div>
+            <div class="cat-card__body"><strong>レオ</strong><p>ノルウェージャンフォレストキャット・生後12週・オス</p><span class="price">¥240,000</span></div>
+          </div>
+          <div class="cat-card">
+            <div class="cat-card__img illus illus-coral"><span class="pill pill-gray">成約済み</span><span class="emoji">🐈</span></div>
+            <div class="cat-card__body"><strong>みけ</strong><p>アメリカンショートヘア・生後14週・メス</p><span class="price">¥150,000</span></div>
+          </div>
+          <div class="cat-card">
+            <div class="cat-card__img illus illus-mint"><span class="pill pill-mint">販売中</span><span class="emoji">🐈‍⬛</span></div>
+            <div class="cat-card__body"><strong>くろ</strong><p>スコティッシュフォールド・生後7週・オス</p><span class="price">¥190,000</span></div>
+          </div>
+          <div class="cat-card">
+            <div class="cat-card__img illus illus-gold"><span class="pill pill-coral">商談中</span><span class="emoji">🐾</span></div>
+            <div class="cat-card__body"><strong>はな</strong><p>マンチカン・生後9週・メス</p><span class="price">¥210,000</span></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===================== VIEW: メッセージ ===================== -->
+    <section id="view-messages" class="view">
+      <div class="panel">
+        <div class="panel-head"><h3>お問い合わせ（5件の未対応）</h3></div>
+        <div class="chat-shell">
+          <div class="chat-list">
+            <div class="chat-list-item active">
+              <div class="avatar avatar-sm mint" style="width:40px;height:40px;font-size:14px;">田</div>
+              <div class="chat-list-item__body">
+                <div class="chat-list-item__top"><strong>田中 様</strong><time>12分前</time></div>
+                <p>ふくちゃんはまだ募集していますか？</p>
+              </div>
+            </div>
+            <div class="chat-list-item">
+              <div class="avatar avatar-sm coral" style="width:40px;height:40px;font-size:14px;">佐</div>
+              <div class="chat-list-item__body">
+                <div class="chat-list-item__top"><strong>佐藤 様</strong><time>1時間前</time></div>
+                <p>ワクチン接種の証明書は…</p>
+              </div>
+            </div>
+            <div class="chat-list-item">
+              <div class="avatar avatar-sm gold" style="width:40px;height:40px;font-size:14px;">鈴</div>
+              <div class="chat-list-item__body">
+                <div class="chat-list-item__top"><strong>鈴木 様</strong><time>3時間前</time></div>
+                <p>来週末に伺いたいのですが…</p>
+              </div>
+            </div>
+            <div class="chat-list-item">
+              <div class="avatar avatar-sm dark" style="width:40px;height:40px;font-size:14px;">高</div>
+              <div class="chat-list-item__body">
+                <div class="chat-list-item__top"><strong>高橋 様</strong><time>昨日</time></div>
+                <p>ありがとうございます、検討します！</p>
+              </div>
+            </div>
+            <div class="chat-list-item">
+              <div class="avatar avatar-sm mint" style="width:40px;height:40px;font-size:14px;">山</div>
+              <div class="chat-list-item__body">
+                <div class="chat-list-item__top"><strong>山本 様</strong><time>2日前</time></div>
+                <p>写真をもう少し見せていただけますか？</p>
+              </div>
+            </div>
+          </div>
+
+          <div class="chat-window">
+            <div class="chat-window__header">
+              <div class="avatar avatar-md mint">田</div>
+              <div>
+                <strong>田中 様</strong>
+                <span>お問い合わせ対象：ふく（スコティッシュフォールド）</span>
+              </div>
+            </div>
+            <div class="chat-window__body">
+              <div class="chat-row">
+                <div>
+                  <div class="chat-bubble">はじめまして。リールで拝見したふくちゃんがとても可愛くて、まだ募集していますか？</div>
+                  <time>14:02</time>
+                </div>
+              </div>
+              <div class="chat-row me">
+                <div>
+                  <div class="chat-bubble">ご連絡ありがとうございます！はい、現在も募集中です。ワクチン接種は2回完了しております。</div>
+                  <time>14:10</time>
+                </div>
+              </div>
+              <div class="chat-row">
+                <div>
+                  <div class="chat-bubble">良かったです！一度見学させていただくことは可能でしょうか？</div>
+                  <time>14:15</time>
+                </div>
+              </div>
+              <div class="chat-row me">
+                <div>
+                  <div class="chat-bubble">もちろんです。今週末の土日でしたらご案内できますが、ご都合いかがでしょうか？</div>
+                  <time>14:18</time>
+                </div>
+              </div>
+            </div>
+            <div class="chat-window__input">
+              <input type="text" placeholder="メッセージを入力...">
+              <button type="button" class="btn btn-coral btn-sm">送信</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===================== VIEW: 売上・統計 ===================== -->
+    <section id="view-stats" class="view">
+      <div class="stat-grid">
+        <div class="stat-card">
+          <div class="stat-card__top"><div class="stat-card__icon mint"><svg class="icon" viewBox="0 0 24 24" width="18" height="18"><path d="M12 2 4 5v6c0 5 3.4 8.4 8 11 4.6-2.6 8-6 8-11V5l-8-3z"/></svg></div></div>
+          <div class="stat-card__value">¥1.24M</div>
+          <div class="stat-card__label">今月の売上</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-card__top"><div class="stat-card__icon coral"><svg class="icon" viewBox="0 0 24 24" width="18" height="18"><polyline points="20 6 9 17 4 12"/></svg></div></div>
+          <div class="stat-card__value">12件</div>
+          <div class="stat-card__label">今月の成約数</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-card__top"><div class="stat-card__icon mint"><svg class="icon" viewBox="0 0 24 24" width="18" height="18"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/></svg></div></div>
+          <div class="stat-card__value">¥103K</div>
+          <div class="stat-card__label">平均成約価格</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-card__top"><div class="stat-card__icon coral"><svg class="icon" viewBox="0 0 24 24" width="18" height="18"><path d="M21 11.5a8.4 8.4 0 0 1-1.1 4.2L21 20l-4.4-1.2a8.4 8.4 0 1 1 4.4-7.3z"/></svg></div></div>
+          <div class="stat-card__value">34%</div>
+          <div class="stat-card__label">リピート問い合わせ率</div>
+        </div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-head"><h3>月別売上推移</h3></div>
+        <div class="bar-chart">
+          <div class="bar-chart__col"><div class="bar-chart__bar" style="height:45%;"></div><span>1月</span></div>
+          <div class="bar-chart__col"><div class="bar-chart__bar" style="height:58%;"></div><span>2月</span></div>
+          <div class="bar-chart__col"><div class="bar-chart__bar" style="height:50%;"></div><span>3月</span></div>
+          <div class="bar-chart__col"><div class="bar-chart__bar coral" style="height:72%;"></div><span>4月</span></div>
+          <div class="bar-chart__col"><div class="bar-chart__bar" style="height:64%;"></div><span>5月</span></div>
+          <div class="bar-chart__col"><div class="bar-chart__bar coral" style="height:90%;"></div><span>6月</span></div>
+        </div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-head"><h3>月別実績</h3></div>
+        <table>
+          <thead><tr><th>月</th><th>新規お問い合わせ</th><th>成約数</th><th>売上</th></tr></thead>
+          <tbody>
+            <tr><td>2026年6月</td><td class="t-num">52</td><td class="t-num">12</td><td class="t-num">¥1,240,000</td></tr>
+            <tr><td>2026年5月</td><td class="t-num">44</td><td class="t-num">9</td><td class="t-num">¥980,000</td></tr>
+            <tr><td>2026年4月</td><td class="t-num">48</td><td class="t-num">10</td><td class="t-num">¥1,050,000</td></tr>
+            <tr><td>2026年3月</td><td class="t-num">36</td><td class="t-num">7</td><td class="t-num">¥740,000</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- ===================== VIEW: プロフィール設定 ===================== -->
+    <section id="view-profile" class="view">
+      <div class="grid-2">
+        <div class="panel">
+          <div class="panel-head"><h3>キャッテリー基本情報</h3></div>
+          <div class="form-grid">
+            <div class="field"><label>キャッテリー名</label><input type="text" value="もふもふ・キャッテリー"></div>
+            <div class="field"><label>代表者名</label><input type="text" value="山田 花子"></div>
+            <div class="field"><label>電話番号</label><input type="text" value="090-1234-5678"></div>
+            <div class="field"><label>メールアドレス</label><input type="email" value="contact@mofumofu-cattery.example"></div>
+            <div class="field full"><label>住所</label><input type="text" value="東京都〇〇区〇〇 1-2-3"></div>
+            <div class="field full"><label>紹介文</label><textarea rows="3">スコティッシュフォールドとマンチカンを中心に、健康と血統管理にこだわって育てています。見学はいつでも歓迎です。</textarea></div>
+          </div>
+          <button type="button" class="btn btn-mint">変更を保存する</button>
+        </div>
+
+        <div style="display:flex;flex-direction:column;gap:22px;">
+          <div class="panel">
+            <div class="panel-head"><h3>審査ステータス</h3></div>
+            <ul class="kv-list">
+              <li><span>審査状況</span><span class="status-dot ok">承認済み</span></li>
+              <li><span>本人確認</span><span class="status-dot ok">完了</span></li>
+              <li><span>飼育環境確認</span><span class="status-dot ok">完了</span></li>
+              <li><span>登録日</span><b>2023/04/12</b></li>
+            </ul>
+          </div>
+
+          <div class="panel">
+            <div class="panel-head"><h3>通知設定</h3></div>
+            <ul class="kv-list">
+              <li><span>新規お問い合わせ通知</span><span class="toggle"><input type="checkbox" checked><span class="track"></span><span class="thumb"></span></span></li>
+              <li><span>いいね・コメント通知</span><span class="toggle"><input type="checkbox" checked><span class="track"></span><span class="thumb"></span></span></li>
+              <li><span>週次レポートメール</span><span class="toggle"><input type="checkbox"><span class="track"></span><span class="thumb"></span></span></li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+</div>
+
+<nav class="proto-nav">
+  <a href="index.html">LP</a>
+  <a href="reel.html">顧客リール</a>
+  <a href="breeder.html" class="active">ブリーダー管理</a>
+  <a href="admin.html">管理者パネル</a>
+</nav>
+
+<script src="assets/main.js"></script>
+</body>
+</html>
