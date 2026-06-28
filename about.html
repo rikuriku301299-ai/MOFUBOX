@@ -25,17 +25,22 @@
     </a>
 
     <nav class="lp-nav">
-      <ul class="lp-nav__links">
-        <li><a href="#service">サービス</a></li>
-        <li><a href="#why">想い</a></li>
-        <li><a href="#roadmap">ロードマップ</a></li>
-        <li><a href="#founder">創業者について</a></li>
-        <li><a href="index.html">← LPへ戻る</a></li>
-      </ul>
-      <div class="lp-nav__cta">
+      <div class="lp-nav__menu" data-mobile-menu>
+        <ul class="lp-nav__links">
+          <li><a href="#service">サービス</a></li>
+          <li><a href="#why">想い</a></li>
+          <li><a href="#roadmap">ロードマップ</a></li>
+          <li><a href="#founder">創業者について</a></li>
+          <li><a href="index.html">← LPへ戻る</a></li>
+        </ul>
         <a href="breeder.html" class="btn btn-outline btn-sm">ブリーダーログイン</a>
+      </div>
+      <div class="lp-nav__cta">
         <a href="reel.html" class="btn btn-coral btn-sm">無料で始める</a>
       </div>
+      <button class="lp-nav__menu-btn" data-mobile-menu-btn aria-label="メニューを開く">
+        <svg class="icon" viewBox="0 0 24 24" width="20" height="20"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+      </button>
     </nav>
   </div>
 </header>
