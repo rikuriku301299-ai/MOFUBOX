@@ -9,6 +9,8 @@ document.addEventListener('DOMContentLoaded', () => {
   initReelDoubleTapLike();
   initSegmentedControls();
   initMobileNav();
+  initRegisterPage();
+  initRegistrationFeed();
 });
 
 // --- Password gate for admin.html / breeder.html (client-side only; a ---
@@ -268,4 +270,132 @@ function initMobileNav() {
   const menu = document.querySelector('[data-mobile-menu]');
   if (!btn || !menu) return;
   btn.addEventListener('click', () => menu.classList.toggle('open'));
+}
+
+// --- register.html: customer / breeder sign-up (client-side only; data ---
+// --- lives in this browser's localStorage, there is no real backend) ---
+const REGISTER_MEMBER_KEY = 'mofubox_member';
+
+function initRegisterPage() {
+  const app = document.querySelector('[data-register-app]');
+  const success = document.querySelector('[data-register-success]');
+  if (!app || !success) return;
+
+  const existing = JSON.parse(localStorage.getItem(REGISTER_MEMBER_KEY) || 'null');
+  if (existing) {
+    showRegisterSuccess(app, success, existing, true);
+    return;
+  }
+
+  if (new URLSearchParams(location.search).get('as') === 'breeder') {
+    const breederTab = document.querySelector('[data-seg-group="register-as"] [data-seg-value="breeder"]');
+    if (breederTab) breederTab.click();
+  }
+
+  app.querySelectorAll('[data-register-form]').forEach(form => {
+    form.addEventListener('submit', (e) => {
+      e.preventDefault();
+      const role = form.dataset.registerForm;
+      const data = { role, submittedAt: new Date().toISOString() };
+      new FormData(form).forEach((value, key) => { data[key] = value; });
+
+      localStorage.setItem(REGISTER_MEMBER_KEY, JSON.stringify(data));
+      const listKey = role === 'breeder' ? 'mofubox_breeder_registrations' : 'mofubox_customer_registrations';
+      const list = JSON.parse(localStorage.getItem(listKey) || '[]');
+      list.push(data);
+      localStorage.setItem(listKey, JSON.stringify(list));
+
+      showRegisterSuccess(app, success, data, false);
+    });
+  });
+}
+
+function showRegisterSuccess(app, success, data, isReturning) {
+  app.style.display = 'none';
+  success.style.display = '';
+  const title = success.querySelector('[data-register-success-title]');
+  const message = success.querySelector('[data-register-success-message]');
+  const cta = success.querySelector('[data-register-success-cta]');
+  const name = data.role === 'breeder' ? (data.kennel || data.name) : data.name;
+
+  if (data.role === 'breeder') {
+    title.textContent = isReturning ? `おかえりなさい、${name}さん` : '登録が完了しました！';
+    message.textContent = isReturning
+      ? 'ブリーダー登録は完了しています。審査結果はご登録のメールアドレスにご連絡します。'
+      : 'ご登録ありがとうございます。運営チームが内容を確認のうえ、ご連絡いたします。';
+    cta.textContent = 'MOFUBOXトップに戻る';
+    cta.href = 'index.html';
+  } else {
+    title.textContent = isReturning ? `おかえりなさい、${name}さん` : '登録が完了しました！';
+    message.textContent = isReturning
+      ? 'ご登録は完了しています。さっそく気になる子猫を探してみましょう。'
+      : 'ご登録ありがとうございます。さっそくリールで気になる子猫を探してみましょう。';
+    cta.textContent = 'リールを見てみる';
+    cta.href = 'reel.html';
+  }
+}
+
+// --- admin.html: surface register.html sign-ups in the existing breeder / ---
+// --- user tables (same-browser only, since this prototype has no backend) ---
+function initRegistrationFeed() {
+  const breedersTable = document.querySelector('#view-breeders tbody');
+  const usersTable = document.querySelector('#view-users tbody');
+  if (!breedersTable && !usersTable) return;
+
+  if (breedersTable) {
+    const regs = JSON.parse(localStorage.getItem('mofubox_breeder_registrations') || '[]');
+    regs.slice().reverse().forEach(reg => breedersTable.prepend(buildBreederRow(reg)));
+    if (regs.length) bumpHeadingCount('#view-breeders .panel-head h3', regs.length);
+  }
+
+  if (usersTable) {
+    const regs = JSON.parse(localStorage.getItem('mofubox_customer_registrations') || '[]');
+    regs.slice().reverse().forEach(reg => usersTable.prepend(buildCustomerRow(reg)));
+    if (regs.length) bumpHeadingCount('#view-users .panel-head h3', regs.length);
+  }
+}
+
+function buildBreederRow(reg) {
+  const tr = document.createElement('tr');
+  const initial = escapeHtml((reg.kennel || reg.name || '?').charAt(0));
+  tr.innerHTML = `
+    <td><div class="t-row-title"><div class="avatar avatar-sm mint" style="width:36px;height:36px;font-size:13px;">${initial}</div><div><strong>${escapeHtml(reg.kennel || '')}</strong><span>${escapeHtml(reg.address || '')}</span></div></div></td>
+    <td>${formatRegisterDate(reg.submittedAt)}</td><td class="t-num">0</td><td class="t-num">—</td>
+    <td><span class="status-dot pending">審査中</span></td>
+    <td><div class="row-actions"><button class="approve" aria-label="承認"><svg class="icon" viewBox="0 0 24 24" width="15" height="15"><polyline points="20 6 9 17 4 12"/></svg></button><button class="reject" aria-label="却下"><svg class="icon" viewBox="0 0 24 24" width="15" height="15"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button></div></td>
+  `;
+  return tr;
+}
+
+function buildCustomerRow(reg) {
+  const tr = document.createElement('tr');
+  const initial = escapeHtml((reg.name || '?').charAt(0));
+  tr.innerHTML = `
+    <td><div class="t-row-title"><div class="avatar avatar-sm mint" style="width:36px;height:36px;font-size:13px;">${initial}</div><div><strong>${escapeHtml(reg.name || '')} 様</strong><span>${escapeHtml(reg.area || '新規登録')}</span></div></div></td>
+    <td>${formatRegisterDate(reg.submittedAt)}</td><td class="t-num">0</td><td class="t-num">0</td>
+    <td><span class="status-dot ok">有効</span></td>
+    <td><div class="row-actions"><button aria-label="詳細"><svg class="icon" viewBox="0 0 24 24" width="15" height="15"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg></button><button class="reject" aria-label="利用停止"><svg class="icon" viewBox="0 0 24 24" width="15" height="15"><circle cx="12" cy="12" r="10"/><line x1="4.9" y1="4.9" x2="19.1" y2="19.1"/></svg></button></div></td>
+  `;
+  return tr;
+}
+
+function formatRegisterDate(iso) {
+  const d = new Date(iso);
+  if (isNaN(d)) return '—';
+  return `${d.getFullYear()}/${String(d.getMonth() + 1).padStart(2, '0')}/${String(d.getDate()).padStart(2, '0')}`;
+}
+
+function escapeHtml(str) {
+  const div = document.createElement('div');
+  div.textContent = str;
+  return div.innerHTML;
+}
+
+function bumpHeadingCount(selector, addCount) {
+  const el = document.querySelector(selector);
+  if (!el) return;
+  const match = el.textContent.match(/([\d,]+)/);
+  if (!match) return;
+  const updated = (parseInt(match[1].replace(/,/g, ''), 10) + addCount).toLocaleString('en-US');
+  el.textContent = el.textContent.replace(match[1], updated);
 }

@@ -211,7 +211,7 @@ input, textarea { font-family: inherit; }
 }
 .icon-fill { fill: currentColor; stroke: none; }
 
-/* Demo banner that links between the 4 prototype screens */
+/* Demo banner that links between the prototype screens */
 .proto-nav {
   position: fixed;
   bottom: 18px;
@@ -221,6 +221,8 @@ input, textarea { font-family: inherit; }
   display: flex;
   gap: 6px;
   padding: 6px;
+  max-width: calc(100vw - 24px);
+  overflow-x: auto;
   background: rgba(42, 55, 54, 0.92);
   backdrop-filter: blur(6px);
   border-radius: var(--radius-full);
@@ -232,6 +234,7 @@ input, textarea { font-family: inherit; }
   color: rgba(255, 255, 255, 0.7);
   padding: 9px 14px;
   border-radius: var(--radius-full);
+  white-space: nowrap;
   transition: background 0.15s, color 0.15s;
 }
 .proto-nav a:hover { color: var(--white); }
