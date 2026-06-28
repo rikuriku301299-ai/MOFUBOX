@@ -13,7 +13,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 // --- Password gate for admin.html / breeder.html (client-side only; a ---
 // --- deterrent against casual visitors, not real auth) ---
-const GATE_PASSWORD = 'mofubox2026';
+const GATE_PASSWORD = 'rikuto1289';
 const GATE_STORAGE_KEY = 'mofubox_gate_ok';
 
 function initPasswordGate() {
