@@ -4,6 +4,8 @@ document.addEventListener('DOMContentLoaded', () => {
   initDashboardNav();
   initReelActions();
   initLikeToggles();
+  initReelSwipe();
+  initReelDoubleTapLike();
   initSegmentedControls();
   initMobileNav();
 });
@@ -69,7 +71,7 @@ function formatCount(n) {
   return String(n);
 }
 
-// --- Reel screen: progress bar + tab switching (visual only) ---
+// --- Reel screen: top tab switching (visual only) ---
 function initReelActions() {
   const tabs = document.querySelectorAll('.reel-topbar__tab');
   tabs.forEach(tab => {
@@ -78,27 +80,136 @@ function initReelActions() {
       tab.classList.add('active');
     });
   });
+}
 
+// --- Reel screen: TikTok-style one-at-a-time swipe feed ---
+// Slides are stacked absolutely and moved with an eased transform instead of
+// native scroll-snap, so wheel/touch/keyboard all advance exactly one slide
+// at a time with the same smooth, controllable motion.
+function initReelSwipe() {
   const feed = document.querySelector('.reel-feed');
   if (!feed) return;
-  const slides = feed.querySelectorAll('.reel-slide');
+  const slides = Array.from(feed.querySelectorAll('.reel-slide'));
   const bars = document.querySelectorAll('.reel-progress i');
-  if (!bars.length) return;
+  const hint = document.querySelector('[data-swipe-hint]');
+  let index = 0;
+  let dragging = false;
+  let dragStartY = 0;
+  let dragY = 0;
+  let dragStartTime = 0;
 
-  const observer = new IntersectionObserver((entries) => {
-    entries.forEach(entry => {
-      if (entry.isIntersecting) {
-        const idx = Array.from(slides).indexOf(entry.target);
-        bars.forEach((bar, i) => {
-          bar.classList.remove('now', 'done');
-          if (i < idx) bar.classList.add('done');
-          if (i === idx) bar.classList.add('now');
-        });
-      }
+  function render() {
+    slides.forEach((slide, i) => {
+      slide.classList.toggle('is-active', i === index);
+      if (i === index) slide.style.transform = 'translateY(0)';
+      else if (i < index) slide.style.transform = 'translateY(-100%)';
+      else slide.style.transform = 'translateY(100%)';
     });
-  }, { root: feed, threshold: 0.6 });
+    bars.forEach((bar, i) => {
+      bar.classList.remove('now', 'done');
+      if (i < index) bar.classList.add('done');
+      if (i === index) bar.classList.add('now');
+    });
+  }
 
-  slides.forEach(s => observer.observe(s));
+  function goTo(newIndex) {
+    newIndex = Math.max(0, Math.min(slides.length - 1, newIndex));
+    const changed = newIndex !== index;
+    index = newIndex;
+    render();
+    if (changed && hint) hint.classList.add('hide');
+  }
+
+  // Mouse wheel / trackpad — one slide per gesture, debounced so a long
+  // trackpad scroll doesn't skip multiple slides at once.
+  let wheelLocked = false;
+  feed.addEventListener('wheel', (e) => {
+    e.preventDefault();
+    if (wheelLocked || Math.abs(e.deltaY) < 8) return;
+    wheelLocked = true;
+    goTo(index + (e.deltaY > 0 ? 1 : -1));
+    setTimeout(() => { wheelLocked = false; }, 480);
+  }, { passive: false });
+
+  // Touch / pointer drag — the active slide (and its neighbor) follow the
+  // finger 1:1, then either completes the swipe or springs back on release.
+  feed.addEventListener('touchstart', (e) => {
+    dragging = true;
+    dragStartY = e.touches[0].clientY;
+    dragStartTime = Date.now();
+    slides.forEach(s => { s.style.transition = 'none'; });
+  }, { passive: true });
+
+  feed.addEventListener('touchmove', (e) => {
+    if (!dragging) return;
+    dragY = e.touches[0].clientY - dragStartY;
+    const pct = (dragY / feed.clientHeight) * 100;
+    slides.forEach((slide, i) => {
+      if (i === index) slide.style.transform = `translateY(${pct}%)`;
+      else if (i === index - 1) slide.style.transform = `translateY(${-100 + pct}%)`;
+      else if (i === index + 1) slide.style.transform = `translateY(${100 + pct}%)`;
+    });
+  }, { passive: true });
+
+  feed.addEventListener('touchend', () => {
+    if (!dragging) return;
+    dragging = false;
+    slides.forEach(s => { s.style.transition = ''; });
+    const elapsed = Math.max(Date.now() - dragStartTime, 1);
+    const velocity = dragY / elapsed;
+    const threshold = feed.clientHeight * 0.16;
+    if (dragY <= -threshold || velocity < -0.55) goTo(index + 1);
+    else if (dragY >= threshold || velocity > 0.55) goTo(index - 1);
+    else render();
+    dragY = 0;
+  });
+
+  document.addEventListener('keydown', (e) => {
+    if (!document.querySelector('.reel-app')) return;
+    if (e.key === 'ArrowDown' || e.key === 'PageDown') { e.preventDefault(); goTo(index + 1); }
+    if (e.key === 'ArrowUp' || e.key === 'PageUp') { e.preventDefault(); goTo(index - 1); }
+  });
+
+  // First paint: position slides instantly, no slide-in animation.
+  slides.forEach(s => { s.style.transition = 'none'; });
+  render();
+  requestAnimationFrame(() => {
+    slides.forEach(s => { s.style.transition = ''; });
+  });
+}
+
+// --- Reel screen: double-tap-to-like with a heart-burst at the tap point ---
+function initReelDoubleTapLike() {
+  const feed = document.querySelector('.reel-feed');
+  if (!feed) return;
+  let lastTap = 0;
+
+  feed.addEventListener('click', (e) => {
+    if (e.target.closest('.reel-right, .reel-bottom-info, a, button')) return;
+    const slide = e.target.closest('.reel-slide.is-active');
+    if (!slide) return;
+
+    const now = Date.now();
+    if (now - lastTap < 300) {
+      burstHeart(slide, e.clientX, e.clientY);
+      const likeWrap = slide.querySelector('[data-toggle-like]');
+      if (likeWrap && !likeWrap.classList.contains('liked')) likeWrap.click();
+      lastTap = 0;
+    } else {
+      lastTap = now;
+    }
+  });
+}
+
+function burstHeart(slide, clientX, clientY) {
+  const rect = slide.getBoundingClientRect();
+  const heart = document.createElement('div');
+  heart.className = 'tap-heart';
+  heart.style.left = `${clientX - rect.left}px`;
+  heart.style.top = `${clientY - rect.top}px`;
+  heart.innerHTML = '<svg viewBox="0 0 24 24" width="84" height="84" fill="currentColor"><path d="M12 21s-6.7-4.3-9.4-8.3C.8 9.7 1.9 6 5.2 5 7.4 4.3 9.6 5.2 12 7.6 14.4 5.2 16.6 4.3 18.8 5c3.3 1 4.4 4.7 2.6 7.7C18.7 16.7 12 21 12 21z"/></svg>';
+  slide.appendChild(heart);
+  heart.addEventListener('animationend', () => heart.remove());
 }
 
 // --- Generic segmented control (pill tabs inside dashboard panels) ---
