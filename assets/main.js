@@ -11,6 +11,7 @@ document.addEventListener('DOMContentLoaded', () => {
   initMobileNav();
   initRegisterPage();
   initRegistrationFeed();
+  initProfileFollow();
 });
 
 // --- Password gate for admin.html / breeder.html (client-side only; a ---
@@ -261,6 +262,17 @@ function initSegmentedControls() {
         });
       });
     });
+  });
+}
+
+// --- profile.html: visual-only follow toggle for the breeder profile page ---
+function initProfileFollow() {
+  const btn = document.querySelector('[data-toggle-follow-profile]');
+  if (!btn) return;
+  const defaultLabel = btn.textContent;
+  btn.addEventListener('click', () => {
+    btn.classList.toggle('is-following');
+    btn.textContent = btn.classList.contains('is-following') ? 'フォロー中' : defaultLabel;
   });
 }
 
