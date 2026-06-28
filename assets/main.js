@@ -1,6 +1,7 @@
 // MOFUBOX — shared interactivity for all prototype screens
 
 document.addEventListener('DOMContentLoaded', () => {
+  initPasswordGate();
   initDashboardNav();
   initReelActions();
   initLikeToggles();
@@ -9,6 +10,37 @@ document.addEventListener('DOMContentLoaded', () => {
   initSegmentedControls();
   initMobileNav();
 });
+
+// --- Password gate for admin.html / breeder.html (client-side only; a ---
+// --- deterrent against casual visitors, not real auth) ---
+const GATE_PASSWORD = 'mofubox2026';
+const GATE_STORAGE_KEY = 'mofubox_gate_ok';
+
+function initPasswordGate() {
+  const overlay = document.querySelector('[data-gate]');
+  if (!overlay) return;
+
+  if (localStorage.getItem(GATE_STORAGE_KEY) === '1') {
+    overlay.classList.add('unlocked');
+    return;
+  }
+
+  const form = overlay.querySelector('[data-gate-form]');
+  const input = overlay.querySelector('[data-gate-input]');
+  const error = overlay.querySelector('[data-gate-error]');
+
+  form.addEventListener('submit', (e) => {
+    e.preventDefault();
+    if (input.value === GATE_PASSWORD) {
+      localStorage.setItem(GATE_STORAGE_KEY, '1');
+      overlay.classList.add('unlocked');
+    } else {
+      error.classList.add('show');
+      input.value = '';
+      input.focus();
+    }
+  });
+}
 
 // --- Dashboard sidebar tab switching (breeder.html / admin.html) ---
 // Any element with [data-view-link] can trigger a view switch (sidebar items,

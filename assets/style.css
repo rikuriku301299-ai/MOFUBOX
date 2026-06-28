@@ -237,6 +237,45 @@ input, textarea { font-family: inherit; }
 .proto-nav a:hover { color: var(--white); }
 .proto-nav a.active { background: var(--mint); color: var(--white); }
 
+/* Lightweight client-side password gate for admin.html / breeder.html */
+.gate-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 99999;
+  background: var(--ink);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+}
+.gate-overlay.unlocked { display: none; }
+.gate-box {
+  background: var(--cream);
+  border-radius: var(--radius-l);
+  padding: 36px 28px;
+  max-width: 320px;
+  width: 100%;
+  text-align: center;
+  box-shadow: var(--shadow-lg);
+}
+.gate-icon { font-size: 38px; margin-bottom: 12px; }
+.gate-box h2 { font-size: 18px; font-weight: 900; margin-bottom: 6px; color: var(--ink); }
+.gate-box p { font-size: 13px; color: var(--ink-soft); margin-bottom: 18px; }
+.gate-box form { display: flex; flex-direction: column; gap: 10px; }
+.gate-box form .btn { width: 100%; }
+.gate-box input {
+  border: 1.5px solid var(--line);
+  border-radius: var(--radius-m);
+  padding: 12px 14px;
+  font-size: 15px;
+  text-align: center;
+  font-family: inherit;
+  width: 100%;
+}
+.gate-box input:focus { outline: none; border-color: var(--mint); }
+.gate-error { color: #C84B3C; font-size: 12.5px; margin: 12px 0 0; display: none; }
+.gate-error.show { display: block; }
+
 /* =========================================================
    1. LANDING PAGE
    ========================================================= */

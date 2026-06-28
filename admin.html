@@ -11,6 +11,19 @@
 </head>
 <body class="dash-body">
 
+<div class="gate-overlay" data-gate>
+  <div class="gate-box">
+    <div class="gate-icon">🔒</div>
+    <h2>管理者専用ページ</h2>
+    <p>パスワードを入力してください。</p>
+    <form data-gate-form>
+      <input type="password" data-gate-input placeholder="パスワード" autocomplete="off" autofocus>
+      <button type="submit" class="btn btn-mint">入る</button>
+    </form>
+    <p class="gate-error" data-gate-error>パスワードが違います</p>
+  </div>
+</div>
+
 <div class="dash">
 
   <aside class="dash-sidebar">
