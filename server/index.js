@@ -9,6 +9,7 @@ const authRoutes = require('./routes/auth');
 const reelRoutes = require('./routes/reels');
 const adminRoutes = require('./routes/admin');
 const paymentRoutes = require('./routes/payments');
+const notificationRoutes = require('./routes/notifications');
 
 const ROOT_DIR = path.join(__dirname, '..');
 const PORT = process.env.PORT || 8910;
@@ -69,6 +70,10 @@ async function handleApi(req, res, pathname, query) {
 
     if (pathname === '/api/reels' && method === 'GET') return reelRoutes.list(req, res);
     if (pathname === '/api/reels' && method === 'POST') return reelRoutes.create(req, res, await readJsonBody(req));
+    if (pathname === '/api/search' && method === 'GET') return reelRoutes.search(req, res, query);
+
+    if (pathname === '/api/notifications' && method === 'GET') return notificationRoutes.list(req, res);
+    if (pathname === '/api/notifications/read-all' && method === 'POST') return notificationRoutes.markAllRead(req, res);
 
     let m = pathname.match(/^\/api\/reels\/(\d+)\/video$/);
     if (m && method === 'PUT') return reelRoutes.uploadVideo(req, res, Number(m[1]));
@@ -78,6 +83,9 @@ async function handleApi(req, res, pathname, query) {
 
     m = pathname.match(/^\/api\/users\/(\d+)\/follow$/);
     if (m && method === 'POST') return reelRoutes.toggleFollow(req, res, Number(m[1]));
+
+    m = pathname.match(/^\/api\/notifications\/(\d+)\/read$/);
+    if (m && method === 'POST') return notificationRoutes.markRead(req, res, Number(m[1]));
 
     if (pathname === '/api/admin/breeders' && method === 'GET') return adminRoutes.listBreeders(req, res, query);
     if (pathname === '/api/admin/customers' && method === 'GET') return adminRoutes.listCustomers(req, res);

@@ -17,6 +17,9 @@ document.addEventListener('DOMContentLoaded', () => {
   initProfileFollow();
   initReelUpload();
   initLogout();
+  initNotifications();
+  initDashboardSearch();
+  initReelSearch();
 });
 
 // --- Thin fetch wrapper for the /api/* backend (server/index.js). Sends/ ---
@@ -242,6 +245,149 @@ function initReelUpload() {
   }
 }
 
+// --- Notification bell (breeder.html / admin.html dashboards): loads real ---
+// --- notifications from the backend and lets the user mark them read. ---
+async function initNotifications() {
+  const wrap = document.querySelector('[data-notif-wrap]');
+  if (!wrap) return;
+
+  const toggle = wrap.querySelector('[data-notif-toggle]');
+  const panel = wrap.querySelector('[data-notif-panel]');
+  const dot = wrap.querySelector('[data-notif-dot]');
+  const list = wrap.querySelector('[data-notif-list]');
+  const readAllBtn = wrap.querySelector('[data-notif-read-all]');
+
+  async function refresh() {
+    const { ok, data } = await api('/api/notifications');
+    if (!ok) return;
+
+    dot.classList.toggle('show', data.unreadCount > 0);
+
+    if (!data.notifications.length) {
+      list.innerHTML = '<div class="notif-empty">通知はまだありません</div>';
+      return;
+    }
+
+    list.innerHTML = data.notifications.map((n) => `
+      <button type="button" class="notif-item${n.read ? '' : ' unread'}" data-notif-id="${n.id}">
+        <div class="notif-item__title">${escapeHtml(n.title)}</div>
+        ${n.body ? `<div class="notif-item__body">${escapeHtml(n.body)}</div>` : ''}
+        <div class="notif-item__time">${formatRegisterDate(n.createdAt)}</div>
+      </button>
+    `).join('');
+
+    list.querySelectorAll('[data-notif-id]').forEach((item) => {
+      item.addEventListener('click', async () => {
+        if (!item.classList.contains('unread')) return;
+        item.classList.remove('unread');
+        const id = item.dataset.notifId;
+        await api(`/api/notifications/${id}/read`, { method: 'POST' });
+        const { data } = await api('/api/notifications');
+        dot.classList.toggle('show', data.unreadCount > 0);
+      });
+    });
+  }
+
+  toggle.addEventListener('click', () => {
+    const opening = !panel.classList.contains('open');
+    panel.classList.toggle('open', opening);
+    if (opening) refresh();
+  });
+
+  document.addEventListener('click', (e) => {
+    if (!wrap.contains(e.target)) panel.classList.remove('open');
+  });
+
+  if (readAllBtn) {
+    readAllBtn.addEventListener('click', async (e) => {
+      e.stopPropagation();
+      await api('/api/notifications/read-all', { method: 'POST' });
+      refresh();
+    });
+  }
+
+  refresh();
+}
+
+// --- breeder.html / admin.html dashboard topbar search box: client-side ---
+// --- filter of the currently rendered rows/cards (no extra request needed ---
+// --- since the data is already loaded into the DOM). ---
+function initDashboardSearch() {
+  const input = document.querySelector('.dash-topbar .search-box input');
+  if (!input) return;
+
+  input.addEventListener('input', () => {
+    const q = input.value.trim().toLowerCase();
+    const activeView = document.querySelector('.view.active');
+    if (!activeView) return;
+
+    const rows = activeView.querySelectorAll('tbody tr');
+    const cards = activeView.querySelectorAll('.t-card, .cat-card');
+
+    rows.forEach((row) => {
+      row.style.display = !q || row.textContent.toLowerCase().includes(q) ? '' : 'none';
+    });
+    cards.forEach((card) => {
+      card.style.display = !q || card.textContent.toLowerCase().includes(q) ? '' : 'none';
+    });
+  });
+}
+
+// --- reel.html: real full-text search over reels (caption / tags / kennel ---
+// --- / area), opened from the bottom-nav 探す tab. ---
+function initReelSearch() {
+  const triggers = document.querySelectorAll('[data-reel-search-trigger]');
+  const overlay = document.querySelector('[data-reel-search]');
+  if (!triggers.length || !overlay) return;
+
+  const input = overlay.querySelector('[data-reel-search-input]');
+  const closeBtn = overlay.querySelector('[data-reel-search-close]');
+  const results = overlay.querySelector('[data-reel-search-results]');
+
+  let debounceTimer = null;
+
+  triggers.forEach((trigger) => {
+    trigger.addEventListener('click', (e) => {
+      e.preventDefault();
+      overlay.classList.add('open');
+      input.focus();
+    });
+  });
+
+  closeBtn.addEventListener('click', () => overlay.classList.remove('open'));
+
+  input.addEventListener('input', () => {
+    clearTimeout(debounceTimer);
+    const q = input.value.trim();
+    if (!q) {
+      results.innerHTML = '<div class="notif-empty">気になるブリーダー名・猫種・地域・タグで検索してみましょう</div>';
+      return;
+    }
+    debounceTimer = setTimeout(async () => {
+      const { ok, data } = await api(`/api/search?q=${encodeURIComponent(q)}`);
+      if (!ok) return;
+      renderReelSearchResults(results, data.reels);
+    }, 250);
+  });
+}
+
+function renderReelSearchResults(container, reels) {
+  if (!reels.length) {
+    container.innerHTML = '<div class="notif-empty">該当するリールが見つかりませんでした</div>';
+    return;
+  }
+  container.innerHTML = reels.map((r) => `
+    <a class="reel-search-result" href="profile.html">
+      <span class="reel-search-result__emoji">${r.posterEmoji || '🐱'}</span>
+      <span>
+        <strong>${escapeHtml(r.breederKennel || r.breederName || '')}</strong>
+        <span class="reel-search-result__caption">${escapeHtml(r.caption || '')}</span>
+        <span class="reel-search-result__tags">${(r.tags || []).map(t => `#${escapeHtml(t)}`).join(' ')}</span>
+      </span>
+    </a>
+  `).join('');
+}
+
 // --- Reel screen: like / save / follow toggle buttons. Persists to the ---
 // --- backend when the slide carries data-reel-id/data-breeder-id (reel.html); ---
 // --- otherwise degrades to a visual-only toggle. ---
@@ -281,11 +427,14 @@ function initLikeToggles() {
         if (!ok) return;
         btn.classList.toggle('followed', data.following);
         btn.textContent = data.following ? '✓' : '+';
+        btn.setAttribute('aria-label', data.following ? 'フォロー中' : 'フォローする');
         return;
       }
 
       btn.classList.toggle('followed');
-      btn.textContent = btn.classList.contains('followed') ? '✓' : '+';
+      const following = btn.classList.contains('followed');
+      btn.textContent = following ? '✓' : '+';
+      btn.setAttribute('aria-label', following ? 'フォロー中' : 'フォローする');
     });
   });
 }

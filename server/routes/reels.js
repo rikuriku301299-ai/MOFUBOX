@@ -3,6 +3,7 @@ const path = require('node:path');
 const crypto = require('node:crypto');
 const { db, UPLOADS_DIR } = require('../db');
 const { currentUser, publicUser } = require('../auth');
+const { notify } = require('../notifications');
 
 const VIDEO_EXT_BY_MIME = {
   'video/mp4': '.mp4',
@@ -28,6 +29,43 @@ function list(req, res) {
     breederId: r.breeder_user_id,
     breederName: r.breeder_name,
     breederKennel: r.breeder_kennel,
+    caption: r.caption,
+    tags: r.tags ? r.tags.split(',') : [],
+    videoUrl: r.video_path ? `/uploads/${r.video_path}` : null,
+    posterEmoji: r.poster_emoji,
+    posterTheme: r.poster_theme,
+    likeCount: r.seed_likes + likeCount.get(r.id).c,
+    likedByMe: user ? !!likedByMe.get(r.id, user.id) : false,
+    followedByMe: user ? !!followedByMe.get(r.breeder_user_id, user.id) : false,
+    createdAt: r.created_at,
+  }));
+  res.json(200, { reels: data });
+}
+
+function search(req, res, query) {
+  const user = currentUser(req);
+  const q = (query.q || '').trim();
+  if (!q) return res.json(200, { reels: [] });
+
+  const like = `%${q}%`;
+  const rows = db.prepare(`
+    SELECT reels.*, users.name AS breeder_name, users.kennel AS breeder_kennel, users.area AS breeder_area, users.id AS breeder_user_id
+    FROM reels
+    JOIN users ON users.id = reels.breeder_id
+    WHERE reels.caption LIKE ? OR reels.tags LIKE ? OR users.kennel LIKE ? OR users.name LIKE ? OR users.area LIKE ?
+    ORDER BY reels.created_at DESC
+  `).all(like, like, like, like, like);
+
+  const likeCount = db.prepare('SELECT COUNT(*) AS c FROM likes WHERE reel_id = ?');
+  const likedByMe = user ? db.prepare('SELECT 1 FROM likes WHERE reel_id = ? AND user_id = ?') : null;
+  const followedByMe = user ? db.prepare('SELECT 1 FROM follows WHERE breeder_id = ? AND follower_id = ?') : null;
+
+  const data = rows.map((r) => ({
+    id: r.id,
+    breederId: r.breeder_user_id,
+    breederName: r.breeder_name,
+    breederKennel: r.breeder_kennel,
+    breederArea: r.breeder_area,
     caption: r.caption,
     tags: r.tags ? r.tags.split(',') : [],
     videoUrl: r.video_path ? `/uploads/${r.video_path}` : null,
@@ -102,7 +140,7 @@ function toggleLike(req, res, reelId) {
   const user = currentUser(req);
   if (!user) return res.json(401, { error: 'login_required' });
 
-  const reel = db.prepare('SELECT id FROM reels WHERE id = ?').get(reelId);
+  const reel = db.prepare('SELECT id, breeder_id, caption FROM reels WHERE id = ?').get(reelId);
   if (!reel) return res.json(404, { error: 'not_found' });
 
   const existing = db.prepare('SELECT id FROM likes WHERE user_id = ? AND reel_id = ?').get(user.id, reelId);
@@ -110,6 +148,9 @@ function toggleLike(req, res, reelId) {
     db.prepare('DELETE FROM likes WHERE id = ?').run(existing.id);
   } else {
     db.prepare('INSERT INTO likes (user_id, reel_id) VALUES (?, ?)').run(user.id, reelId);
+    if (reel.breeder_id !== user.id) {
+      notify(reel.breeder_id, 'like', 'リールにいいねがつきました', `${user.name || 'ユーザー'}さんが「${reel.caption || '投稿'}」にいいねしました`, `/breeder.html#view-reels`);
+    }
   }
 
   const seed = db.prepare('SELECT seed_likes FROM reels WHERE id = ?').get(reelId).seed_likes;
@@ -130,8 +171,9 @@ function toggleFollow(req, res, breederId) {
     db.prepare('DELETE FROM follows WHERE id = ?').run(existing.id);
   } else {
     db.prepare('INSERT INTO follows (follower_id, breeder_id) VALUES (?, ?)').run(user.id, breederId);
+    notify(breederId, 'follow', '新しいフォロワー', `${user.name || 'ユーザー'}さんにフォローされました`, `/breeder.html#view-profile`);
   }
   res.json(200, { following: !existing });
 }
 
-module.exports = { list, create, uploadVideo, toggleLike, toggleFollow };
+module.exports = { list, search, create, uploadVideo, toggleLike, toggleFollow };

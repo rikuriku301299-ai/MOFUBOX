@@ -1,5 +1,6 @@
 const { db } = require('../db');
 const { currentUser, publicUser } = require('../auth');
+const { notify } = require('../notifications');
 
 function requireAdmin(req, res) {
   const user = currentUser(req);
@@ -31,7 +32,14 @@ function reviewBreeder(req, res, id, decision) {
   if (!breeder) return res.json(404, { error: 'not_found' });
   const status = decision === 'approve' ? 'approved' : 'rejected';
   db.prepare('UPDATE users SET status = ? WHERE id = ?').run(status, id);
+  notify(
+    id,
+    'review',
+    status === 'approved' ? 'ブリーダー審査が承認されました' : 'ブリーダー審査が却下されました',
+    status === 'approved' ? 'ご登録ありがとうございます。管理画面にログインできるようになりました。' : '審査の結果、今回は承認に至りませんでした。',
+    '/breeder.html'
+  );
   res.json(200, { status });
 }
 
-module.exports = { listBreeders, listCustomers, reviewBreeder };
+module.exports = { listBreeders, listCustomers, reviewBreeder, requireAdmin };

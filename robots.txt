@@ -1,0 +1,12 @@
+User-agent: *
+Allow: /index.html
+Allow: /about.html
+Allow: /reel.html
+Allow: /profile.html
+Allow: /register.html
+Disallow: /breeder.html
+Disallow: /admin.html
+Disallow: /api/
+Disallow: /uploads/
+
+Sitemap: https://example.com/sitemap.xml

@@ -17,6 +17,8 @@ const MIME = {
   '.webm': 'video/webm',
   '.mov': 'video/quicktime',
   '.woff2': 'font/woff2',
+  '.txt': 'text/plain; charset=utf-8',
+  '.xml': 'application/xml; charset=utf-8',
 };
 
 // Serves a file from `rootDir`, honoring HTTP Range requests (needed for
@@ -38,6 +40,13 @@ function serveFile(req, res, rootDir, requestPath) {
     const ext = path.extname(filePath).toLowerCase();
     const contentType = MIME[ext] || 'application/octet-stream';
     const range = req.headers.range;
+    const etag = `"${stat.size.toString(16)}-${Math.round(stat.mtimeMs).toString(16)}"`;
+
+    if (!range && req.headers['if-none-match'] === etag) {
+      res.writeHead(304, { ETag: etag });
+      res.end();
+      return;
+    }
 
     if (range) {
       const match = /bytes=(\d*)-(\d*)/.exec(range);
@@ -63,6 +72,7 @@ function serveFile(req, res, rootDir, requestPath) {
       'Content-Length': stat.size,
       'Content-Type': contentType,
       'Accept-Ranges': 'bytes',
+      ETag: etag,
     });
     fs.createReadStream(filePath).pipe(res);
   });
