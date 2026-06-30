@@ -165,7 +165,7 @@ function initReelSwipe() {
     if (wheelLocked || Math.abs(e.deltaY) < 8) return;
     wheelLocked = true;
     goTo(index + (e.deltaY > 0 ? 1 : -1));
-    setTimeout(() => { wheelLocked = false; }, 720);
+    setTimeout(() => { wheelLocked = false; }, 1220);
   }, { passive: false });
 
   // Touch / pointer drag — the active slide (and its neighbor) follow the
