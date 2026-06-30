@@ -43,6 +43,7 @@ body {
   color: var(--ink);
   background: var(--cream);
   -webkit-font-smoothing: antialiased;
+  overflow-x: hidden;
 }
 img { max-width: 100%; display: block; }
 a { color: inherit; text-decoration: none; }
@@ -1267,6 +1268,62 @@ table tbody tr:hover { background: var(--cream); }
 .profile-reel-card__title {
   font-size: 11px; font-weight: 700; color: var(--ink-soft); margin-top: 6px; line-height: 1.4;
   display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
+}
+
+/* =========================================================
+   Motion: scroll reveal, count-up, ambient floats
+   ========================================================= */
+
+html { scroll-behavior: smooth; }
+
+.reveal {
+  opacity: 0;
+  transform: translateY(34px);
+  transition: opacity 0.7s cubic-bezier(0.22, 1, 0.36, 1), transform 0.7s cubic-bezier(0.22, 1, 0.36, 1);
+}
+.reveal-left { transform: translateX(-46px); }
+.reveal-right { transform: translateX(46px); }
+.reveal.is-visible,
+.reveal-left.is-visible,
+.reveal-right.is-visible {
+  opacity: 1;
+  transform: none;
+}
+
+@keyframes hero-blob-float {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  50% { transform: translate(-18px, 22px) scale(1.06); }
+}
+.lp-hero::before { animation: hero-blob-float 10s ease-in-out infinite; }
+.lp-hero::after { animation: hero-blob-float 12s ease-in-out infinite reverse; }
+
+@keyframes phone-bob {
+  0%, 100% { transform: rotate(2deg) translateY(0); }
+  50% { transform: rotate(2deg) translateY(-14px); }
+}
+.phone { animation: phone-bob 5.5s ease-in-out infinite; }
+
+@keyframes badge-bob {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-9px); }
+}
+.phone-float-badge { animation: badge-bob 4s ease-in-out infinite; }
+.phone-float-badge.b2 { animation-delay: 1.2s; }
+
+@media (max-width: 880px) {
+  /* Two-column layouts stack to one column at this width, so the left/right
+     slide-in would shove already near-full-width content off-screen and
+     cause horizontal overflow — fall back to the plain fade-up instead. */
+  .reveal-left, .reveal-right { transform: translateY(34px); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
 }
 
 /* =========================================================
