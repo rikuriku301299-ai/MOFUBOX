@@ -1,0 +1,17 @@
+{
+  "name": "mofubox",
+  "version": "1.0.0",
+  "description": "MOFUBOX - cat breeder matching platform",
+  "private": true,
+  "type": "commonjs",
+  "main": "server/index.js",
+  "engines": {
+    "node": ">=22.5.0"
+  },
+  "scripts": {
+    "start": "node server/index.js",
+    "dev": "node --watch server/index.js"
+  },
+  "license": "UNLICENSED",
+  "dependencies": {}
+}

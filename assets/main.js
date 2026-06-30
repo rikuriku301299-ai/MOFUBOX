@@ -7,6 +7,7 @@ document.addEventListener('DOMContentLoaded', () => {
   initDashboardNav();
   initReelActions();
   initLikeToggles();
+  initReelData();
   initReelSwipe();
   initReelDoubleTapLike();
   initSegmentedControls();
@@ -14,32 +15,69 @@ document.addEventListener('DOMContentLoaded', () => {
   initRegisterPage();
   initRegistrationFeed();
   initProfileFollow();
+  initReelUpload();
+  initLogout();
 });
 
-// --- Password gate for admin.html / breeder.html (client-side only; a ---
-// --- deterrent against casual visitors, not real auth) ---
-const GATE_PASSWORD = 'rikuto1289';
-const GATE_STORAGE_KEY = 'mofubox_gate_ok';
+// --- Thin fetch wrapper for the /api/* backend (server/index.js). Sends/ ---
+// --- receives the session cookie automatically (same-origin). ---
+async function api(path, { method = 'GET', body } = {}) {
+  const res = await fetch(path, {
+    method,
+    credentials: 'same-origin',
+    headers: body ? { 'Content-Type': 'application/json' } : undefined,
+    body: body ? JSON.stringify(body) : undefined,
+  });
+  let data = null;
+  try { data = await res.json(); } catch { /* no body */ }
+  return { ok: res.ok, status: res.status, data: data || {} };
+}
 
-function initPasswordGate() {
+function initLogout() {
+  document.querySelectorAll('[data-logout]').forEach(btn => {
+    btn.addEventListener('click', async () => {
+      await api('/api/auth/logout', { method: 'POST' });
+      location.reload();
+    });
+  });
+}
+
+// --- Login gate for admin.html / breeder.html — real per-account auth ---
+// --- against the backend (server/index.js), session cookie based. ---
+async function initPasswordGate() {
   const overlay = document.querySelector('[data-gate]');
   if (!overlay) return;
 
-  if (localStorage.getItem(GATE_STORAGE_KEY) === '1') {
+  const form = overlay.querySelector('[data-gate-form]');
+  const requiredRole = form.dataset.gateRole;
+  const emailInput = overlay.querySelector('[data-gate-email]');
+  const input = overlay.querySelector('[data-gate-input]');
+  const error = overlay.querySelector('[data-gate-error]');
+
+  function roleAllowed(user) {
+    if (!user || user.role !== requiredRole) return false;
+    if (user.role === 'breeder' && user.status !== 'approved') return false;
+    return true;
+  }
+
+  // Already have a valid session for this role? Skip straight in.
+  const { data: meData } = await api('/api/auth/me');
+  if (roleAllowed(meData.user)) {
     overlay.classList.add('unlocked');
     return;
   }
 
-  const form = overlay.querySelector('[data-gate-form]');
-  const input = overlay.querySelector('[data-gate-input]');
-  const error = overlay.querySelector('[data-gate-error]');
-
-  form.addEventListener('submit', (e) => {
+  form.addEventListener('submit', async (e) => {
     e.preventDefault();
-    if (input.value === GATE_PASSWORD) {
-      localStorage.setItem(GATE_STORAGE_KEY, '1');
+    const { ok, data } = await api('/api/auth/login', {
+      method: 'POST',
+      body: { email: emailInput.value, password: input.value },
+    });
+
+    if (ok && roleAllowed(data.user)) {
       overlay.classList.add('unlocked');
     } else {
+      if (ok && data.user) await api('/api/auth/logout', { method: 'POST' });
       error.classList.add('show');
       input.value = '';
       input.focus();
@@ -79,12 +117,150 @@ function initDashboardNav() {
   });
 }
 
-// --- Reel screen: like / save toggle buttons ---
+// --- Reel screen: hydrate like/follow state + counts from the backend so a ---
+// --- logged-in user sees their real, persisted likes/follows on load. ---
+async function initReelData() {
+  const slides = document.querySelectorAll('.reel-slide[data-reel-id]');
+  if (!slides.length) return;
+
+  const { ok, data } = await api('/api/reels');
+  if (!ok) return;
+  const byId = new Map(data.reels.map(r => [String(r.id), r]));
+
+  slides.forEach(slide => {
+    const reel = byId.get(slide.dataset.reelId);
+    if (!reel) return;
+
+    const likeBtn = slide.querySelector('[data-toggle-like]');
+    if (likeBtn) {
+      likeBtn.classList.toggle('liked', reel.likedByMe);
+      const countEl = likeBtn.querySelector('[data-count]');
+      if (countEl) {
+        countEl.dataset.base = reel.likeCount - (reel.likedByMe ? 1 : 0);
+        countEl.textContent = formatCount(reel.likeCount);
+      }
+    }
+
+    const followBtn = slide.querySelector('[data-toggle-follow]');
+    if (followBtn) {
+      followBtn.classList.toggle('followed', reel.followedByMe);
+      followBtn.textContent = reel.followedByMe ? '✓' : '+';
+    }
+  });
+}
+
+// --- Breeder dashboard: new reel upload form. Creates the reel record, ---
+// --- then uploads the raw video file in a second request (real fetch, ---
+// --- not the api() helper, since the body must be the raw file bytes). ---
+function initReelUpload() {
+  const form = document.querySelector('[data-reel-upload-form]');
+  if (!form) return;
+
+  const input = form.querySelector('[data-reel-video-input]');
+  const trigger = form.querySelector('[data-reel-upload-trigger]');
+  const label = form.querySelector('[data-reel-upload-label]');
+  const captionInput = form.querySelector('[data-reel-caption]');
+  const tagsInput = form.querySelector('[data-reel-tags]');
+  const status = form.querySelector('[data-reel-upload-status]');
+  const submitBtn = form.querySelector('[data-reel-submit]');
+
+  const defaultLabel = label ? label.textContent : '';
+  let selectedFile = null;
+
+  const showStatus = (text, tone) => {
+    if (!status) return;
+    status.textContent = text;
+    status.style.display = text ? 'block' : 'none';
+    status.style.color = tone === 'error' ? 'var(--coral, #e8615a)' : tone === 'success' ? 'var(--mint, #2fa88a)' : '';
+  };
+
+  if (trigger && input) {
+    trigger.addEventListener('click', () => input.click());
+  }
+
+  if (input) {
+    input.addEventListener('change', () => {
+      selectedFile = input.files && input.files[0] ? input.files[0] : null;
+      if (label) label.textContent = selectedFile ? selectedFile.name : defaultLabel;
+    });
+  }
+
+  if (submitBtn) {
+    submitBtn.addEventListener('click', async () => {
+      const caption = captionInput ? captionInput.value.trim() : '';
+      const tags = tagsInput
+        ? tagsInput.value.split(',').map(s => s.trim()).filter(Boolean)
+        : [];
+
+      if (!selectedFile) {
+        showStatus('動画ファイルを選択してください', 'error');
+        return;
+      }
+      if (!caption) {
+        showStatus('タイトル・キャプションを入力してください', 'error');
+        return;
+      }
+
+      submitBtn.disabled = true;
+      showStatus('投稿中…', null);
+
+      try {
+        const { ok, data } = await api('/api/reels', { method: 'POST', body: { caption, tags } });
+        if (!ok || !data.id) {
+          showStatus(data.message || '投稿に失敗しました', 'error');
+          submitBtn.disabled = false;
+          return;
+        }
+
+        const uploadRes = await fetch(`/api/reels/${data.id}/video`, {
+          method: 'PUT',
+          credentials: 'same-origin',
+          headers: { 'Content-Type': selectedFile.type },
+          body: selectedFile,
+        });
+
+        if (!uploadRes.ok) {
+          let message = '動画のアップロードに失敗しました';
+          try { const errData = await uploadRes.json(); if (errData.message) message = errData.message; } catch { /* no body */ }
+          showStatus(message, 'error');
+          submitBtn.disabled = false;
+          return;
+        }
+
+        showStatus('投稿しました！', 'success');
+        if (captionInput) captionInput.value = '';
+        if (tagsInput) tagsInput.value = '';
+        if (input) input.value = '';
+        selectedFile = null;
+        if (label) label.textContent = defaultLabel;
+      } catch {
+        showStatus('通信エラーが発生しました', 'error');
+      } finally {
+        submitBtn.disabled = false;
+      }
+    });
+  }
+}
+
+// --- Reel screen: like / save / follow toggle buttons. Persists to the ---
+// --- backend when the slide carries data-reel-id/data-breeder-id (reel.html); ---
+// --- otherwise degrades to a visual-only toggle. ---
 function initLikeToggles() {
   document.querySelectorAll('[data-toggle-like]').forEach(btn => {
-    btn.addEventListener('click', () => {
-      btn.classList.toggle('liked');
+    btn.addEventListener('click', async () => {
+      const slide = btn.closest('[data-reel-id]');
       const countEl = btn.querySelector('[data-count]');
+
+      if (slide) {
+        const { ok, status, data } = await api(`/api/reels/${slide.dataset.reelId}/like`, { method: 'POST' });
+        if (status === 401) { location.href = 'register.html'; return; }
+        if (!ok) return;
+        btn.classList.toggle('liked', data.liked);
+        if (countEl) countEl.textContent = formatCount(data.count);
+        return;
+      }
+
+      btn.classList.toggle('liked');
       if (!countEl) return;
       const base = parseInt(countEl.dataset.base, 10) || 0;
       countEl.textContent = formatCount(btn.classList.contains('liked') ? base + 1 : base);
@@ -96,7 +272,18 @@ function initLikeToggles() {
   });
 
   document.querySelectorAll('[data-toggle-follow]').forEach(btn => {
-    btn.addEventListener('click', () => {
+    btn.addEventListener('click', async () => {
+      const slide = btn.closest('[data-breeder-id]');
+
+      if (slide) {
+        const { ok, status, data } = await api(`/api/users/${slide.dataset.breederId}/follow`, { method: 'POST' });
+        if (status === 401) { location.href = 'register.html'; return; }
+        if (!ok) return;
+        btn.classList.toggle('followed', data.following);
+        btn.textContent = data.following ? '✓' : '+';
+        return;
+      }
+
       btn.classList.toggle('followed');
       btn.textContent = btn.classList.contains('followed') ? '✓' : '+';
     });
@@ -371,13 +558,33 @@ function initSegmentedControls() {
 }
 
 // --- profile.html: visual-only follow toggle for the breeder profile page ---
-function initProfileFollow() {
+async function initProfileFollow() {
   const btn = document.querySelector('[data-toggle-follow-profile]');
   if (!btn) return;
   const defaultLabel = btn.textContent;
-  btn.addEventListener('click', () => {
-    btn.classList.toggle('is-following');
-    btn.textContent = btn.classList.contains('is-following') ? 'フォロー中' : defaultLabel;
+  const breederId = btn.dataset.breederId;
+
+  function render(following) {
+    btn.classList.toggle('is-following', following);
+    btn.textContent = following ? 'フォロー中' : defaultLabel;
+  }
+
+  if (breederId) {
+    const { ok, data } = await api('/api/reels');
+    if (ok) {
+      const mine = data.reels.find(r => String(r.breederId) === breederId);
+      if (mine) render(mine.followedByMe);
+    }
+  }
+
+  btn.addEventListener('click', async () => {
+    if (!breederId) {
+      render(!btn.classList.contains('is-following'));
+      return;
+    }
+    const { ok, status, data } = await api(`/api/users/${breederId}/follow`, { method: 'POST' });
+    if (status === 401) { location.href = 'register.html'; return; }
+    if (ok) render(data.following);
   });
 }
 
@@ -389,18 +596,16 @@ function initMobileNav() {
   btn.addEventListener('click', () => menu.classList.toggle('open'));
 }
 
-// --- register.html: customer / breeder sign-up (client-side only; data ---
-// --- lives in this browser's localStorage, there is no real backend) ---
-const REGISTER_MEMBER_KEY = 'mofubox_member';
-
-function initRegisterPage() {
+// --- register.html: customer / breeder sign-up against the real backend ---
+// --- (server/index.js); session cookie keeps the user signed in. ---
+async function initRegisterPage() {
   const app = document.querySelector('[data-register-app]');
   const success = document.querySelector('[data-register-success]');
   if (!app || !success) return;
 
-  const existing = JSON.parse(localStorage.getItem(REGISTER_MEMBER_KEY) || 'null');
-  if (existing) {
-    showRegisterSuccess(app, success, existing, true);
+  const { data: meData } = await api('/api/auth/me');
+  if (meData.user) {
+    showRegisterSuccess(app, success, meData.user, true);
     return;
   }
 
@@ -410,36 +615,51 @@ function initRegisterPage() {
   }
 
   app.querySelectorAll('[data-register-form]').forEach(form => {
-    form.addEventListener('submit', (e) => {
+    const errorEl = form.querySelector('[data-register-error]') || (() => {
+      const p = document.createElement('p');
+      p.className = 'gate-error';
+      p.style.cssText = 'display:none;color:var(--coral,#e8615a);font-size:13px;margin:-6px 0 14px;';
+      p.dataset.registerError = '';
+      form.querySelector('button[type=submit]').insertAdjacentElement('beforebegin', p);
+      return p;
+    })();
+
+    form.addEventListener('submit', async (e) => {
       e.preventDefault();
       const role = form.dataset.registerForm;
-      const data = { role, submittedAt: new Date().toISOString() };
-      new FormData(form).forEach((value, key) => { data[key] = value; });
+      const payload = { role };
+      new FormData(form).forEach((value, key) => { payload[key] = value; });
+      if (payload.breed) { payload.breed_interest = payload.breed; delete payload.breed; }
 
-      localStorage.setItem(REGISTER_MEMBER_KEY, JSON.stringify(data));
-      const listKey = role === 'breeder' ? 'mofubox_breeder_registrations' : 'mofubox_customer_registrations';
-      const list = JSON.parse(localStorage.getItem(listKey) || '[]');
-      list.push(data);
-      localStorage.setItem(listKey, JSON.stringify(list));
+      const submitBtn = form.querySelector('button[type=submit]');
+      submitBtn.disabled = true;
+      const { ok, data } = await api('/api/auth/register', { method: 'POST', body: payload });
+      submitBtn.disabled = false;
 
-      showRegisterSuccess(app, success, data, false);
+      if (!ok) {
+        errorEl.textContent = data.message || '登録に失敗しました。入力内容をご確認ください。';
+        errorEl.style.display = '';
+        return;
+      }
+      errorEl.style.display = 'none';
+      showRegisterSuccess(app, success, data.user, false);
     });
   });
 }
 
-function showRegisterSuccess(app, success, data, isReturning) {
+function showRegisterSuccess(app, success, user, isReturning) {
   app.style.display = 'none';
   success.style.display = '';
   revealNow(success);
   const title = success.querySelector('[data-register-success-title]');
   const message = success.querySelector('[data-register-success-message]');
   const cta = success.querySelector('[data-register-success-cta]');
-  const name = data.role === 'breeder' ? (data.kennel || data.name) : data.name;
+  const name = user.role === 'breeder' ? (user.kennel || user.name) : user.name;
 
-  if (data.role === 'breeder') {
+  if (user.role === 'breeder') {
     title.textContent = isReturning ? `おかえりなさい、${name}さん` : '登録が完了しました！';
     message.textContent = isReturning
-      ? 'ブリーダー登録は完了しています。審査結果はご登録のメールアドレスにご連絡します。'
+      ? `ブリーダー登録は完了しています（審査状況：${user.status === 'approved' ? '承認済み' : user.status === 'rejected' ? '却下' : '審査中'}）。`
       : 'ご登録ありがとうございます。運営チームが内容を確認のうえ、ご連絡いたします。';
     cta.textContent = 'MOFUBOXトップに戻る';
     cta.href = 'index.html';
@@ -453,52 +673,80 @@ function showRegisterSuccess(app, success, data, isReturning) {
   }
 }
 
-// --- admin.html: surface register.html sign-ups in the existing breeder / ---
-// --- user tables (same-browser only, since this prototype has no backend) ---
-function initRegistrationFeed() {
+// --- admin.html: surface real pending breeder applications / customers ---
+// --- from the backend into the existing breeder / user tables, with ---
+// --- working approve / reject buttons wired to /api/admin/*. ---
+async function initRegistrationFeed() {
   const breedersTable = document.querySelector('#view-breeders tbody');
   const usersTable = document.querySelector('#view-users tbody');
   if (!breedersTable && !usersTable) return;
 
+  const { data: meData } = await api('/api/auth/me');
+  if (!meData.user || meData.user.role !== 'admin') return;
+
   if (breedersTable) {
-    const regs = JSON.parse(localStorage.getItem('mofubox_breeder_registrations') || '[]');
-    regs.slice().reverse().forEach(reg => breedersTable.prepend(buildBreederRow(reg)));
-    if (regs.length) bumpHeadingCount('#view-breeders .panel-head h3', regs.length);
+    const { ok: bOk, data } = await api('/api/admin/breeders');
+    if (bOk) {
+      data.breeders.slice().reverse().forEach(b => breedersTable.prepend(buildBreederRow(b)));
+      if (data.breeders.length) bumpHeadingCount('#view-breeders .panel-head h3', data.breeders.length);
+    }
   }
 
   if (usersTable) {
-    const regs = JSON.parse(localStorage.getItem('mofubox_customer_registrations') || '[]');
-    regs.slice().reverse().forEach(reg => usersTable.prepend(buildCustomerRow(reg)));
-    if (regs.length) bumpHeadingCount('#view-users .panel-head h3', regs.length);
+    const { ok: uOk, data } = await api('/api/admin/customers');
+    if (uOk) {
+      data.customers.slice().reverse().forEach(c => usersTable.prepend(buildCustomerRow(c)));
+      if (data.customers.length) bumpHeadingCount('#view-users .panel-head h3', data.customers.length);
+    }
   }
 }
 
-function buildBreederRow(reg) {
+const STATUS_DOT = {
+  pending: '<span class="status-dot pending">審査中</span>',
+  approved: '<span class="status-dot ok">承認済み</span>',
+  rejected: '<span class="status-dot danger">却下</span>',
+  active: '<span class="status-dot ok">有効</span>',
+};
+
+function buildBreederRow(b) {
   const tr = document.createElement('tr');
-  const initial = escapeHtml((reg.kennel || reg.name || '?').charAt(0));
+  const initial = escapeHtml((b.kennel || b.name || '?').charAt(0));
+  tr.dataset.breederId = b.id;
   tr.innerHTML = `
-    <td><div class="t-row-title"><div class="avatar avatar-sm mint" style="width:36px;height:36px;font-size:13px;">${initial}</div><div><strong>${escapeHtml(reg.kennel || '')}</strong><span>${escapeHtml(reg.address || '')}</span></div></div></td>
-    <td>${formatRegisterDate(reg.submittedAt)}</td><td class="t-num">0</td><td class="t-num">—</td>
-    <td><span class="status-dot pending">審査中</span></td>
-    <td><div class="row-actions"><button class="approve" aria-label="承認"><svg class="icon" viewBox="0 0 24 24" width="15" height="15"><polyline points="20 6 9 17 4 12"/></svg></button><button class="reject" aria-label="却下"><svg class="icon" viewBox="0 0 24 24" width="15" height="15"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button></div></td>
+    <td><div class="t-row-title"><div class="avatar avatar-sm mint" style="width:36px;height:36px;font-size:13px;">${initial}</div><div><strong>${escapeHtml(b.kennel || '')}</strong><span>${escapeHtml(b.address || '')}</span></div></div></td>
+    <td>${formatRegisterDate(b.created_at)}</td><td class="t-num">0</td><td class="t-num">—</td>
+    <td data-status-cell>${STATUS_DOT[b.status] || STATUS_DOT.pending}</td>
+    <td><div class="row-actions">${b.status === 'pending'
+      ? '<button class="approve" data-admin-action="approve" aria-label="承認"><svg class="icon" viewBox="0 0 24 24" width="15" height="15"><polyline points="20 6 9 17 4 12"/></svg></button><button class="reject" data-admin-action="reject" aria-label="却下"><svg class="icon" viewBox="0 0 24 24" width="15" height="15"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>'
+      : '<button aria-label="詳細"><svg class="icon" viewBox="0 0 24 24" width="15" height="15"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg></button>'}</div></td>
   `;
+  tr.querySelectorAll('[data-admin-action]').forEach(btn => {
+    btn.addEventListener('click', async () => {
+      const decision = btn.dataset.adminAction;
+      const { ok, data } = await api(`/api/admin/breeders/${b.id}/${decision}`, { method: 'POST' });
+      if (!ok) return;
+      const cell = tr.querySelector('[data-status-cell]');
+      cell.innerHTML = STATUS_DOT[data.status] || '';
+      tr.querySelector('.row-actions').innerHTML = '<button aria-label="詳細"><svg class="icon" viewBox="0 0 24 24" width="15" height="15"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg></button>';
+    });
+  });
   return tr;
 }
 
-function buildCustomerRow(reg) {
+function buildCustomerRow(c) {
   const tr = document.createElement('tr');
-  const initial = escapeHtml((reg.name || '?').charAt(0));
+  const initial = escapeHtml((c.name || '?').charAt(0));
   tr.innerHTML = `
-    <td><div class="t-row-title"><div class="avatar avatar-sm mint" style="width:36px;height:36px;font-size:13px;">${initial}</div><div><strong>${escapeHtml(reg.name || '')} 様</strong><span>${escapeHtml(reg.area || '新規登録')}</span></div></div></td>
-    <td>${formatRegisterDate(reg.submittedAt)}</td><td class="t-num">0</td><td class="t-num">0</td>
-    <td><span class="status-dot ok">有効</span></td>
-    <td><div class="row-actions"><button aria-label="詳細"><svg class="icon" viewBox="0 0 24 24" width="15" height="15"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg></button><button class="reject" aria-label="利用停止"><svg class="icon" viewBox="0 0 24 24" width="15" height="15"><circle cx="12" cy="12" r="10"/><line x1="4.9" y1="4.9" x2="19.1" y2="19.1"/></svg></button></div></td>
+    <td><div class="t-row-title"><div class="avatar avatar-sm mint" style="width:36px;height:36px;font-size:13px;">${initial}</div><div><strong>${escapeHtml(c.name || '')} 様</strong><span>${escapeHtml(c.area || '新規登録')}</span></div></div></td>
+    <td>${formatRegisterDate(c.created_at)}</td><td class="t-num">0</td><td class="t-num">0</td>
+    <td>${STATUS_DOT.active}</td>
+    <td><div class="row-actions"><button aria-label="詳細"><svg class="icon" viewBox="0 0 24 24" width="15" height="15"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg></button></div></td>
   `;
   return tr;
 }
 
 function formatRegisterDate(iso) {
-  const d = new Date(iso);
+  const d = new Date(iso.replace(' ', 'T') + 'Z');
   if (isNaN(d)) return '—';
   return `${d.getFullYear()}/${String(d.getMonth() + 1).padStart(2, '0')}/${String(d.getDate()).padStart(2, '0')}`;
 }

@@ -15,12 +15,13 @@
   <div class="gate-box">
     <div class="gate-icon">🔒</div>
     <h2>管理者専用ページ</h2>
-    <p>パスワードを入力してください。</p>
-    <form data-gate-form>
-      <input type="password" data-gate-input placeholder="パスワード" autocomplete="off" autofocus>
+    <p>管理者アカウントでログインしてください。</p>
+    <form data-gate-form data-gate-role="admin">
+      <input type="email" data-gate-email placeholder="メールアドレス" autocomplete="username" autofocus style="margin-bottom:10px;">
+      <input type="password" data-gate-input placeholder="パスワード" autocomplete="current-password">
       <button type="submit" class="btn btn-mint">入る</button>
     </form>
-    <p class="gate-error" data-gate-error>パスワードが違います</p>
+    <p class="gate-error" data-gate-error>メールアドレスまたはパスワードが正しくありません</p>
   </div>
 </div>
 
@@ -76,7 +77,7 @@
         <strong>運営アカウント</strong>
         <span>管理者</span>
       </div>
-      <button aria-label="ログアウト"><svg class="icon" viewBox="0 0 24 24" width="18" height="18"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg></button>
+      <button aria-label="ログアウト" data-logout><svg class="icon" viewBox="0 0 24 24" width="18" height="18"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg></button>
     </div>
   </aside>
 
