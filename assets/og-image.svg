@@ -1,0 +1,84 @@
+<svg width="1200" height="630" viewBox="0 0 1200 630" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1200" y2="630" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#3FADA8"/>
+      <stop offset="100%" stop-color="#1F6E6B"/>
+    </linearGradient>
+    <linearGradient id="crl" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#E8855A"/>
+      <stop offset="100%" stop-color="#C85A2C"/>
+    </linearGradient>
+    <linearGradient id="card-bg" x1="0" y1="0" x2="0" y2="510" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#FDFAF6"/>
+      <stop offset="100%" stop-color="#F6EFE3"/>
+    </linearGradient>
+    <clipPath id="phone-clip">
+      <rect x="790" y="110" width="290" height="430" rx="34"/>
+    </clipPath>
+  </defs>
+
+  <!-- Background -->
+  <rect width="1200" height="630" fill="url(#bg)"/>
+
+  <!-- Decorative blobs -->
+  <circle cx="980" cy="60" r="260" fill="rgba(255,255,255,0.06)"/>
+  <circle cx="1110" cy="560" r="180" fill="rgba(255,255,255,0.05)"/>
+  <circle cx="60"  cy="530" r="200" fill="rgba(255,255,255,0.05)"/>
+
+  <!-- Left white card -->
+  <rect x="56" y="56" width="660" height="518" rx="28" fill="url(#card-bg)" opacity="0.97"/>
+
+  <!-- Logo mark -->
+  <rect x="92" y="96" width="52" height="52" rx="14" fill="url(#bg)"/>
+  <text x="118" y="131" text-anchor="middle" font-size="28" font-family="'Apple Color Emoji','Segoe UI Emoji',sans-serif">🐱</text>
+
+  <!-- MOFUBOX wordmark -->
+  <text x="158" y="136" font-family="'Poppins','Helvetica Neue',Arial,sans-serif" font-weight="800" font-size="30" fill="#1F6E6B">MOFU</text>
+  <text x="265" y="136" font-family="'Poppins','Helvetica Neue',Arial,sans-serif" font-weight="800" font-size="30" fill="#E8855A">BOX</text>
+
+  <!-- Eyebrow badge -->
+  <rect x="92" y="172" width="268" height="32" rx="16" fill="#E1F3F1"/>
+  <text x="106" y="193" font-family="'Hiragino Sans','Noto Sans JP','Yu Gothic',sans-serif" font-size="13" font-weight="700" fill="#1F6E6B">リールで出会う、猫ブリーダーマッチング</text>
+
+  <!-- Main headline -->
+  <text x="92" y="265" font-family="'Hiragino Sans','Noto Sans JP','Yu Gothic',sans-serif" font-weight="900" font-size="46" fill="#2A3736">もふっと出会う、</text>
+  <text x="92" y="325" font-family="'Hiragino Sans','Noto Sans JP','Yu Gothic',sans-serif" font-weight="900" font-size="46" fill="#3FADA8">運命の子猫</text>
+  <text x="414" y="325" font-family="'Hiragino Sans','Noto Sans JP','Yu Gothic',sans-serif" font-weight="900" font-size="46" fill="#2A3736">と。</text>
+
+  <!-- Sub text -->
+  <text x="92" y="374" font-family="'Hiragino Sans','Noto Sans JP','Yu Gothic',sans-serif" font-size="16" fill="#5C6B6A">スワイプして見るだけ。審査済みブリーダーと安心マッチング。</text>
+
+  <!-- Stats cards -->
+  <rect x="92" y="408" width="166" height="86" rx="16" fill="#E1F3F1"/>
+  <text x="175" y="446" text-anchor="middle" font-family="'Poppins','Helvetica Neue',Arial,sans-serif" font-weight="800" font-size="28" fill="#1F6E6B">1,200+</text>
+  <text x="175" y="469" text-anchor="middle" font-family="'Hiragino Sans','Noto Sans JP',sans-serif" font-size="12" font-weight="700" fill="#5C6B6A">登録ブリーダー</text>
+
+  <rect x="274" y="408" width="166" height="86" rx="16" fill="#FCE6D9"/>
+  <text x="357" y="446" text-anchor="middle" font-family="'Poppins','Helvetica Neue',Arial,sans-serif" font-weight="800" font-size="28" fill="#D2693C">8,500+</text>
+  <text x="357" y="469" text-anchor="middle" font-family="'Hiragino Sans','Noto Sans JP',sans-serif" font-size="12" font-weight="700" fill="#5C6B6A">マッチング成立</text>
+
+  <rect x="456" y="408" width="148" height="86" rx="16" fill="#E1F3F1"/>
+  <text x="530" y="446" text-anchor="middle" font-family="'Poppins','Helvetica Neue',Arial,sans-serif" font-weight="800" font-size="28" fill="#1F6E6B">98%</text>
+  <text x="530" y="469" text-anchor="middle" font-family="'Hiragino Sans','Noto Sans JP',sans-serif" font-size="12" font-weight="700" fill="#5C6B6A">利用者満足度</text>
+
+  <!-- Right: Phone mockup -->
+  <rect x="786" y="106" width="298" height="438" rx="38" fill="#1A2B2A"/>
+  <rect x="798" y="118" width="274" height="414" rx="30" fill="url(#crl)" clip-path="url(#phone-clip)"/>
+
+  <!-- Cat emoji inside phone -->
+  <text x="935" y="370" text-anchor="middle" font-size="110" font-family="'Apple Color Emoji','Segoe UI Emoji',sans-serif">🐱</text>
+
+  <!-- Phone status bar pill -->
+  <rect x="880" y="118" width="110" height="22" rx="11" fill="#1A2B2A"/>
+
+  <!-- Verified badge on phone -->
+  <rect x="816" y="138" width="180" height="36" rx="18" fill="rgba(255,255,255,0.22)"/>
+  <text x="906" y="161" text-anchor="middle" font-family="'Hiragino Sans','Noto Sans JP',sans-serif" font-size="13" font-weight="700" fill="white">✓ 審査済みブリーダー</text>
+
+  <!-- Like badge on phone -->
+  <rect x="826" y="450" width="180" height="36" rx="18" fill="rgba(255,255,255,0.92)"/>
+  <text x="916" y="473" text-anchor="middle" font-family="'Hiragino Sans','Noto Sans JP',sans-serif" font-size="13" font-weight="700" fill="#2A3736">♡ 2,481  いいね</text>
+
+  <!-- Bottom label -->
+  <text x="600" y="608" text-anchor="middle" font-family="'Poppins','Helvetica Neue',Arial,sans-serif" font-size="13" fill="rgba(255,255,255,0.55)">mofubox.jp</text>
+</svg>
