@@ -4,6 +4,7 @@ const {
   setSessionCookie, clearSessionCookie, currentUser, publicUser, parseCookies, SESSION_COOKIE,
 } = require('../auth');
 const { notifyAdmins } = require('../notifications');
+const { screenBreeder } = require('../screening');
 
 const VALID_ROLES = new Set(['customer', 'breeder']); // admin accounts are seeded, not self-registered
 
@@ -18,7 +19,11 @@ function register(req, res, body) {
   const existing = db.prepare('SELECT id FROM users WHERE email = ?').get(email);
   if (existing) return res.json(409, { error: 'email_taken', message: 'このメールアドレスはすでに登録されています。' });
 
-  const status = role === 'breeder' ? 'pending' : 'active';
+  // Breeders are auto-approved on sign-up so they can edit their profile and
+  // post their cats immediately — no waiting for manual review. A lightweight
+  // automatic screen still flags suspicious registrations for the admin to
+  // review (and suspend if needed) after the fact.
+  const status = role === 'breeder' ? 'approved' : 'active';
   const info = db.prepare(`
     INSERT INTO users (role, email, password_hash, name, kennel, phone, address, area, bio, breed_interest, status)
     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
@@ -27,7 +32,17 @@ function register(req, res, body) {
   const user = db.prepare('SELECT * FROM users WHERE id = ?').get(info.lastInsertRowid);
 
   if (role === 'breeder') {
-    notifyAdmins('registration', '新規ブリーダー申請', `${kennel}（${name}様）から審査待ちの申請が届きました`, '/admin.html#view-breeders');
+    const { flagged, reasons } = screenBreeder({ kennel, name, bio, address });
+    if (flagged) {
+      notifyAdmins(
+        'registration',
+        '要確認：自動チェックで注意フラグ',
+        `${kennel}（${name}様）が登録・自動承認されましたが、自動チェックで注意対象になりました（${reasons.join('・')}）。内容をご確認ください。`,
+        '/admin.html#view-breeders'
+      );
+    } else {
+      notifyAdmins('registration', '新規ブリーダーが登録', `${kennel}（${name}様）が登録し、自動承認されました`, '/admin.html#view-breeders');
+    }
   } else {
     notifyAdmins('registration', '新規お客様登録', `${name}様が新規登録しました`, '/admin.html#view-users');
   }
