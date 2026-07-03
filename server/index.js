@@ -93,6 +93,9 @@ async function handleApi(req, res, pathname, query) {
     m = pathname.match(/^\/api\/admin\/breeders\/(\d+)\/(approve|reject)$/);
     if (m && method === 'POST') return adminRoutes.reviewBreeder(req, res, Number(m[1]), m[2]);
 
+    m = pathname.match(/^\/api\/admin\/users\/(\d+)\/(suspend|reinstate|delete)$/);
+    if (m && method === 'POST') return adminRoutes.manageUser(req, res, Number(m[1]), m[2]);
+
     if (pathname === '/api/payments/checkout-session' && method === 'POST') {
       return paymentRoutes.createCheckoutSession(req, res, await readJsonBody(req));
     }

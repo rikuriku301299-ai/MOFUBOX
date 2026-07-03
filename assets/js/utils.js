@@ -1,8 +1,9 @@
 export const STATUS_DOT = {
-  pending:  '<span class="status-dot pending">審査中</span>',
-  approved: '<span class="status-dot ok">承認済み</span>',
-  rejected: '<span class="status-dot danger">却下</span>',
-  active:   '<span class="status-dot ok">有効</span>',
+  pending:   '<span class="status-dot pending">審査中</span>',
+  approved:  '<span class="status-dot ok">承認済み</span>',
+  rejected:  '<span class="status-dot danger">却下</span>',
+  active:    '<span class="status-dot ok">有効</span>',
+  suspended: '<span class="status-dot danger">停止中</span>',
 };
 
 export function formatCount(n) {

@@ -42,4 +42,24 @@ function reviewBreeder(req, res, id, decision) {
   res.json(200, { status });
 }
 
-module.exports = { listBreeders, listCustomers, reviewBreeder, requireAdmin };
+function manageUser(req, res, id, action) {
+  if (!requireAdmin(req, res)) return;
+  const user = db.prepare('SELECT id, role FROM users WHERE id = ?').get(id);
+  if (!user) return res.json(404, { error: 'not_found' });
+  if (action === 'suspend') {
+    db.prepare("UPDATE users SET status = 'suspended' WHERE id = ?").run(id);
+    return res.json(200, { status: 'suspended' });
+  }
+  if (action === 'reinstate') {
+    const newStatus = user.role === 'breeder' ? 'approved' : 'active';
+    db.prepare('UPDATE users SET status = ? WHERE id = ?').run(newStatus, id);
+    return res.json(200, { status: newStatus });
+  }
+  if (action === 'delete') {
+    db.prepare('DELETE FROM users WHERE id = ?').run(id);
+    return res.json(200, { deleted: true });
+  }
+  return res.json(400, { error: 'unknown_action' });
+}
+
+module.exports = { listBreeders, listCustomers, reviewBreeder, manageUser, requireAdmin };
