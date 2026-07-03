@@ -1525,11 +1525,17 @@ html { scroll-behavior: smooth; }
 }
 
 @media (max-width: 640px) {
+  .container { padding: 0 18px; }
   .breed-grid { grid-template-columns: repeat(2, 1fr); gap: 12px; }
   .breed-card { padding: 20px 12px; }
   .mobile-cta { display: block; }
   .lp-hero h1 { font-size: 34px; }
-  .section { padding: 64px 0; }
+  .lp-hero { padding: 48px 0 36px; }
+  .section { padding: 42px 0; }
+  .section-head { margin-bottom: 30px; }
+  .section-head.left { margin-bottom: 26px; }
+  .notify-band { padding: 32px 22px; gap: 24px; }
+  .cta-band { padding: 36px 22px; }
   .features-grid { grid-template-columns: 1fr; }
   .cat-grid { grid-template-columns: 1fr 1fr; }
   .dash-main { padding: 20px 16px 50px; }
