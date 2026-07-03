@@ -27,9 +27,17 @@ export async function initPasswordGate() {
     return true;
   }
 
+  function unlock(user) {
+    overlay.classList.add('unlocked');
+    // Signal data-loading modules (e.g. admin lists) that an authenticated
+    // session is now available, so they can (re)load after login — not just
+    // on initial page load when the user may still be at the gate.
+    document.dispatchEvent(new CustomEvent('gate:unlocked', { detail: { user } }));
+  }
+
   const { data: meData } = await api('/api/auth/me');
   if (roleAllowed(meData.user)) {
-    overlay.classList.add('unlocked');
+    unlock(meData.user);
     return;
   }
 
@@ -40,7 +48,7 @@ export async function initPasswordGate() {
       body: { email: emailInput.value, password: input.value },
     });
     if (ok && roleAllowed(data.user)) {
-      overlay.classList.add('unlocked');
+      unlock(data.user);
     } else {
       if (ok && data.user) await api('/api/auth/logout', { method: 'POST' });
       error.classList.add('show');

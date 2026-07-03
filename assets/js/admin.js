@@ -1,35 +1,46 @@
 import { api } from './api.js';
 import { escapeHtml, formatRegisterDate, STATUS_DOT } from './utils.js';
 
-export async function initRegistrationFeed() {
+export function initRegistrationFeed() {
   const breedersTable = document.querySelector('#view-breeders tbody');
   const usersTable = document.querySelector('#view-users tbody');
   if (!breedersTable && !usersTable) return;
 
-  const { data: meData } = await api('/api/auth/me');
-  if (!meData.user || meData.user.role !== 'admin') return;
+  let loaded = false;
 
-  if (breedersTable) {
-    await loadBreeders(breedersTable, 'all');
-    document.querySelectorAll('[data-seg-group="breeders-filter"] [data-seg-value]').forEach(btn => {
-      btn.addEventListener('click', () => {
-        document.querySelectorAll('[data-seg-group="breeders-filter"] button').forEach(b => b.classList.remove('active'));
-        btn.classList.add('active');
-        loadBreeders(breedersTable, btn.dataset.segValue);
+  async function loadAll() {
+    if (loaded) return;
+    const { data: meData } = await api('/api/auth/me');
+    if (!meData.user || meData.user.role !== 'admin') return;
+    loaded = true;
+
+    if (breedersTable) {
+      await loadBreeders(breedersTable, 'all');
+      document.querySelectorAll('[data-seg-group="breeders-filter"] [data-seg-value]').forEach(btn => {
+        btn.addEventListener('click', () => {
+          document.querySelectorAll('[data-seg-group="breeders-filter"] button').forEach(b => b.classList.remove('active'));
+          btn.classList.add('active');
+          loadBreeders(breedersTable, btn.dataset.segValue);
+        });
       });
-    });
+    }
+
+    if (usersTable) {
+      await loadCustomers(usersTable, 'all');
+      document.querySelectorAll('[data-seg-group="users-filter"] [data-seg-value]').forEach(btn => {
+        btn.addEventListener('click', () => {
+          document.querySelectorAll('[data-seg-group="users-filter"] button').forEach(b => b.classList.remove('active'));
+          btn.classList.add('active');
+          loadCustomers(usersTable, btn.dataset.segValue);
+        });
+      });
+    }
   }
 
-  if (usersTable) {
-    await loadCustomers(usersTable, 'all');
-    document.querySelectorAll('[data-seg-group="users-filter"] [data-seg-value]').forEach(btn => {
-      btn.addEventListener('click', () => {
-        document.querySelectorAll('[data-seg-group="users-filter"] button').forEach(b => b.classList.remove('active'));
-        btn.classList.add('active');
-        loadCustomers(usersTable, btn.dataset.segValue);
-      });
-    });
-  }
+  // Load now if a valid admin session already exists, and also after the login
+  // gate unlocks (admin.js runs on page load, before the password is entered).
+  loadAll();
+  document.addEventListener('gate:unlocked', loadAll);
 }
 
 async function loadBreeders(tbody, filter) {
