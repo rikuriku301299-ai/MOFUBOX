@@ -44,7 +44,13 @@ async function loadBreeders(tbody, filter) {
   const h3 = document.querySelector('#view-breeders .panel-head h3');
   if (h3) h3.textContent = `登録ブリーダー一覧（${data.breeders.length}軒）`;
   if (!data.breeders.length) {
-    tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;color:var(--ink-faint);padding:24px;">該当するブリーダーがいません</td></tr>';
+    tbody.innerHTML = `<tr><td colspan="6">
+      <div style="text-align:center;padding:56px 24px;color:var(--ink-soft);">
+        <div style="font-size:48px;margin-bottom:16px;">🐱</div>
+        <div style="font-weight:700;font-size:15px;margin-bottom:8px;">${filter === 'pending' ? '審査待ちのブリーダーはいません' : 'まだブリーダーの登録がありません'}</div>
+        <div style="font-size:13px;color:var(--ink-faint);">ブリーダーが登録申請するとここに表示されます</div>
+      </div>
+    </td></tr>`;
     return;
   }
   data.breeders.forEach(b => tbody.appendChild(buildBreederRow(b)));
@@ -64,7 +70,13 @@ async function loadCustomers(tbody, filter) {
   const h3 = document.querySelector('#view-users .panel-head h3');
   if (h3) h3.textContent = `顧客ユーザー一覧（${customers.length}人）`;
   if (!customers.length) {
-    tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;color:var(--ink-faint);padding:24px;">該当するユーザーがいません</td></tr>';
+    tbody.innerHTML = `<tr><td colspan="6">
+      <div style="text-align:center;padding:56px 24px;color:var(--ink-soft);">
+        <div style="font-size:48px;margin-bottom:16px;">👤</div>
+        <div style="font-weight:700;font-size:15px;margin-bottom:8px;">まだお客様の登録がありません</div>
+        <div style="font-size:13px;color:var(--ink-faint);">ユーザーが登録するとここに表示されます</div>
+      </div>
+    </td></tr>`;
     return;
   }
   customers.forEach(c => tbody.appendChild(buildCustomerRow(c)));
