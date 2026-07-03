@@ -8,7 +8,11 @@ const DATA_DIR = path.join(__dirname, '..', 'data');
 const DB_PATH = process.env.MOFUBOX_DB_PATH || path.join(DATA_DIR, 'mofubox.sqlite3');
 const UPLOADS_DIR = process.env.MOFUBOX_UPLOADS_DIR || path.join(DATA_DIR, 'uploads');
 
+// Ensure the parent dir of the DB file and the uploads dir both exist. When a
+// persistent volume is mounted (e.g. MOFUBOX_DB_PATH=/data/mofubox.sqlite3),
+// this creates the volume's subdirs so data survives redeploys/restarts.
 fs.mkdirSync(DATA_DIR, { recursive: true });
+fs.mkdirSync(path.dirname(DB_PATH), { recursive: true });
 fs.mkdirSync(UPLOADS_DIR, { recursive: true });
 
 const db = new DatabaseSync(DB_PATH);
