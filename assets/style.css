@@ -390,6 +390,9 @@ input, textarea { font-family: inherit; }
   margin: 22px 0 20px;
   letter-spacing: -0.01em;
 }
+/* Keep Japanese phrase units from breaking mid-word at line ends. Each .nb
+   stays intact; line breaks only happen between phrases. */
+.nb { display: inline-block; }
 .lp-hero h1 .accent { color: var(--coral); }
 .lp-hero h1 .underline {
   position: relative;
