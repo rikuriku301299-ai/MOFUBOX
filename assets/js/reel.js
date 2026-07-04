@@ -134,7 +134,7 @@ export function initReelSwipe() {
     if (wheelLocked || Math.abs(e.deltaY) < 8) return;
     wheelLocked = true;
     goTo(index + (e.deltaY > 0 ? 1 : -1));
-    setTimeout(() => { wheelLocked = false; }, 1220);
+    setTimeout(() => { wheelLocked = false; }, 650);
   }, { passive: false });
 
   feed.addEventListener('touchstart', (e) => {
