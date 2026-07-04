@@ -1608,12 +1608,17 @@ html { scroll-behavior: smooth; }
   .breed-grid { grid-template-columns: repeat(2, 1fr); gap: 12px; }
   .breed-card { padding: 20px 12px; }
   .mobile-cta { display: block; }
-  .lp-hero h1 { font-size: 34px; }
+  .lp-hero h1 { font-size: 34px; margin: 16px 0 16px; }
   .section-head h2 { font-size: 27px; }
-  .lp-hero { padding: 48px 0 36px; }
-  .section { padding: 42px 0; }
-  .section-head { margin-bottom: 30px; }
-  .section-head.left { margin-bottom: 26px; }
+  .lp-hero { padding: 40px 0 26px; }
+  /* Tighten the mobile hero: less dead space between text, CTAs, stats and the
+     phone mockup so content flows and the gallery is reached sooner. */
+  .lp-hero__cta { margin-top: 22px; }
+  .lp-hero__stats { margin-top: 26px; gap: 18px; }
+  .phone { margin-top: 18px; width: 244px; height: 496px; }
+  .section { padding: 36px 0; }
+  .section-head { margin-bottom: 26px; }
+  .section-head.left { margin-bottom: 24px; }
   .notify-band { padding: 32px 22px; gap: 24px; }
   .cta-band { padding: 36px 22px; }
   .features-grid { grid-template-columns: 1fr; }
