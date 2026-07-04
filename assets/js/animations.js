@@ -1,8 +1,14 @@
 import { formatCountUpNumber } from './utils.js';
 
 export function initScrollReveal() {
-  if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
-  if (!('IntersectionObserver' in window)) return;
+  // Note: we intentionally still run under prefers-reduced-motion. The CSS then
+  // turns the reveal into a gentle opacity-only fade (no movement), which is
+  // accessible AND avoids leaving hardcoded-`reveal` elements stuck invisible.
+  if (!('IntersectionObserver' in window)) {
+    // No observer support: just show everything so nothing stays hidden.
+    document.querySelectorAll('.reveal').forEach(el => el.classList.add('is-visible'));
+    return;
+  }
 
   const els = Array.from(document.querySelectorAll(
     '.feature-card, .step-card, .t-card, .faq-item, .section-head, .cta-band, ' +

@@ -1440,10 +1440,23 @@ html { scroll-behavior: smooth; }
 
 @media (prefers-reduced-motion: reduce) {
   html { scroll-behavior: auto; }
+
+  /* Stop all looping / positional motion (blob float, phone bob, marquee,
+     slide-ins) — this is the movement that reduced-motion is meant to remove. */
   *, *::before, *::after {
     animation-duration: 0.01ms !important;
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
+  }
+
+  /* But keep scroll-reveal as a gentle opacity-only cross-fade with NO movement.
+     A fade without positional motion is accessible, and it keeps the page from
+     snapping harshly (and prevents hardcoded-reveal content from disappearing).
+     Higher specificity than the * rule above, so this wins even with !important. */
+  .reveal, .reveal-left, .reveal-right {
+    transform: none !important;
+    transition: opacity 0.7s ease !important;
+    transition-delay: 0ms !important;
   }
 }
 
