@@ -1176,14 +1176,26 @@ table tbody tr:hover { background: var(--cream); }
 .row-actions button.reject:hover { background: var(--coral-light); }
 
 .cat-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 18px; }
-.cat-card { border: 1px solid var(--line); border-radius: var(--radius-m); overflow: hidden; background: var(--white); }
+.cat-card { border: 1px solid var(--line); border-radius: var(--radius-m); overflow: hidden; background: linear-gradient(165deg, #FFFFFF 0%, #FFFCF8 100%); transition: transform 0.22s ease, box-shadow 0.22s ease, border-color 0.22s ease; }
+a.cat-card { color: inherit; display: block; }
+a.cat-card:hover { transform: translateY(-5px); box-shadow: 0 18px 38px rgba(232, 133, 90, 0.16), 0 6px 16px rgba(42, 55, 54, 0.06); border-color: rgba(232, 133, 90, 0.28); }
 .cat-card__img { height: 150px; position: relative; }
-.cat-card__img .emoji { font-size: 44px; }
-.cat-card__img .pill { position: absolute; top: 10px; left: 10px; }
+a.cat-card:hover .cat-card__img .emoji { transform: scale(1.08); transition: transform 0.3s ease; }
+.cat-card__img .emoji { font-size: 44px; transition: transform 0.3s ease; }
+.cat-card__img .pill { position: absolute; top: 10px; left: 10px; z-index: 3; }
 .cat-card__body { padding: 14px; }
 .cat-card__body strong { font-size: 14px; display: block; }
-.cat-card__body p { font-size: 12.5px; color: var(--ink-soft); margin: 4px 0 10px; }
+.cat-card__body p { font-size: 12px; color: var(--ink-soft); margin: 4px 0 10px; line-height: 1.6; }
 .cat-card__body .price { font-family: var(--font-en); font-weight: 800; color: var(--coral-dark); font-size: 15px; }
+
+/* Available-kitten abundance banner on the LP */
+.kitten-stat { display: flex; align-items: center; justify-content: center; gap: 16px; flex-wrap: wrap; margin-top: 4px; }
+.kitten-stat__num { font-size: 46px; font-weight: 800; color: var(--coral-dark); line-height: 1; }
+.kitten-stat__num span { font-size: 26px; }
+.kitten-stat__label { font-size: 14px; font-weight: 700; color: var(--ink-soft); }
+.kitten-stat__live { display: inline-flex; align-items: center; gap: 7px; font-size: 12.5px; font-weight: 700; color: var(--mint-darker); background: var(--mint-light); padding: 6px 12px; border-radius: var(--radius-full); }
+.kitten-stat__live .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--mint); animation: livePulse 1.6s ease-in-out infinite; }
+@keyframes livePulse { 0%, 100% { opacity: 1; transform: scale(1); } 50% { opacity: 0.35; transform: scale(0.7); } }
 
 .inquiry-list { display: flex; flex-direction: column; }
 .inquiry-item { display: flex; gap: 12px; padding: 14px 0; border-bottom: 1px solid var(--line); }
@@ -1575,6 +1587,7 @@ html { scroll-behavior: smooth; }
   .breed-card { padding: 20px 12px; }
   .mobile-cta { display: block; }
   .lp-hero h1 { font-size: 34px; }
+  .section-head h2 { font-size: 27px; }
   .lp-hero { padding: 48px 0 36px; }
   .section { padding: 42px 0; }
   .section-head { margin-bottom: 30px; }
