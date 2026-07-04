@@ -7,7 +7,10 @@ export function initScrollReveal() {
   const els = Array.from(document.querySelectorAll(
     '.feature-card, .step-card, .t-card, .faq-item, .section-head, .cta-band, ' +
     '.split > div, .lp-hero__inner > div, .stat-card, .cat-card, .report-card, ' +
-    '.panel, .profile-reel-card, .profile-section'
+    '.panel, .profile-reel-card, .profile-section, ' +
+    // Also observe anything with a hardcoded `reveal` class in the HTML (e.g.
+    // .breed-card, .kitten-stat) so it never gets stuck invisible.
+    '.reveal'
   ));
   if (!els.length) return;
 
