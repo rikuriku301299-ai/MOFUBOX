@@ -55,6 +55,9 @@ body::before {
   inset: 0;
   z-index: -1;
   pointer-events: none;
+  /* Promote to its own GPU layer so this fixed layer composites on scroll
+     instead of repainting — keeps mobile scrolling smooth. */
+  transform: translateZ(0);
   background:
     radial-gradient(1100px 640px at 88% -6%, rgba(63, 173, 168, 0.14), transparent 60%),
     radial-gradient(980px 720px at -12% 12%, rgba(232, 133, 90, 0.11), transparent 58%),
@@ -600,7 +603,6 @@ input, textarea { font-family: inherit; }
 .section-alt {
   background:
     linear-gradient(180deg, rgba(255, 255, 255, 0) 0%, rgba(255, 253, 250, 0.72) 12%, rgba(255, 252, 247, 0.82) 50%, rgba(251, 243, 233, 0.72) 88%, rgba(255, 255, 255, 0) 100%);
-  backdrop-filter: blur(2px);
 }
 
 .features-grid {
@@ -1386,7 +1388,6 @@ html { scroll-behavior: smooth; }
   opacity: 0;
   transform: translateY(34px);
   transition: opacity 1s cubic-bezier(0.16, 1, 0.3, 1), transform 1s cubic-bezier(0.16, 1, 0.3, 1);
-  will-change: opacity, transform;
 }
 .reveal-left { transform: translateX(-46px); }
 .reveal-right { transform: translateX(46px); }
@@ -1545,8 +1546,7 @@ html { scroll-behavior: smooth; }
   bottom: 0; left: 0; right: 0;
   padding: 12px 20px;
   padding-bottom: calc(12px + env(safe-area-inset-bottom));
-  background: rgba(253, 250, 246, 0.95);
-  backdrop-filter: blur(12px);
+  background: #FBF6EE;
   border-top: 1px solid var(--line);
   z-index: 89;
 }
