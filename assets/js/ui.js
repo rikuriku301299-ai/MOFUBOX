@@ -1,5 +1,16 @@
 import { revealNow } from './animations.js';
 
+// Photo cards (breed cards, etc.) show a real photo when one is present and
+// gracefully fall back to the emoji sitting behind it if the image is missing
+// or fails to load. Handles images that already errored before this ran.
+export function initPhotoFallbacks() {
+  document.querySelectorAll('[data-photo] img').forEach(img => {
+    const drop = () => img.remove();
+    if (img.complete && img.naturalWidth === 0) drop();
+    else img.addEventListener('error', drop);
+  });
+}
+
 export function initSegmentedControls() {
   document.querySelectorAll('.seg').forEach(seg => {
     const buttons = seg.querySelectorAll('button');

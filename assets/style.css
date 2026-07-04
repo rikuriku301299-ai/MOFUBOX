@@ -1474,6 +1474,28 @@ html { scroll-behavior: smooth; }
   box-shadow: 0 16px 34px rgba(63, 173, 168, 0.16), 0 5px 14px rgba(42, 55, 54, 0.05);
   border-color: rgba(63, 173, 168, 0.32);
 }
+/* Round breed photo — shows a real photo when present (object-fit cover),
+   otherwise the emoji sitting behind it shows through as a graceful fallback. */
+.breed-card__photo {
+  width: 76px;
+  height: 76px;
+  border-radius: 50%;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  background: linear-gradient(135deg, var(--mint-light), var(--coral-light));
+  transition: transform 0.25s ease;
+}
+.breed-card:hover .breed-card__photo { transform: scale(1.06); }
+.breed-card__photo img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
 .breed-card__emoji { font-size: 40px; line-height: 1; }
 .breed-card__name { font-size: 13px; font-weight: 700; color: var(--ink); line-height: 1.45; }
 .breed-card__count {
