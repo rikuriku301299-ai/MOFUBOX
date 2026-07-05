@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>お問い合わせ | MOFUBOX</title>
+<meta name="description" content="MOFUBOXへのお問い合わせ窓口。サービス・ブリーダー登録・個人情報に関するご相談を受け付けています。">
+<meta name="robots" content="index, follow">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E%F0%9F%90%B1%3C/text%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&family=Zen+Maru+Gothic:wght@400;500;700;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/style.css">
+<style>
+  .legal { max-width: 680px; margin: 0 auto; }
+  .legal p { font-size: 15px; line-height: 1.95; color: var(--ink-soft); }
+  .contact-card { background: var(--white); border: 1px solid var(--line); border-radius: var(--radius-l); padding: 28px 30px; margin: 22px 0; }
+  .contact-card h3 { font-size: 16px; font-weight: 900; margin-bottom: 8px; }
+  .field { display: flex; flex-direction: column; gap: 6px; margin-bottom: 16px; }
+  .field label { font-size: 13px; font-weight: 700; color: var(--ink); }
+  .field input, .field textarea { border: 1.5px solid var(--line); border-radius: var(--radius-s); padding: 12px 14px; font-size: 15px; background: var(--cream); }
+  .field input:focus, .field textarea:focus { outline: 2px solid var(--mint-light-2); border-color: var(--mint); }
+</style>
+</head>
+<body>
+
+<header class="lp-header">
+  <div class="container lp-header__inner">
+    <a href="index.html" class="logo">
+      <span class="logo__mark">
+        <svg class="icon" viewBox="0 0 24 24" width="20" height="20" fill="currentColor" stroke="none">
+          <circle cx="5.5" cy="9" r="2.1"/><circle cx="9.7" cy="5.3" r="2.1"/><circle cx="14.3" cy="5.3" r="2.1"/><circle cx="18.5" cy="9" r="2.1"/>
+          <path d="M12 11c3.4 0 6.4 2.2 6.4 5.1 0 2.4-2 3.9-4.4 3.9-1 0-1.5-.4-2-.4s-1 .4-2 .4c-2.4 0-4.4-1.5-4.4-3.9C5.6 13.2 8.6 11 12 11z"/>
+        </svg>
+      </span>
+      <span><span class="logo__mofu">MOFU</span><span class="logo__box">BOX</span></span>
+    </a>
+    <nav class="lp-nav">
+      <div class="lp-nav__cta">
+        <a href="index.html" class="btn btn-outline btn-sm">← トップへ戻る</a>
+      </div>
+    </nav>
+  </div>
+</header>
+
+<main>
+  <section class="section" style="padding-top:56px;">
+    <div class="container">
+      <div class="legal">
+        <span class="eyebrow">CONTACT</span>
+        <h1 style="font-size:30px;font-weight:900;margin:14px 0 10px;">お問い合わせ</h1>
+        <p>サービスのご利用、ブリーダー登録、個人情報の取り扱いに関するご相談を受け付けています。以下のフォームからお気軽にご連絡ください。</p>
+
+        <div class="contact-card">
+          <form onsubmit="event.preventDefault(); this.style.display='none'; document.getElementById('sent').style.display='block';">
+            <div class="field">
+              <label for="c-name">お名前</label>
+              <input id="c-name" type="text" required autocomplete="name" placeholder="山田 太郎">
+            </div>
+            <div class="field">
+              <label for="c-email">メールアドレス</label>
+              <input id="c-email" type="email" required autocomplete="email" placeholder="you@example.com">
+            </div>
+            <div class="field">
+              <label for="c-body">お問い合わせ内容</label>
+              <textarea id="c-body" rows="5" required placeholder="ご質問・ご相談の内容をご記入ください。"></textarea>
+            </div>
+            <button type="submit" class="btn btn-coral">送信する</button>
+          </form>
+          <div id="sent" style="display:none;">
+            <h3>送信ありがとうございます</h3>
+            <p style="margin:0;">内容を確認のうえ、担当より折り返しご連絡いたします。</p>
+          </div>
+        </div>
+
+        <p style="font-size:13px;color:var(--ink-faint);">※ 現在は準備期間のため、お問い合わせへの返信までお時間をいただく場合があります。正式なサポート窓口（専用メールアドレス）は、事業体制の確定後にこちらへ掲載します。</p>
+
+        <p style="margin-top:28px;"><a href="index.html" class="btn btn-mint">← トップへ戻る</a></p>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer class="lp-footer">
+  <div class="container">
+    <div class="lp-footer__bottom" style="border-top:none;">
+      <span>© 2026 MOFUBOX, Inc. All rights reserved.</span>
+      <div class="lp-footer__social">
+        <a href="terms.html">利用規約</a>
+        <a href="privacy.html">プライバシーポリシー</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script type="module" src="assets/main.js"></script>
+</body>
+</html>
