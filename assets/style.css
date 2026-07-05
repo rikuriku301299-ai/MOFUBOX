@@ -1658,93 +1658,141 @@ html { scroll-behavior: smooth; }
 }
 
 /* =========================================================
-   LANDING PAGE — EDITORIAL REFINEMENT
-   Scoped to body.lp-editorial so the app pages (reel/dashboard/admin)
-   keep the original system untouched. Direction: 明朝 display + generous
-   air + a muted, paper-like palette — hand-crafted, premium, less "AI cozy".
+   LANDING PAGE — WARM EMOTIONAL (photo-led, soft rose)
+   Inspired by a caring, photography-forward pet-adoption feel. Scoped to
+   body.lp-editorial so app pages keep the original system.
    ========================================================= */
 .lp-editorial {
-  /* Muted, paper-like palette (sophisticated over bright cozy cream). */
-  --cream: #F5F1E8;
-  --cream-deep: #EBE4D5;
-  --white: #FCFAF5;
-  --ink: #262420;
-  --ink-soft: #565248;
-  --ink-faint: #948C7C;
-  --line: #E3DACA;
-  --mint: #5E7E71;
-  --mint-dark: #4C6A5E;
-  --mint-darker: #3A5249;
-  --mint-light: #E5EBE6;
-  --mint-light-2: #D2DED7;
-  --coral: #B26A4C;
-  --coral-dark: #955339;
-  --coral-light: #F0DFD2;
-  --font-serif: "Zen Old Mincho", "Hiragino Mincho ProN", "Yu Mincho", serif;
+  --cream: #FCF5F2;
+  --cream-deep: #F6E7E2;
+  --white: #FFFFFF;
+  --ink: #46383A;
+  --ink-soft: #7C696D;
+  --ink-faint: #B39FA4;
+  --line: #F0E2DF;
+  --coral: #E77E84;
+  --coral-dark: #D2626A;
+  --coral-light: #FBE1E2;
+  --mint: #6FA79B;
+  --mint-dark: #558A7F;
+  --mint-darker: #3F6D63;
+  --mint-light: #E3F0EC;
+  --mint-light-2: #CFE6DF;
   --font-jp: "Zen Kaku Gothic New", "Hiragino Sans", "Yu Gothic", sans-serif;
+  --font-round: "Zen Maru Gothic", "Hiragino Maru Gothic ProN", sans-serif;
   color: var(--ink);
-  letter-spacing: 0.01em;
 }
 
-/* Display headings in Mincho — the core signal of a designed, editorial page. */
-.lp-editorial .lp-hero h1,
+/* Soft, rounded, warm display type for headings — friendly, not clinical. */
 .lp-editorial .section-head h2,
 .lp-editorial .split h2,
 .lp-editorial .cta-band h2,
 .lp-editorial .notify-band h2,
-.lp-editorial #story h2,
-.lp-editorial .founder-quote {
-  font-family: var(--font-serif);
-  font-weight: 700;
-  letter-spacing: 0.02em;
+.lp-editorial #story h2 {
+  font-family: var(--font-round);
+  font-weight: 900;
+  letter-spacing: 0.01em;
+  line-height: 1.5;
 }
-.lp-editorial .lp-hero h1 { font-size: 47px; line-height: 1.52; font-weight: 700; }
-.lp-editorial .section-head h2 { font-size: 33px; line-height: 1.5; }
-.lp-editorial .lp-hero h1 .underline { color: var(--mint-darker); }
-.lp-editorial .lp-hero h1 .accent { color: var(--coral); }
-
-/* Refined kicker label — a thin rule + wide-tracked caps, no candy pill. */
 .lp-editorial .eyebrow {
-  background: none;
-  padding: 0;
-  border-radius: 0;
+  background: var(--coral-light);
   color: var(--coral-dark);
   font-family: var(--font-jp);
   font-weight: 700;
-  font-size: 10.5px;
-  letter-spacing: 0.32em;
-  gap: 11px;
+  letter-spacing: 0.14em;
+  font-size: 11px;
+  padding: 7px 15px;
+  border-radius: var(--radius-full);
 }
-.lp-editorial .section-head .eyebrow::before,
-.lp-editorial .section-head .eyebrow::after {
-  content: "";
-  width: 26px;
-  height: 1px;
-  background: currentColor;
-  opacity: 0.5;
+.lp-editorial .section-head { margin-bottom: 46px; }
+
+/* ---- Emotional hero ---- */
+.hero-e { padding: 20px 20px 8px; }
+.hero-e__frame {
+  position: relative;
+  max-width: 1240px;
+  margin: 0 auto;
+  min-height: 620px;
+  border-radius: 34px;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  box-shadow: 0 30px 70px rgba(210, 98, 106, 0.18);
 }
-.lp-editorial .eyebrow::before { content: ""; width: 26px; height: 1px; background: currentColor; opacity: 0.5; }
+.hero-e__media {
+  position: absolute;
+  inset: 0;
+  /* Warm rose→peach placeholder shown until a real hero photo is added at
+     assets/hero/hero-cat.jpg (the broken <img> is auto-removed if missing). */
+  background:
+    radial-gradient(120% 90% at 82% 20%, #F9D8C4 0%, rgba(249,216,196,0) 55%),
+    linear-gradient(120deg, #EF97A7 0%, #F2A9AE 42%, #F6C7B0 100%);
+}
+.hero-e__media img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+.hero-e__wash {
+  position: absolute; inset: 0;
+  background: linear-gradient(100deg, rgba(233,120,132,0.94) 0%, rgba(236,140,150,0.80) 34%, rgba(240,160,150,0.30) 62%, rgba(255,255,255,0) 82%);
+}
+.hero-e__content {
+  position: relative;
+  z-index: 2;
+  max-width: 560px;
+  padding: 56px clamp(28px, 5vw, 68px);
+  color: #fff;
+}
+.hero-e__kicker {
+  display: inline-block;
+  font-size: 12.5px; font-weight: 700; letter-spacing: 0.06em;
+  background: rgba(255,255,255,0.22);
+  padding: 7px 16px; border-radius: var(--radius-full);
+  margin-bottom: 22px;
+  backdrop-filter: none;
+}
+.hero-e__title {
+  font-family: var(--font-round);
+  font-weight: 900;
+  font-size: clamp(30px, 4.4vw, 50px);
+  line-height: 1.5;
+  letter-spacing: 0.01em;
+  text-shadow: 0 2px 18px rgba(150, 50, 60, 0.28);
+  margin-bottom: 22px;
+}
+.hero-e__lead {
+  font-size: 16px; line-height: 2;
+  color: rgba(255,255,255,0.96);
+  text-shadow: 0 1px 10px rgba(150, 50, 60, 0.25);
+  margin-bottom: 30px;
+}
+.hero-e__actions { display: flex; align-items: center; gap: 20px; flex-wrap: wrap; }
+.btn-hero { font-size: 16px; padding: 15px 30px; border-radius: var(--radius-full); box-shadow: 0 12px 28px rgba(180, 60, 70, 0.35); }
+.hero-e__link { color: #fff; font-weight: 700; font-size: 14px; text-decoration: underline; text-underline-offset: 4px; text-decoration-color: rgba(255,255,255,0.5); }
+.hero-e__link:hover { text-decoration-color: #fff; }
+.hero-e__ribbon {
+  position: absolute;
+  left: clamp(28px, 5vw, 68px);
+  bottom: 26px;
+  z-index: 3;
+  display: flex; align-items: center; gap: 12px;
+  color: #fff; font-weight: 700; font-size: 12.5px; letter-spacing: 0.08em;
+}
+.hero-e__ribbon::before,
+.hero-e__ribbon::after {
+  content: ""; width: 34px; height: 0;
+  border-top: 1.5px dashed rgba(255,255,255,0.7);
+}
+.pc-only { display: inline; }
 
-/* More air; refined sub-copy. */
-.lp-editorial .section-head { margin-bottom: 52px; }
-.lp-editorial .section-head p { font-family: var(--font-jp); color: var(--ink-soft); line-height: 1.95; }
-.lp-editorial .lp-hero p.lead { font-size: 16px; line-height: 2; letter-spacing: 0.02em; }
-
-/* Buttons: a restrained radius reads more upmarket than full pills. */
-.lp-editorial .btn { border-radius: 8px; letter-spacing: 0.04em; font-weight: 700; }
-.lp-editorial .btn-outline { border-radius: 8px; }
-
-/* Cards a touch crisper (less pillowy shadow, hairline border). */
-.lp-editorial .feature-card,
-.lp-editorial .breed-card,
-.lp-editorial .cat-card { border-radius: 10px; }
-
-/* Section rhythm — a hair more vertical breathing room on desktop. */
-.lp-editorial .section { padding: 108px 0; }
-
-@media (max-width: 640px) {
-  .lp-editorial .lp-hero h1 { font-size: 32px; line-height: 1.5; }
-  .lp-editorial .section-head h2 { font-size: 25px; }
-  .lp-editorial .section-head { margin-bottom: 34px; }
-  .lp-editorial .section { padding: 44px 0; }
+@media (max-width: 860px) {
+  .hero-e { padding: 12px 12px 4px; }
+  .hero-e__frame { min-height: 600px; border-radius: 24px; align-items: flex-end; }
+  /* On small screens the photo reads best behind a bottom-up wash. */
+  .hero-e__wash { background: linear-gradient(180deg, rgba(233,120,132,0.30) 0%, rgba(233,120,132,0.55) 42%, rgba(220,100,112,0.92) 100%); }
+  .hero-e__content { max-width: none; padding: 40px 26px 70px; }
+  .hero-e__title { font-size: 27px; }
+  .hero-e__lead { font-size: 14.5px; line-height: 1.9; }
+  .pc-only { display: none; }
+  .hero-e__ribbon { left: 26px; bottom: 22px; }
+  .btn-hero { width: 100%; justify-content: center; }
+  .hero-e__actions { width: 100%; }
+  .hero-e__link { width: 100%; text-align: center; }
 }
