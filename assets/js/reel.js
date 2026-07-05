@@ -131,7 +131,7 @@ export function initReelSwipe() {
   let wheelLocked = false;
   feed.addEventListener('wheel', (e) => {
     e.preventDefault();
-    if (wheelLocked || Math.abs(e.deltaY) < 8) return;
+    if (wheelLocked || Math.abs(e.deltaY) < 20) return;
     wheelLocked = true;
     goTo(index + (e.deltaY > 0 ? 1 : -1));
     setTimeout(() => { wheelLocked = false; }, 650);
@@ -161,9 +161,12 @@ export function initReelSwipe() {
     slides.forEach(s => { s.style.transition = ''; });
     const elapsed = Math.max(Date.now() - dragStartTime, 1);
     const velocity = dragY / elapsed;
-    const threshold = feed.clientHeight * 0.16;
-    if (dragY <= -threshold || velocity < -0.55) goTo(index + 1);
-    else if (dragY >= threshold || velocity > 0.55) goTo(index - 1);
+    // Lower sensitivity: you have to drag further (and flick faster) before the
+    // feed commits to the next slide, so it feels like a real scroll rather than
+    // snapping on the slightest swipe.
+    const threshold = feed.clientHeight * 0.30;
+    if (dragY <= -threshold || velocity < -0.9) goTo(index + 1);
+    else if (dragY >= threshold || velocity > 0.9) goTo(index - 1);
     else render();
     dragY = 0;
   });
