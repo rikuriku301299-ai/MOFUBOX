@@ -858,7 +858,7 @@ body.reel-body { background: #0c1414; }
   height: 100%;
   overflow: hidden;
   transform: translateY(100%);
-  transition: transform 0.7s cubic-bezier(0.33, 1, 0.68, 1);
+  transition: transform 0.7s cubic-bezier(0.4, 0, 0.2, 1);
   pointer-events: none;
   /* Keep each slide on its own GPU layer so the dotted texture is painted once
      and only composited (not repainted) while sliding — smooth on mobile. */
@@ -867,7 +867,7 @@ body.reel-body { background: #0c1414; }
 }
 .reel-slide.is-active { pointer-events: auto; z-index: 2; }
 .reel-slide.is-active .reel-right,
-.reel-slide.is-active .reel-bottom-info { animation: reel-card-in 0.5s cubic-bezier(0.22, 1, 0.36, 1); }
+.reel-slide.is-active .reel-bottom-info { animation: reel-card-in 0.5s cubic-bezier(0.4, 0, 0.2, 1); }
 @keyframes reel-card-in { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: translateY(0); } }
 .reel-slide__media { position: absolute; inset: 0; width: 100%; height: 100%; }
 .reel-slide__media .emoji { font-size: 110px; }
