@@ -1802,3 +1802,25 @@ html { scroll-behavior: smooth; }
   .hero-e__actions { width: 100%; }
   .hero-e__link { width: 100%; text-align: center; }
 }
+
+/* ---- Placeholder cat illustration (until real photos are added) ----
+   Replaces the emoji with a clean white cat silhouette on a warm tinted
+   ground, so cards read as intentional photo slots rather than emoji. When a
+   real photo is dropped in, the <img> covers the silhouette. */
+.lp-editorial .breed-card__photo {
+  background:
+    url("cat-silhouette.svg") center 60% / 46px no-repeat,
+    linear-gradient(140deg, #F2A9AE 0%, #EE93A4 100%);
+}
+.lp-editorial .breed-card__emoji { display: none; }
+
+.lp-editorial .cat-card__img .emoji { display: none; }
+.lp-editorial .cat-card__img::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  background: url("cat-silhouette.svg") center 44% / 76px no-repeat;
+  opacity: 0.9;
+  pointer-events: none;
+}
