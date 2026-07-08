@@ -10,6 +10,7 @@ const reelRoutes = require('./routes/reels');
 const adminRoutes = require('./routes/admin');
 const paymentRoutes = require('./routes/payments');
 const notificationRoutes = require('./routes/notifications');
+const messageRoutes = require('./routes/messages');
 
 const ROOT_DIR = path.join(__dirname, '..');
 const PORT = process.env.PORT || 8910;
@@ -67,6 +68,12 @@ async function handleApi(req, res, pathname, query) {
     if (pathname === '/api/auth/login' && method === 'POST') return authRoutes.login(req, res, await readJsonBody(req));
     if (pathname === '/api/auth/logout' && method === 'POST') return authRoutes.logout(req, res);
     if (pathname === '/api/auth/me' && method === 'GET') return authRoutes.me(req, res);
+    if (pathname === '/api/auth/profile' && method === 'POST') return authRoutes.updateProfile(req, res, await readJsonBody(req));
+
+    if (pathname === '/api/messages' && method === 'GET') return messageRoutes.listConversations(req, res);
+    let m = pathname.match(/^\/api\/messages\/(\d+)$/);
+    if (m && method === 'GET') return messageRoutes.getThread(req, res, Number(m[1]));
+    if (m && method === 'POST') return messageRoutes.sendMessage(req, res, Number(m[1]), await readJsonBody(req));
 
     if (pathname === '/api/reels' && method === 'GET') return reelRoutes.list(req, res);
     if (pathname === '/api/reels' && method === 'POST') return reelRoutes.create(req, res, await readJsonBody(req));
@@ -75,7 +82,7 @@ async function handleApi(req, res, pathname, query) {
     if (pathname === '/api/notifications' && method === 'GET') return notificationRoutes.list(req, res);
     if (pathname === '/api/notifications/read-all' && method === 'POST') return notificationRoutes.markAllRead(req, res);
 
-    let m = pathname.match(/^\/api\/reels\/(\d+)\/video$/);
+    m = pathname.match(/^\/api\/reels\/(\d+)\/video$/);
     if (m && method === 'PUT') return reelRoutes.uploadVideo(req, res, Number(m[1]));
 
     m = pathname.match(/^\/api\/reels\/(\d+)\/like$/);

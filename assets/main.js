@@ -9,6 +9,7 @@ import { initRegisterPage } from './js/register.js';
 import { initRegistrationFeed } from './js/admin.js';
 import { initProfileFollow } from './js/profile.js';
 import { initNotifications } from './js/notifications.js';
+import { initMessages, initMyPage } from './js/messages.js';
 
 initScrollReveal();
 initCountUp();
@@ -30,3 +31,5 @@ initLogout();
 initNotifications();
 initDashboardSearch();
 initReelSearch();
+initMessages();
+initMyPage();

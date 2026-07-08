@@ -41,6 +41,46 @@
     </div>
   </div>
 
+  <!-- MESSAGES -->
+  <div class="reel-sheet" data-msg-overlay>
+    <div class="reel-sheet__head">
+      <button type="button" class="reel-sheet__icon" data-msg-back aria-label="戻る" style="display:none;">
+        <svg class="icon" viewBox="0 0 24 24" width="20" height="20"><path d="M15 18l-6-6 6-6"/></svg>
+      </button>
+      <h3 data-msg-title>メッセージ</h3>
+      <button type="button" class="reel-sheet__icon" data-msg-close aria-label="閉じる">
+        <svg class="icon" viewBox="0 0 24 24" width="20" height="20"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+    <div class="reel-sheet__body">
+      <div class="msg-list" data-msg-list-view>
+        <div class="notif-empty" data-msg-list></div>
+      </div>
+      <div class="msg-thread" data-msg-thread-view style="display:none;">
+        <div class="msg-thread__scroll" data-msg-thread></div>
+        <form class="msg-composer" data-msg-form>
+          <input type="text" data-msg-input placeholder="メッセージを入力…" autocomplete="off" maxlength="2000">
+          <button type="submit" aria-label="送信">
+            <svg class="icon" viewBox="0 0 24 24" width="18" height="18"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2" fill="currentColor" stroke="none"/></svg>
+          </button>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- MY PAGE -->
+  <div class="reel-sheet" data-mypage-overlay>
+    <div class="reel-sheet__head">
+      <h3>マイページ</h3>
+      <button type="button" class="reel-sheet__icon" data-mypage-close aria-label="閉じる">
+        <svg class="icon" viewBox="0 0 24 24" width="20" height="20"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+    <div class="reel-sheet__body" data-mypage-body>
+      <div class="notif-empty">読み込み中…</div>
+    </div>
+  </div>
+
   <div class="reel-progress">
     <i class="now"><b></b></i>
     <i><b></b></i>
@@ -98,8 +138,8 @@
         </a>
         <div class="reel-bottom-info__cat">スコティッシュフォールド「ふく」・生後10週／東京都・ワクチン2回済み</div>
         <div class="reel-bottom-info__tags"><span>#スコティッシュフォールド</span><span>#子猫</span><span>#東京</span></div>
-        <a href="profile.html" class="reel-bottom-info__cta">
-          詳細を見る・相談する
+        <a href="#" class="reel-bottom-info__cta" data-consult>
+          チャットで相談する
           <svg class="icon" viewBox="0 0 24 24" width="14" height="14"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
         </a>
         <div class="reel-sound">
@@ -151,8 +191,8 @@
         </a>
         <div class="reel-bottom-info__cat">マンチカン「もも」・生後8週／神奈川県・両親猫の写真あり</div>
         <div class="reel-bottom-info__tags"><span>#マンチカン</span><span>#短足</span><span>#神奈川</span></div>
-        <a href="profile.html" class="reel-bottom-info__cta">
-          詳細を見る・相談する
+        <a href="#" class="reel-bottom-info__cta" data-consult>
+          チャットで相談する
           <svg class="icon" viewBox="0 0 24 24" width="14" height="14"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
         </a>
         <div class="reel-sound">
@@ -204,8 +244,8 @@
         </a>
         <div class="reel-bottom-info__cat">ノルウェージャンフォレストキャット「レオ」・生後12週／北海道</div>
         <div class="reel-bottom-info__tags"><span>#ノルウェージャン</span><span>#長毛</span><span>#北海道</span></div>
-        <a href="profile.html" class="reel-bottom-info__cta">
-          詳細を見る・相談する
+        <a href="#" class="reel-bottom-info__cta" data-consult>
+          チャットで相談する
           <svg class="icon" viewBox="0 0 24 24" width="14" height="14"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
         </a>
         <div class="reel-sound">
@@ -257,8 +297,8 @@
         </a>
         <div class="reel-bottom-info__cat">アメリカンショートヘア「トラ」・生後9週／愛知県・兄弟猫2匹同時募集</div>
         <div class="reel-bottom-info__tags"><span>#アメショ</span><span>#兄弟猫</span><span>#愛知</span></div>
-        <a href="profile.html" class="reel-bottom-info__cta">
-          詳細を見る・相談する
+        <a href="#" class="reel-bottom-info__cta" data-consult>
+          チャットで相談する
           <svg class="icon" viewBox="0 0 24 24" width="14" height="14"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
         </a>
         <div class="reel-sound">
@@ -310,8 +350,8 @@
         </a>
         <div class="reel-bottom-info__cat">ラグドール「ルナ」・生後11週／福岡県・抱っこ抜群の甘えん坊</div>
         <div class="reel-bottom-info__tags"><span>#ラグドール</span><span>#甘えん坊</span><span>#福岡</span></div>
-        <a href="profile.html" class="reel-bottom-info__cta">
-          詳細を見る・相談する
+        <a href="#" class="reel-bottom-info__cta" data-consult>
+          チャットで相談する
           <svg class="icon" viewBox="0 0 24 24" width="14" height="14"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
         </a>
         <div class="reel-sound">
@@ -335,14 +375,14 @@
     <a href="breeder.html#view-reels" class="post">
       <span class="post-icon"><svg class="icon" viewBox="0 0 24 24" width="20" height="20" stroke-width="2.4"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></span>
     </a>
-    <a href="#">
+    <a href="#" data-msg-trigger>
       <span class="wrap">
         <svg class="icon" viewBox="0 0 24 24" width="22" height="22"><path d="M21 11.5a8.4 8.4 0 0 1-1.1 4.2L21 20l-4.4-1.2a8.4 8.4 0 1 1 4.4-7.3z"/></svg>
-        <span class="badge">3</span>
+        <span class="badge" data-msg-badge style="display:none;">0</span>
       </span>
       <span>メッセージ</span>
     </a>
-    <a href="#">
+    <a href="#" data-mypage-trigger>
       <svg class="icon" viewBox="0 0 24 24" width="22" height="22"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 3.6-7 8-7s8 3 8 7"/></svg>
       <span>マイページ</span>
     </a>

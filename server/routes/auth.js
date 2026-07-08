@@ -78,4 +78,27 @@ function me(req, res) {
   res.json(200, { user: publicUser(user) });
 }
 
-module.exports = { register, login, logout, me };
+// POST /api/auth/profile — update the signed-in user's own editable fields.
+const EDITABLE_FIELDS = ['name', 'kennel', 'phone', 'address', 'area', 'bio', 'breed_interest'];
+function updateProfile(req, res, body) {
+  const user = currentUser(req);
+  if (!user) return res.json(401, { error: 'unauthorized' });
+
+  const sets = [];
+  const values = [];
+  for (const key of EDITABLE_FIELDS) {
+    if (body && Object.prototype.hasOwnProperty.call(body, key)) {
+      sets.push(`${key} = ?`);
+      const v = body[key];
+      values.push(v === '' || v == null ? null : String(v).trim());
+    }
+  }
+  if (!sets.length) return res.json(400, { error: 'no_fields' });
+
+  values.push(user.id);
+  db.prepare(`UPDATE users SET ${sets.join(', ')} WHERE id = ?`).run(...values);
+  const updated = db.prepare('SELECT * FROM users WHERE id = ?').get(user.id);
+  res.json(200, { user: publicUser(updated) });
+}
+
+module.exports = { register, login, logout, me, updateProfile };
