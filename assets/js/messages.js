@@ -6,7 +6,7 @@ function attr(s) { return escapeHtml(s == null ? '' : String(s)).replace(/"/g, '
 
 function timeLabel(iso) {
   if (!iso) return '';
-  const d = new Date(iso.replace(' ', 'T') + 'Z');
+  const d = new Date(/[TZ]/.test(iso) ? iso : iso.replace(' ', 'T') + 'Z');
   if (isNaN(d)) return '';
   const now = new Date();
   if (d.toDateString() === now.toDateString()) {
@@ -213,4 +213,98 @@ export function initMyPage() {
 
   if (trigger) trigger.addEventListener('click', (e) => { e.preventDefault(); open(); });
   closeBtn.addEventListener('click', close);
+}
+
+// Breeder dashboard messaging (breeder.html view-messages): reply to customers.
+export function initBreederMessages() {
+  const listEl = document.querySelector('[data-bm-list]');
+  if (!listEl) return;
+  const windowEl = document.querySelector('[data-bm-window]');
+  const emptyEl = windowEl.querySelector('[data-bm-empty]');
+  const activeEl = windowEl.querySelector('[data-bm-active]');
+  const headerEl = windowEl.querySelector('[data-bm-header]');
+  const bodyEl = windowEl.querySelector('[data-bm-body]');
+  const form = windowEl.querySelector('[data-bm-form]');
+  const input = windowEl.querySelector('[data-bm-input]');
+  const heading = document.querySelector('[data-bm-heading]');
+
+  let currentOther = null;
+  let loaded = false;
+
+  async function loadList() {
+    const { ok, data } = await api('/api/messages');
+    if (!ok) return;
+    const convs = data.conversations;
+    if (heading) heading.textContent = `メッセージ${data.totalUnread ? `（未読 ${data.totalUnread}）` : ''}`;
+    if (!convs.length) {
+      listEl.className = 'notif-empty';
+      listEl.textContent = 'まだお問い合わせはありません。お客様からメッセージが届くとここに表示されます。';
+      return;
+    }
+    listEl.className = 'chat-list';
+    listEl.innerHTML = '';
+    convs.forEach(c => {
+      const item = document.createElement('div');
+      item.className = 'chat-list-item' + (currentOther && currentOther.userId === c.userId ? ' active' : '');
+      const initial = escapeHtml((c.name || '?').charAt(0));
+      item.innerHTML = `
+        <div class="avatar avatar-sm mint" style="width:40px;height:40px;font-size:14px;">${initial}</div>
+        <div class="chat-list-item__body">
+          <div class="chat-list-item__top"><strong>${escapeHtml(c.name)}</strong><time>${timeLabel(c.lastAt)}</time></div>
+          <p>${c.lastFromMe ? 'あなた: ' : ''}${escapeHtml(c.lastBody)}${c.unread ? `　・未読${c.unread}` : ''}</p>
+        </div>`;
+      item.addEventListener('click', () => openThread({ userId: c.userId, name: c.name }));
+      listEl.appendChild(item);
+    });
+  }
+
+  function appendRow(fromMe, body, at) {
+    const row = document.createElement('div');
+    row.className = 'chat-row' + (fromMe ? ' me' : '');
+    const inner = document.createElement('div');
+    const bubble = document.createElement('div');
+    bubble.className = 'chat-bubble';
+    bubble.textContent = body;
+    inner.appendChild(bubble);
+    if (at) { const t = document.createElement('time'); t.textContent = timeLabel(at); inner.appendChild(t); }
+    row.appendChild(inner);
+    bodyEl.appendChild(row);
+  }
+
+  async function openThread(other) {
+    currentOther = other;
+    emptyEl.style.display = 'none';
+    activeEl.style.display = 'flex';
+    const initial = escapeHtml((other.name || '?').charAt(0));
+    headerEl.innerHTML = `<div class="avatar avatar-md mint">${initial}</div><div><strong>${escapeHtml(other.name)}</strong><span>お客様とのメッセージ</span></div>`;
+    bodyEl.innerHTML = '<div class="notif-empty">読み込み中…</div>';
+    const { ok, data } = await api(`/api/messages/${other.userId}`);
+    bodyEl.innerHTML = '';
+    if (!ok) { bodyEl.innerHTML = '<div class="notif-empty">読み込めませんでした</div>'; return; }
+    data.messages.forEach(m => appendRow(m.fromMe, m.body, m.at));
+    bodyEl.scrollTop = bodyEl.scrollHeight;
+    loadList();
+  }
+
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const text = input.value.trim();
+    if (!text || !currentOther) return;
+    input.value = '';
+    appendRow(true, text, new Date().toISOString());
+    bodyEl.scrollTop = bodyEl.scrollHeight;
+    const { ok } = await api(`/api/messages/${currentOther.userId}`, { method: 'POST', body: { body: text } });
+    if (ok) loadList();
+  });
+
+  async function loadAll() {
+    if (loaded) return;
+    const { data } = await api('/api/auth/me');
+    if (!data.user || data.user.role !== 'breeder') return;
+    loaded = true;
+    loadList();
+  }
+
+  loadAll();
+  document.addEventListener('gate:unlocked', loadAll);
 }

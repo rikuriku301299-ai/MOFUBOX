@@ -379,83 +379,20 @@
     <!-- ===================== VIEW: メッセージ ===================== -->
     <section id="view-messages" class="view">
       <div class="panel">
-        <div class="panel-head"><h3>お問い合わせ（5件の未対応）</h3></div>
+        <div class="panel-head"><h3 data-bm-heading>メッセージ</h3></div>
         <div class="chat-shell">
-          <div class="chat-list">
-            <div class="chat-list-item active">
-              <div class="avatar avatar-sm mint" style="width:40px;height:40px;font-size:14px;">田</div>
-              <div class="chat-list-item__body">
-                <div class="chat-list-item__top"><strong>田中 様</strong><time>12分前</time></div>
-                <p>ふくちゃんはまだ募集していますか？</p>
-              </div>
-            </div>
-            <div class="chat-list-item">
-              <div class="avatar avatar-sm coral" style="width:40px;height:40px;font-size:14px;">佐</div>
-              <div class="chat-list-item__body">
-                <div class="chat-list-item__top"><strong>佐藤 様</strong><time>1時間前</time></div>
-                <p>ワクチン接種の証明書は…</p>
-              </div>
-            </div>
-            <div class="chat-list-item">
-              <div class="avatar avatar-sm gold" style="width:40px;height:40px;font-size:14px;">鈴</div>
-              <div class="chat-list-item__body">
-                <div class="chat-list-item__top"><strong>鈴木 様</strong><time>3時間前</time></div>
-                <p>来週末に伺いたいのですが…</p>
-              </div>
-            </div>
-            <div class="chat-list-item">
-              <div class="avatar avatar-sm dark" style="width:40px;height:40px;font-size:14px;">高</div>
-              <div class="chat-list-item__body">
-                <div class="chat-list-item__top"><strong>高橋 様</strong><time>昨日</time></div>
-                <p>ありがとうございます、検討します！</p>
-              </div>
-            </div>
-            <div class="chat-list-item">
-              <div class="avatar avatar-sm mint" style="width:40px;height:40px;font-size:14px;">山</div>
-              <div class="chat-list-item__body">
-                <div class="chat-list-item__top"><strong>山本 様</strong><time>2日前</time></div>
-                <p>写真をもう少し見せていただけますか？</p>
-              </div>
-            </div>
+          <div class="chat-list" data-bm-list>
+            <div class="notif-empty">読み込み中…</div>
           </div>
-
-          <div class="chat-window">
-            <div class="chat-window__header">
-              <div class="avatar avatar-md mint">田</div>
-              <div>
-                <strong>田中 様</strong>
-                <span>お問い合わせ対象：ふく（スコティッシュフォールド）</span>
-              </div>
-            </div>
-            <div class="chat-window__body">
-              <div class="chat-row">
-                <div>
-                  <div class="chat-bubble">はじめまして。リールで拝見したふくちゃんがとても可愛くて、まだ募集していますか？</div>
-                  <time>14:02</time>
-                </div>
-              </div>
-              <div class="chat-row me">
-                <div>
-                  <div class="chat-bubble">ご連絡ありがとうございます！はい、現在も募集中です。ワクチン接種は2回完了しております。</div>
-                  <time>14:10</time>
-                </div>
-              </div>
-              <div class="chat-row">
-                <div>
-                  <div class="chat-bubble">良かったです！一度見学させていただくことは可能でしょうか？</div>
-                  <time>14:15</time>
-                </div>
-              </div>
-              <div class="chat-row me">
-                <div>
-                  <div class="chat-bubble">もちろんです。今週末の土日でしたらご案内できますが、ご都合いかがでしょうか？</div>
-                  <time>14:18</time>
-                </div>
-              </div>
-            </div>
-            <div class="chat-window__input">
-              <input type="text" placeholder="メッセージを入力...">
-              <button type="button" class="btn btn-coral btn-sm">送信</button>
+          <div class="chat-window" data-bm-window>
+            <div class="notif-empty" data-bm-empty style="margin:auto;">左のリストからお客様を選ぶと、これまでのやり取りが表示されます。</div>
+            <div data-bm-active style="display:none;flex-direction:column;height:100%;">
+              <div class="chat-window__header" data-bm-header></div>
+              <div class="chat-window__body" data-bm-body></div>
+              <form class="chat-window__input" data-bm-form>
+                <input type="text" placeholder="メッセージを入力..." data-bm-input autocomplete="off" maxlength="2000">
+                <button type="submit" class="btn btn-coral btn-sm">送信</button>
+              </form>
             </div>
           </div>
         </div>
