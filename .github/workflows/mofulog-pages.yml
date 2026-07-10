@@ -45,9 +45,9 @@ jobs:
   deploy:
     needs: build
     runs-on: ubuntu-latest
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
+    # NOTE: environment ブロックを意図的に外している。auto-provision された
+    # github-pages environment はデフォルトブランチ以外からのデプロイを
+    # ブロックするため、開発ブランチからのデプロイがジョブ開始前に失敗する。
     steps:
       - id: deployment
         uses: actions/deploy-pages@v4
