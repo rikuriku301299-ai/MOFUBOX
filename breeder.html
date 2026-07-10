@@ -401,6 +401,16 @@
 
     <!-- ===================== VIEW: 売上・統計 ===================== -->
     <section id="view-stats" class="view">
+      <div class="panel" style="border:1.5px solid var(--mint-light-2);">
+        <div class="panel-head"><h3>お迎え成立を記録する</h3></div>
+        <p style="font-size:13.5px;color:var(--ink-soft);margin-bottom:14px;">お客様とのお迎えが成立したら、ここに記録してください。プラットフォーム手数料（7%）が自動で計算され、決済リンクが発行されます。</p>
+        <form data-deal-form style="display:flex;flex-wrap:wrap;gap:12px;align-items:flex-end;">
+          <div class="field" style="flex:1;min-width:150px;"><label>子猫の名前（任意）</label><input type="text" name="catName" placeholder="例）ふく"></div>
+          <div class="field" style="flex:1;min-width:150px;"><label>成約金額（円）</label><input type="number" name="priceYen" min="1000" step="1000" placeholder="例）250000" required></div>
+          <button type="submit" class="btn btn-mint">記録して手数料を精算</button>
+        </form>
+        <div data-deal-result style="display:none;margin-top:16px;padding:16px 18px;background:var(--mint-light);border-radius:var(--radius-m);"></div>
+      </div>
       <div class="stat-grid">
         <div class="stat-card">
           <div class="stat-card__top"><div class="stat-card__icon mint"><svg class="icon" viewBox="0 0 24 24" width="18" height="18"><path d="M12 2 4 5v6c0 5 3.4 8.4 8 11 4.6-2.6 8-6 8-11V5l-8-3z"/></svg></div></div>

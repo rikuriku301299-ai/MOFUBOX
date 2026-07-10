@@ -5,8 +5,10 @@
 const crypto = require('node:crypto');
 const { db } = require('../db');
 const { currentUser } = require('../auth');
+const { notifyAdmins } = require('../notifications');
 
 const STRIPE_API = 'https://api.stripe.com/v1';
+const COMMISSION_RATE = 0.07;
 
 function stripeConfigured() {
   return Boolean(process.env.STRIPE_SECRET_KEY);
@@ -103,4 +105,71 @@ function webhook(req, res, rawBody) {
   res.json(200, { received: true });
 }
 
-module.exports = { createCheckoutSession, webhook, stripeConfigured };
+// POST /api/deals — a breeder records a completed adoption/sale. The platform
+// commission (COMMISSION_RATE) is computed automatically and, once Stripe is
+// live, a Checkout link is generated to collect it without any manual work.
+// Until Stripe keys exist, the commission is still recorded so revenue tallies.
+async function recordDeal(req, res, body) {
+  const user = currentUser(req);
+  if (!user || user.role !== 'breeder') return res.json(403, { error: 'breeder_only' });
+
+  const price = Math.round(Number(body && body.priceYen) || 0);
+  if (price < 1000) return res.json(400, { error: 'invalid_price', message: '成約金額を正しく入力してください（1,000円以上）。' });
+  const commission = Math.round(price * COMMISSION_RATE);
+  const catName = String((body && body.catName) || '').trim();
+  const label = catName ? `${catName}・` : '';
+  const description = `成約手数料（${label}成約額 ¥${price.toLocaleString()} の${Math.round(COMMISSION_RATE * 100)}%）`;
+
+  if (stripeConfigured()) {
+    try {
+      const origin = req.headers.origin || `http://${req.headers.host}`;
+      const session = await stripeRequest('checkout/sessions', {
+        mode: 'payment',
+        'payment_method_types[0]': 'card',
+        'line_items[0][price_data][currency]': 'jpy',
+        'line_items[0][price_data][unit_amount]': String(commission),
+        'line_items[0][price_data][product_data][name]': description,
+        'line_items[0][quantity]': '1',
+        success_url: `${origin}/payment-success.html?session_id={CHECKOUT_SESSION_ID}`,
+        cancel_url: `${origin}/breeder.html`,
+      });
+      db.prepare(`INSERT INTO orders (user_id, stripe_session_id, description, amount, currency, status)
+        VALUES (?, ?, ?, ?, 'jpy', 'pending')`).run(user.id, session.id, description, commission);
+      notifyAdmins('revenue', '成約が記録されました',
+        `${user.kennel || user.name} ／ 手数料 ¥${commission.toLocaleString()}（決済リンク発行済み）`, '/admin.html#view-revenue');
+      return res.json(200, { price, commission, live: true, url: session.url });
+    } catch (e) {
+      return res.json(502, { error: 'stripe_request_failed', message: e.message });
+    }
+  }
+
+  db.prepare(`INSERT INTO orders (user_id, description, amount, currency, status)
+    VALUES (?, ?, ?, 'jpy', 'recorded')`).run(user.id, description, commission);
+  notifyAdmins('revenue', '成約が記録されました',
+    `${user.kennel || user.name} ／ 手数料 ¥${commission.toLocaleString()}（Stripe未接続のため記録のみ）`, '/admin.html#view-revenue');
+  res.json(200, { price, commission, live: false, message: 'Stripe接続後は自動で決済リンクが発行され、寝ている間も手数料が入金されます。' });
+}
+
+// GET /api/revenue — admin summary: total commission collected + recorded.
+function revenueSummary(req, res) {
+  const user = currentUser(req);
+  if (!user || user.role !== 'admin') return res.json(403, { error: 'admin_only' });
+  const paid = db.prepare("SELECT COALESCE(SUM(amount),0) AS s, COUNT(*) AS c FROM orders WHERE status = 'paid'").get();
+  const pending = db.prepare("SELECT COALESCE(SUM(amount),0) AS s, COUNT(*) AS c FROM orders WHERE status IN ('pending','recorded')").get();
+  const recent = db.prepare(`
+    SELECT o.description, o.amount, o.status, o.created_at, u.kennel, u.name
+    FROM orders o LEFT JOIN users u ON u.id = o.user_id
+    ORDER BY o.created_at DESC LIMIT 20`).all();
+  res.json(200, {
+    paidTotal: paid.s, paidCount: paid.c,
+    pendingTotal: pending.s, pendingCount: pending.c,
+    commissionRate: COMMISSION_RATE,
+    stripeLive: stripeConfigured(),
+    recent: recent.map(r => ({
+      breeder: r.kennel || r.name || '—',
+      description: r.description, amount: r.amount, status: r.status, at: r.created_at,
+    })),
+  });
+}
+
+module.exports = { createCheckoutSession, webhook, stripeConfigured, recordDeal, revenueSummary };

@@ -103,6 +103,9 @@ async function handleApi(req, res, pathname, query) {
     m = pathname.match(/^\/api\/admin\/users\/(\d+)\/(suspend|reinstate|delete)$/);
     if (m && method === 'POST') return adminRoutes.manageUser(req, res, Number(m[1]), m[2]);
 
+    if (pathname === '/api/deals' && method === 'POST') return paymentRoutes.recordDeal(req, res, await readJsonBody(req));
+    if (pathname === '/api/revenue' && method === 'GET') return paymentRoutes.revenueSummary(req, res);
+
     if (pathname === '/api/payments/checkout-session' && method === 'POST') {
       return paymentRoutes.createCheckoutSession(req, res, await readJsonBody(req));
     }

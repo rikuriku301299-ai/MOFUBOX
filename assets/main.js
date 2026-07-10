@@ -10,6 +10,7 @@ import { initRegistrationFeed } from './js/admin.js';
 import { initProfileFollow } from './js/profile.js';
 import { initNotifications } from './js/notifications.js';
 import { initMessages, initMyPage, initBreederMessages } from './js/messages.js';
+import { initBreederDeals, initAdminRevenue } from './js/revenue.js';
 
 initScrollReveal();
 initCountUp();
@@ -34,3 +35,5 @@ initReelSearch();
 initMessages();
 initMyPage();
 initBreederMessages();
+initBreederDeals();
+initAdminRevenue();
