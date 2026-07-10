@@ -1,8 +1,8 @@
 # モフログを GitHub Pages に自動デプロイするワークフロー。
 # mofulog/ 配下を push するだけでサイトが更新される(手動作業ゼロ)。
-#
-# 初回のみ必要な設定: リポジトリの Settings → Pages → Source を
-# "GitHub Actions" にする(mofulog/README.md のチェックリスト参照)。
+# Pages が未有効の場合も configure-pages の enablement で自動有効化を試みる。
+# それが権限エラーになる場合のみ、Settings → Pages → Source を
+# "GitHub Actions" に手動設定する(mofulog/README.md のチェックリスト参照)。
 name: Deploy mofulog to GitHub Pages
 
 on:
@@ -10,6 +10,7 @@ on:
     branches:
       - main
       - claude/mofubox-landing-page-m98xnw # 現在のデフォルトブランチ
+      - claude/passive-income-system-5cp0di # モフログ開発ブランチ(マージ前から公開)
     paths:
       - "mofulog/**"
       - ".github/workflows/mofulog-pages.yml"
@@ -35,6 +36,8 @@ jobs:
       - name: Build site
         run: node mofulog/build.js
       - uses: actions/configure-pages@v5
+        with:
+          enablement: true
       - uses: actions/upload-pages-artifact@v3
         with:
           path: mofulog/dist

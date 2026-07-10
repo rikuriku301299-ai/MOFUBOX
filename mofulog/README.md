@@ -22,10 +22,10 @@ MOFUBOX とは別の収入源として作った、**アフィリエイト収益�
 
 コードは完成していますが、以下は**アカウント登録が必要なため人間にしかできません**。上から順に、合計1〜2時間程度です。
 
-- [ ] **1. GitHub Pages を有効化** — リポジトリの Settings → Pages → Source を「GitHub Actions」にする。これだけでサイトが `https://rikuriku301299-ai.github.io/MOFUBOX/` に公開されます(以後は push のたび自動更新)。
+- [ ] **1. GitHub Pages の公開を確認** — デプロイワークフローが Pages の自動有効化(`enablement: true`)を試みるので、基本は push だけで `https://rikuriku301299-ai.github.io/MOFUBOX/` に公開されます。Actions の「Deploy mofulog to GitHub Pages」が権限エラーで失敗している場合のみ、Settings → Pages → Source を「GitHub Actions」に手動設定してください。
 - [ ] **2. もしもアフィリエイトに登録**(<https://af.moshimo.com/>) — Amazon・楽天の両方をここ経由で扱えて、個人サイトでも審査が通りやすい定番。楽天の商品リンクを作ったら `products.json` の `rakutenUrl` に貼る。
 - [ ] **3. Amazonアソシエイトに登録**(<https://affiliate.amazon.co.jp/>) — 承認されたら発行されるトラッキングID(例: `xxxx-22`)を `config.json` の `affiliates.amazonTag` に記入。※審査には「180日以内に3件の成果」が必要なので、先にサイトを公開しSNSで数記事流してから申請するのがコツ。
-- [ ] **4. 商品を実物に差し替え** — `products.json` の各商品はいまカテゴリの代表例(ASIN空欄)です。Amazonで実際に紹介したい商品を選び、商品ページURLの `/dp/` の後ろにある10桁(ASIN)を `asin` に記入。空欄のままでも検索リンクで動作はしますが、成果率が大きく下がります。
+- [ ] **4. 商品を確認(設定済み)** — `products.json` には実在の定番8商品(カリカリマシーンV2/V2C・ピュアクリスタル・ロイヤルカナン キトン・メディファス・PETKITピュラマックス・ニャンとも清潔トイレ・ニオイをとる砂)のASINを設定済みです。別の商品を推したい場合は、商品ページURLの `/dp/` の後ろの10桁(ASIN)に差し替えてください。公開後に一度、各ボタンのリンク先が正しい商品かブラウザで確認することを推奨します。
 - [ ] **5. 導線を張る** — MOFUBOXのフッターやリール、SNSプロフィールからモフログへリンク。`config.json` の `mofuboxUrl` にMOFUBOXのURLを入れると全ページのフッターに相互リンクが出ます。
 - [ ] (任意) **6. Google AdSense** — 記事が10〜20本たまってから申請。承認されたら `affiliates.adsenseClientId` に `ca-pub-...` を記入するとクリック型広告も併用できます。
 - [ ] (任意) **7. 独自ドメイン** — 本気で育てるなら年1,500円程度で取得し、Pages のカスタムドメインに設定。`config.json` の `siteUrl` も変更。
