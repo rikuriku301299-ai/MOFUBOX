@@ -401,6 +401,11 @@
 
     <!-- ===================== VIEW: 売上・統計 ===================== -->
     <section id="view-stats" class="view">
+      <div class="panel" data-connect-card style="display:none;">
+        <div class="panel-head"><h3>入金設定（受け取り口座の連携）</h3></div>
+        <p style="font-size:13.5px;color:var(--ink-soft);margin-bottom:14px;" data-connect-msg>お客様のお支払いを受け取るには、Stripeとの連携が必要です。連携すると、成約時にお客様が支払った金額から手数料（7%）が自動で差し引かれ、残りがあなたの口座に振り込まれます。</p>
+        <button type="button" class="btn btn-mint" data-connect-btn>Stripeと連携して入金を受け取る</button>
+      </div>
       <div class="panel" style="border:1.5px solid var(--mint-light-2);">
         <div class="panel-head"><h3>お迎え成立を記録する</h3></div>
         <p style="font-size:13.5px;color:var(--ink-soft);margin-bottom:14px;">お客様とのお迎えが成立したら、ここに記録してください。プラットフォーム手数料（7%）が自動で計算され、決済リンクが発行されます。</p>

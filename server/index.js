@@ -105,6 +105,8 @@ async function handleApi(req, res, pathname, query) {
 
     if (pathname === '/api/deals' && method === 'POST') return paymentRoutes.recordDeal(req, res, await readJsonBody(req));
     if (pathname === '/api/revenue' && method === 'GET') return paymentRoutes.revenueSummary(req, res);
+    if (pathname === '/api/connect/start' && method === 'POST') return paymentRoutes.connectStart(req, res);
+    if (pathname === '/api/connect/status' && method === 'GET') return paymentRoutes.connectStatus(req, res);
 
     if (pathname === '/api/payments/checkout-session' && method === 'POST') {
       return paymentRoutes.createCheckoutSession(req, res, await readJsonBody(req));

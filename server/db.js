@@ -117,4 +117,12 @@ CREATE TABLE IF NOT EXISTS messages (
 CREATE INDEX IF NOT EXISTS idx_messages_pair ON messages(sender_id, recipient_id);
 `);
 
+// Lightweight migrations for columns added after the initial schema.
+for (const [table, col, def] of [
+  ['users', 'stripe_account_id', 'TEXT'],
+]) {
+  const exists = db.prepare(`PRAGMA table_info(${table})`).all().some(c => c.name === col);
+  if (!exists) db.exec(`ALTER TABLE ${table} ADD COLUMN ${col} ${def}`);
+}
+
 module.exports = { db, UPLOADS_DIR, DATA_DIR };
