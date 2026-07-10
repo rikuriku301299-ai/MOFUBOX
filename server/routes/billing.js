@@ -1,7 +1,8 @@
-// Monetization API routes: plan subscriptions, reel boosts, deal reporting.
-// With Stripe configured, purchases go through Checkout and are fulfilled by
-// the webhook; without it, everything activates instantly in demo mode so the
-// full revenue loop can be exercised locally.
+// Monetization API routes. Site usage is free — these endpoints only cover
+// the optional reel boost and the success-based deal fee. With Stripe
+// configured, purchases go through Checkout and are fulfilled by the webhook;
+// without it, everything activates instantly in demo mode so the full revenue
+// loop can be exercised locally.
 const { db } = require('../db');
 const { currentUser } = require('../auth');
 const billing = require('../billing');
@@ -16,9 +17,8 @@ function requireBreeder(req, res) {
   return user;
 }
 
-function plans(req, res) {
+function pricing(req, res) {
   res.json(200, {
-    plans: Object.values(billing.PLANS),
     boost: billing.BOOST,
     dealFeeRate: billing.DEAL_FEE_RATE,
     stripeConfigured: stripeConfigured(),
@@ -29,9 +29,6 @@ function me(req, res) {
   const user = requireBreeder(req, res);
   if (!user) return;
 
-  const sub = billing.getSubscription(user.id);
-  const plan = billing.planOf(user.id);
-  const reelCount = db.prepare('SELECT COUNT(*) AS c FROM reels WHERE breeder_id = ?').get(user.id).c;
   const boosts = db.prepare(`
     SELECT boosts.*, reels.caption AS reel_caption
     FROM boosts JOIN reels ON reels.id = boosts.reel_id
@@ -40,19 +37,13 @@ function me(req, res) {
   `).all(user.id);
   const deals = db.prepare('SELECT * FROM deals WHERE breeder_id = ? ORDER BY created_at DESC LIMIT 20').all(user.id);
 
-  res.json(200, {
-    plan,
-    subscription: sub,
-    reelCount,
-    activeBoosts: boosts,
-    deals,
-  });
+  res.json(200, { activeBoosts: boosts, deals });
 }
 
-async function checkoutFor(req, user, { kind, description, amountYen, meta, mode }) {
+async function checkoutFor(req, user, { kind, description, amountYen, meta }) {
   const origin = req.headers.origin || `http://${req.headers.host}`;
-  const params = {
-    mode: mode || 'payment',
+  const session = await stripeRequest('checkout/sessions', {
+    mode: 'payment',
     'payment_method_types[0]': 'card',
     'line_items[0][price_data][currency]': 'jpy',
     'line_items[0][price_data][unit_amount]': String(amountYen),
@@ -60,11 +51,7 @@ async function checkoutFor(req, user, { kind, description, amountYen, meta, mode
     'line_items[0][quantity]': '1',
     success_url: `${origin}/payment-success.html?session_id={CHECKOUT_SESSION_ID}`,
     cancel_url: `${origin}/payment-cancelled.html`,
-  };
-  if (mode === 'subscription') {
-    params['line_items[0][price_data][recurring][interval]'] = 'month';
-  }
-  const session = await stripeRequest('checkout/sessions', params);
+  });
 
   db.prepare(`
     INSERT INTO orders (user_id, stripe_session_id, kind, description, amount, currency, status, meta)
@@ -72,60 +59,6 @@ async function checkoutFor(req, user, { kind, description, amountYen, meta, mode
   `).run(user.id, session.id, kind, description, amountYen, meta ? JSON.stringify(meta) : null);
 
   return session;
-}
-
-async function subscribe(req, res, body) {
-  const user = requireBreeder(req, res);
-  if (!user) return;
-
-  const planId = String(body.plan || '');
-  const plan = billing.PLANS[planId];
-  if (!plan) return res.json(400, { error: 'unknown_plan' });
-
-  const current = billing.planOf(user.id);
-  if (current.id === planId) return res.json(400, { error: 'already_on_plan', message: 'すでにこのプランをご利用中です。' });
-
-  // Downgrading to free is a cancellation (including at Stripe's side).
-  if (plan.priceYen === 0) return cancel(req, res);
-
-  if (!stripeConfigured()) {
-    const sub = billing.activatePlan(user.id, planId, null);
-    return res.json(200, {
-      mode: 'demo',
-      subscription: sub,
-      plan: billing.planOf(user.id),
-      message: 'デモモード：Stripe未設定のため即時有効化しました。月額は自動更新で計上されます。',
-    });
-  }
-
-  try {
-    const session = await checkoutFor(req, user, {
-      kind: 'subscription',
-      description: `MOFUBOX ${plan.name}プラン（月額）`,
-      amountYen: plan.priceYen,
-      meta: { plan: planId },
-      mode: 'subscription',
-    });
-    res.json(200, { mode: 'stripe', url: session.url, sessionId: session.id });
-  } catch (e) {
-    res.json(502, { error: 'stripe_request_failed', message: e.message });
-  }
-}
-
-async function cancel(req, res) {
-  const user = requireBreeder(req, res);
-  if (!user) return;
-
-  const sub = billing.getSubscription(user.id);
-  if (sub && sub.stripe_subscription_id && stripeConfigured()) {
-    try {
-      await stripeRequest(`subscriptions/${sub.stripe_subscription_id}`, { cancel_at_period_end: 'true' });
-    } catch (e) {
-      return res.json(502, { error: 'stripe_request_failed', message: e.message });
-    }
-  }
-  const updated = billing.cancelPlan(user.id);
-  res.json(200, { subscription: updated, plan: billing.planOf(user.id) });
 }
 
 async function boost(req, res, body) {
@@ -193,4 +126,4 @@ async function reportDeal(req, res, body) {
   }
 }
 
-module.exports = { plans, me, subscribe, cancel, boost, reportDeal };
+module.exports = { pricing, me, boost, reportDeal };

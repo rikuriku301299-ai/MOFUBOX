@@ -4,7 +4,6 @@ const crypto = require('node:crypto');
 const { db, UPLOADS_DIR } = require('../db');
 const { currentUser, publicUser } = require('../auth');
 const { notify } = require('../notifications');
-const { planOf } = require('../billing');
 
 const VIDEO_EXT_BY_MIME = {
   'video/mp4': '.mp4',
@@ -14,21 +13,16 @@ const VIDEO_EXT_BY_MIME = {
 
 function list(req, res) {
   const user = currentUser(req);
-  // Paid placement: actively boosted reels come first, then reels from
-  // breeders on higher subscription plans, then everything else by recency.
+  // Paid placement: actively boosted reels come first, everything else by recency.
   const rows = db.prepare(`
     SELECT reels.*, users.name AS breeder_name, users.kennel AS breeder_kennel, users.id AS breeder_user_id,
       EXISTS(
         SELECT 1 FROM boosts
         WHERE boosts.reel_id = reels.id AND boosts.status = 'active' AND boosts.ends_at > datetime('now')
-      ) AS boosted,
-      COALESCE((
-        SELECT CASE s.plan WHEN 'pro' THEN 2 WHEN 'standard' THEN 1 ELSE 0 END
-        FROM subscriptions s WHERE s.breeder_id = users.id AND s.status = 'active'
-      ), 0) AS plan_rank
+      ) AS boosted
     FROM reels
     JOIN users ON users.id = reels.breeder_id
-    ORDER BY boosted DESC, plan_rank DESC, reels.created_at DESC, reels.id DESC
+    ORDER BY boosted DESC, reels.created_at DESC, reels.id DESC
   `).all();
 
   const likeCount = db.prepare('SELECT COUNT(*) AS c FROM likes WHERE reel_id = ?');
@@ -94,18 +88,6 @@ function search(req, res, query) {
 function create(req, res, body) {
   const user = currentUser(req);
   if (!user || user.role !== 'breeder') return res.json(403, { error: 'breeder_only' });
-
-  // Plan-based posting limits — the upgrade path that funds the platform.
-  const plan = planOf(user.id);
-  if (plan.reelLimit != null) {
-    const count = db.prepare('SELECT COUNT(*) AS c FROM reels WHERE breeder_id = ?').get(user.id).c;
-    if (count >= plan.reelLimit) {
-      return res.json(403, {
-        error: 'reel_limit_reached',
-        message: `現在のプラン（${plan.name}）ではリール投稿は${plan.reelLimit}本までです。プランをアップグレードすると枠を増やせます。`,
-      });
-    }
-  }
 
   const { caption, tags, poster_emoji, poster_theme, cat_id } = body;
   const info = db.prepare(`

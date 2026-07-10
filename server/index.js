@@ -12,7 +12,6 @@ const paymentRoutes = require('./routes/payments');
 const notificationRoutes = require('./routes/notifications');
 const messageRoutes = require('./routes/messages');
 const billingRoutes = require('./routes/billing');
-const { renewDueDemoSubscriptions } = require('./billing');
 
 const ROOT_DIR = path.join(__dirname, '..');
 const PORT = process.env.PORT || 8910;
@@ -105,10 +104,8 @@ async function handleApi(req, res, pathname, query) {
     m = pathname.match(/^\/api\/admin\/users\/(\d+)\/(suspend|reinstate|delete)$/);
     if (m && method === 'POST') return adminRoutes.manageUser(req, res, Number(m[1]), m[2]);
 
-    if (pathname === '/api/billing/plans' && method === 'GET') return billingRoutes.plans(req, res);
+    if (pathname === '/api/billing/pricing' && method === 'GET') return billingRoutes.pricing(req, res);
     if (pathname === '/api/billing/me' && method === 'GET') return billingRoutes.me(req, res);
-    if (pathname === '/api/billing/subscribe' && method === 'POST') return billingRoutes.subscribe(req, res, await readJsonBody(req));
-    if (pathname === '/api/billing/cancel' && method === 'POST') return billingRoutes.cancel(req, res);
     if (pathname === '/api/billing/boost' && method === 'POST') return billingRoutes.boost(req, res, await readJsonBody(req));
     if (pathname === '/api/billing/deals' && method === 'POST') return billingRoutes.reportDeal(req, res, await readJsonBody(req));
 
@@ -147,15 +144,3 @@ const server = http.createServer(async (req, res) => {
 server.listen(PORT, () => {
   console.log(`MOFUBOX server listening on http://localhost:${PORT}`);
 });
-
-// Demo-mode billing engine: while Stripe handles renewals in production, this
-// hourly sweep keeps demo subscriptions renewing (and revenue accruing) on
-// their own — no manual action needed.
-renewDueDemoSubscriptions();
-setInterval(() => {
-  try {
-    renewDueDemoSubscriptions();
-  } catch (e) {
-    console.error('subscription renewal sweep failed:', e.message);
-  }
-}, 60 * 60 * 1000).unref();

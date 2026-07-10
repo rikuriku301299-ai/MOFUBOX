@@ -101,24 +101,8 @@ function webhook(req, res, rawBody) {
     const order = db.prepare('SELECT * FROM orders WHERE stripe_session_id = ?').get(session.id);
     if (order && order.status !== 'paid') {
       db.prepare("UPDATE orders SET status = 'paid' WHERE id = ?").run(order.id);
-      // Attach the Stripe subscription/customer ids so renewals can be matched.
-      if (order.kind === 'subscription' && session.subscription) {
-        let meta = {};
-        try { meta = order.meta ? JSON.parse(order.meta) : {}; } catch { /* ignore */ }
-        meta.stripe = { subscriptionId: session.subscription, customerId: session.customer || null };
-        db.prepare('UPDATE orders SET meta = ? WHERE id = ?').run(JSON.stringify(meta), order.id);
-        order.meta = JSON.stringify(meta);
-      }
       billing.fulfillOrder(order);
     }
-  }
-
-  if (event.type === 'invoice.paid') {
-    billing.handleInvoicePaid(event.data.object);
-  }
-
-  if (event.type === 'customer.subscription.deleted') {
-    billing.handleSubscriptionDeleted(event.data.object);
   }
 
   res.json(200, { received: true });

@@ -1918,18 +1918,5 @@ html { scroll-behavior: smooth; }
 .mypage__saved { text-align: center; color: var(--mint-darker); font-weight: 700; font-size: 13.5px; margin-top: 12px; min-height: 18px; }
 .mypage__logout { display: block; text-align: center; margin-top: 24px; color: var(--ink-faint); font-size: 13px; text-decoration: underline; }
 
-/* Monetization: plan cards (breeder #view-plan) */
-.plan-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; margin-bottom: 22px; }
-.plan-card {
-  background: var(--white); border: 1px solid var(--line); border-radius: var(--radius-m);
-  padding: 24px; display: flex; flex-direction: column; gap: 14px; position: relative; min-width: 0;
-}
-.plan-card.current { border-color: var(--mint); box-shadow: 0 0 0 2px var(--mint-light); }
-.plan-card.featured { border-color: var(--coral); }
-.plan-card__badge { position: absolute; top: -11px; right: 14px; }
-.plan-card__name { font-size: 15px; font-weight: 800; }
-.plan-card__price { font-family: var(--font-en); font-size: 26px; font-weight: 800; }
-.plan-card__price small { font-size: 13px; color: var(--ink-soft); font-weight: 700; }
-.plan-card__features { display: flex; flex-direction: column; gap: 8px; font-size: 13px; color: var(--ink-soft); flex: 1; list-style: none; padding: 0; margin: 0; }
+/* Monetization: boost / deal-report status notes (breeder #view-plan) */
 .plan-status-note { font-size: 13px; font-weight: 700; margin: -8px 0 22px; display: none; }
-@media (max-width: 900px) { .plan-grid { grid-template-columns: 1fr; } }

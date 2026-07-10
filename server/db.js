@@ -116,18 +116,6 @@ CREATE TABLE IF NOT EXISTS messages (
 );
 CREATE INDEX IF NOT EXISTS idx_messages_pair ON messages(sender_id, recipient_id);
 
-CREATE TABLE IF NOT EXISTS subscriptions (
-  id INTEGER PRIMARY KEY AUTOINCREMENT,
-  breeder_id INTEGER NOT NULL UNIQUE REFERENCES users(id) ON DELETE CASCADE,
-  plan TEXT NOT NULL DEFAULT 'free' CHECK(plan IN ('free','standard','pro')),
-  status TEXT NOT NULL DEFAULT 'active',
-  stripe_customer_id TEXT,
-  stripe_subscription_id TEXT,
-  current_period_end TEXT,
-  created_at TEXT NOT NULL DEFAULT (datetime('now')),
-  updated_at TEXT NOT NULL DEFAULT (datetime('now'))
-);
-
 CREATE TABLE IF NOT EXISTS boosts (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
   reel_id INTEGER NOT NULL REFERENCES reels(id) ON DELETE CASCADE,

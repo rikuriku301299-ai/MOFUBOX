@@ -1,5 +1,6 @@
-// Monetization UI: breeder-side plan/boost/deal management (breeder.html
+// Monetization UI: breeder-side boost purchase & deal reporting (breeder.html
 // #view-plan) and the admin revenue dashboard (admin.html #view-revenue).
+// Site usage itself is free — there are no paid plans.
 import { api } from './api.js';
 import { escapeHtml, formatRegisterDate } from './utils.js';
 
@@ -18,8 +19,6 @@ export function initBreederBilling() {
   const root = document.getElementById('view-plan');
   if (!root) return;
 
-  const cardsEl = root.querySelector('[data-plan-cards]');
-  const planStatus = root.querySelector('[data-plan-status]');
   const boostSelect = root.querySelector('[data-boost-select]');
   const boostSubmit = root.querySelector('[data-boost-submit]');
   const boostStatus = root.querySelector('[data-boost-status]');
@@ -32,65 +31,6 @@ export function initBreederBilling() {
 
   let catalog = null;
   let myId = null;
-
-  const setText = (attr, text) => {
-    const el = root.querySelector(`[${attr}]`);
-    if (el) el.textContent = text;
-  };
-
-  function renderCurrent(me) {
-    const plan = me.plan;
-    const pill = root.querySelector('[data-plan-current-pill]');
-    if (pill) {
-      pill.textContent = `${plan.name}プラン`;
-      pill.className = `pill ${plan.id === 'free' ? 'pill-gray' : 'pill-mint'}`;
-    }
-    setText('data-plan-current-name', `${plan.name}プラン`);
-    setText('data-plan-current-price', plan.priceYen ? `${yen(plan.priceYen)} / 月` : '無料');
-    const quota = plan.reelLimit == null ? '無制限' : `${me.reelCount} / ${plan.reelLimit}本`;
-    setText('data-plan-current-quota', quota);
-    const renewal = me.subscription && me.subscription.current_period_end
-      ? formatRegisterDate(me.subscription.current_period_end.replace('T', ' ').slice(0, 19))
-      : '—';
-    setText('data-plan-current-renewal', renewal);
-  }
-
-  function renderPlanCards(me) {
-    if (!cardsEl || !catalog) return;
-    const currentId = me.plan.id;
-    cardsEl.innerHTML = catalog.plans.map((p) => {
-      const isCurrent = p.id === currentId;
-      const btn = isCurrent
-        ? '<button type="button" class="btn btn-outline" disabled>ご利用中</button>'
-        : `<button type="button" class="btn ${p.id === 'pro' ? 'btn-coral' : 'btn-mint'}" data-plan-subscribe="${p.id}">${p.priceYen ? 'このプランにする' : 'フリーに戻す'}</button>`;
-      return `
-        <div class="plan-card${isCurrent ? ' current' : ''}${p.id === 'pro' ? ' featured' : ''}">
-          ${p.id === 'pro' ? '<span class="pill pill-coral plan-card__badge">人気No.1</span>' : ''}
-          <div class="plan-card__name">${escapeHtml(p.name)}</div>
-          <div class="plan-card__price">${p.priceYen ? `${yen(p.priceYen)}<small> / 月</small>` : '¥0'}</div>
-          <ul class="plan-card__features">
-            ${p.features.map((f) => `<li>✓ ${escapeHtml(f)}</li>`).join('')}
-          </ul>
-          ${btn}
-        </div>`;
-    }).join('');
-
-    cardsEl.querySelectorAll('[data-plan-subscribe]').forEach((btn) => {
-      btn.addEventListener('click', async () => {
-        btn.disabled = true;
-        showStatus(planStatus, '処理中…', null);
-        const { ok, data } = await api('/api/billing/subscribe', { method: 'POST', body: { plan: btn.dataset.planSubscribe } });
-        if (ok && data.url) { window.location.href = data.url; return; }
-        if (ok) {
-          showStatus(planStatus, data.message || 'プランを変更しました。', 'success');
-          await refresh();
-        } else {
-          showStatus(planStatus, data.message || 'プラン変更に失敗しました。', 'error');
-          btn.disabled = false;
-        }
-      });
-    });
-  }
 
   function renderBoosts(me) {
     if (boostPrice && catalog) boostPrice.textContent = `${yen(catalog.boost.priceYen)} / ${catalog.boost.days}日間`;
@@ -141,15 +81,13 @@ export function initBreederBilling() {
   async function refresh() {
     const { ok, data } = await api('/api/billing/me');
     if (!ok) return;
-    renderCurrent(data);
-    renderPlanCards(data);
     renderBoosts(data);
     renderDeals(data);
   }
 
   (async () => {
-    const [plansRes, meRes] = await Promise.all([api('/api/billing/plans'), api('/api/auth/me')]);
-    if (plansRes.ok) catalog = plansRes.data;
+    const [pricingRes, meRes] = await Promise.all([api('/api/billing/pricing'), api('/api/auth/me')]);
+    if (pricingRes.ok) catalog = pricingRes.data;
     if (meRes.ok && meRes.data.user) myId = meRes.data.user.id;
     await refresh();
     await renderBoostSelect();
@@ -193,15 +131,14 @@ export function initBreederBilling() {
 /* ============================== 管理者側 ============================== */
 
 const KIND_LABEL = {
-  subscription: '<span class="pill pill-mint">サブスク</span>',
   boost: '<span class="pill pill-coral">ブースト</span>',
-  deal_fee: '<span class="pill pill-gray">成約手数料</span>',
+  deal_fee: '<span class="pill pill-mint">成約手数料</span>',
   one_time: '<span class="pill pill-gray">その他</span>',
 };
 
 export function initAdminRevenue() {
-  const mrrEl = document.querySelector('[data-rev-mrr]');
-  if (!mrrEl) return;
+  const monthEl = document.querySelector('[data-rev-month]');
+  if (!monthEl) return;
 
   api('/api/admin/revenue').then(({ ok, data }) => {
     if (!ok) return;
@@ -211,15 +148,12 @@ export function initAdminRevenue() {
       if (el) el.textContent = text;
     };
 
-    set('data-rev-mrr', yen(data.mrr));
     set('data-rev-month', yen(data.monthTotal));
     set('data-rev-24h', yen(data.last24h));
-    const subCount = Object.values(data.subsByPlan || {}).reduce((a, b) => a + b, 0);
-    set('data-rev-subs', `${subCount}件`);
-    set('data-rev-kind-subscription', yen((data.byKind || {}).subscription || 0));
     set('data-rev-kind-boost', yen((data.byKind || {}).boost || 0));
     set('data-rev-kind-deal-fee', yen((data.byKind || {}).deal_fee || 0));
     set('data-rev-volume', yen(data.dealVolumeMonth || 0));
+    set('data-rev-deal-count', `${data.dealCountMonth || 0}件`);
 
     const chart = document.querySelector('[data-rev-chart]');
     if (chart && data.series) {

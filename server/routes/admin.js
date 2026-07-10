@@ -1,7 +1,6 @@
 const { db } = require('../db');
 const { currentUser, publicUser } = require('../auth');
 const { notify } = require('../notifications');
-const { PLANS } = require('../billing');
 
 function requireAdmin(req, res) {
   const user = currentUser(req);
@@ -64,18 +63,10 @@ function manageUser(req, res, id, action) {
 }
 
 // Live revenue summary for the admin dashboard — everything is computed from
-// the orders ledger so the numbers grow on their own as subscriptions renew,
-// boosts are bought, and deal fees come in.
+// the orders ledger so the numbers grow on their own as boosts are bought and
+// deal fees come in.
 function revenue(req, res) {
   if (!requireAdmin(req, res)) return;
-
-  const activeSubs = db.prepare(`
-    SELECT plan, COUNT(*) AS c FROM subscriptions
-    WHERE status = 'active' AND plan != 'free'
-    GROUP BY plan
-  `).all();
-  const subsByPlan = Object.fromEntries(activeSubs.map((r) => [r.plan, r.c]));
-  const mrr = activeSubs.reduce((sum, r) => sum + (PLANS[r.plan] ? PLANS[r.plan].priceYen * r.c : 0), 0);
 
   const sumWhere = (where, ...args) =>
     db.prepare(`SELECT COALESCE(SUM(amount), 0) AS s FROM orders WHERE status = 'paid' AND ${where}`).get(...args).s;
@@ -83,7 +74,7 @@ function revenue(req, res) {
   const monthTotal = sumWhere("created_at >= datetime('now', 'start of month')");
   const last24h = sumWhere("created_at >= datetime('now', '-1 day')");
   const byKind = {};
-  for (const kind of ['subscription', 'boost', 'deal_fee']) {
+  for (const kind of ['boost', 'deal_fee']) {
     byKind[kind] = sumWhere("kind = ? AND created_at >= datetime('now', 'start of month')", kind);
   }
 
@@ -113,9 +104,10 @@ function revenue(req, res) {
     LIMIT 12
   `).all();
 
-  const dealVolumeMonth = db.prepare(`
-    SELECT COALESCE(SUM(price), 0) AS s FROM deals WHERE created_at >= datetime('now', 'start of month')
-  `).get().s;
+  const dealsMonth = db.prepare(`
+    SELECT COALESCE(SUM(price), 0) AS volume, COUNT(*) AS count
+    FROM deals WHERE created_at >= datetime('now', 'start of month')
+  `).get();
 
   const ranking = db.prepare(`
     SELECT users.name, users.kennel, COUNT(*) AS deal_count, SUM(deals.price) AS volume, SUM(deals.fee) AS fees
@@ -125,7 +117,16 @@ function revenue(req, res) {
     LIMIT 8
   `).all();
 
-  res.json(200, { mrr, subsByPlan, monthTotal, last24h, byKind, series, recentOrders, dealVolumeMonth, ranking });
+  res.json(200, {
+    monthTotal,
+    last24h,
+    byKind,
+    series,
+    recentOrders,
+    dealVolumeMonth: dealsMonth.volume,
+    dealCountMonth: dealsMonth.count,
+    ranking,
+  });
 }
 
 module.exports = { listBreeders, listCustomers, reviewBreeder, manageUser, requireAdmin, revenue };
