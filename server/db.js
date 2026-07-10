@@ -115,6 +115,48 @@ CREATE TABLE IF NOT EXISTS messages (
   created_at TEXT NOT NULL DEFAULT (datetime('now'))
 );
 CREATE INDEX IF NOT EXISTS idx_messages_pair ON messages(sender_id, recipient_id);
+
+CREATE TABLE IF NOT EXISTS subscriptions (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  breeder_id INTEGER NOT NULL UNIQUE REFERENCES users(id) ON DELETE CASCADE,
+  plan TEXT NOT NULL DEFAULT 'free' CHECK(plan IN ('free','standard','pro')),
+  status TEXT NOT NULL DEFAULT 'active',
+  stripe_customer_id TEXT,
+  stripe_subscription_id TEXT,
+  current_period_end TEXT,
+  created_at TEXT NOT NULL DEFAULT (datetime('now')),
+  updated_at TEXT NOT NULL DEFAULT (datetime('now'))
+);
+
+CREATE TABLE IF NOT EXISTS boosts (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  reel_id INTEGER NOT NULL REFERENCES reels(id) ON DELETE CASCADE,
+  breeder_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  amount INTEGER NOT NULL,
+  status TEXT NOT NULL DEFAULT 'pending',
+  starts_at TEXT,
+  ends_at TEXT,
+  created_at TEXT NOT NULL DEFAULT (datetime('now'))
+);
+CREATE INDEX IF NOT EXISTS idx_boosts_reel ON boosts(reel_id, status);
+
+CREATE TABLE IF NOT EXISTS deals (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  breeder_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  cat_name TEXT,
+  buyer_name TEXT,
+  price INTEGER NOT NULL,
+  fee INTEGER NOT NULL,
+  fee_status TEXT NOT NULL DEFAULT 'pending',
+  created_at TEXT NOT NULL DEFAULT (datetime('now'))
+);
+CREATE INDEX IF NOT EXISTS idx_deals_breeder ON deals(breeder_id);
 `);
+
+// Lightweight migrations for databases created before the monetization
+// feature landed: orders gained a revenue-kind tag and a metadata blob.
+const orderColumns = db.prepare('PRAGMA table_info(orders)').all().map((c) => c.name);
+if (!orderColumns.includes('kind')) db.exec("ALTER TABLE orders ADD COLUMN kind TEXT NOT NULL DEFAULT 'one_time'");
+if (!orderColumns.includes('meta')) db.exec('ALTER TABLE orders ADD COLUMN meta TEXT');
 
 module.exports = { db, UPLOADS_DIR, DATA_DIR };

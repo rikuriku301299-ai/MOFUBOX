@@ -1,6 +1,7 @@
 const { db } = require('../db');
 const { currentUser, publicUser } = require('../auth');
 const { notify } = require('../notifications');
+const { PLANS } = require('../billing');
 
 function requireAdmin(req, res) {
   const user = currentUser(req);
@@ -62,4 +63,69 @@ function manageUser(req, res, id, action) {
   return res.json(400, { error: 'unknown_action' });
 }
 
-module.exports = { listBreeders, listCustomers, reviewBreeder, manageUser, requireAdmin };
+// Live revenue summary for the admin dashboard — everything is computed from
+// the orders ledger so the numbers grow on their own as subscriptions renew,
+// boosts are bought, and deal fees come in.
+function revenue(req, res) {
+  if (!requireAdmin(req, res)) return;
+
+  const activeSubs = db.prepare(`
+    SELECT plan, COUNT(*) AS c FROM subscriptions
+    WHERE status = 'active' AND plan != 'free'
+    GROUP BY plan
+  `).all();
+  const subsByPlan = Object.fromEntries(activeSubs.map((r) => [r.plan, r.c]));
+  const mrr = activeSubs.reduce((sum, r) => sum + (PLANS[r.plan] ? PLANS[r.plan].priceYen * r.c : 0), 0);
+
+  const sumWhere = (where, ...args) =>
+    db.prepare(`SELECT COALESCE(SUM(amount), 0) AS s FROM orders WHERE status = 'paid' AND ${where}`).get(...args).s;
+
+  const monthTotal = sumWhere("created_at >= datetime('now', 'start of month')");
+  const last24h = sumWhere("created_at >= datetime('now', '-1 day')");
+  const byKind = {};
+  for (const kind of ['subscription', 'boost', 'deal_fee']) {
+    byKind[kind] = sumWhere("kind = ? AND created_at >= datetime('now', 'start of month')", kind);
+  }
+
+  // Last 6 calendar months of paid revenue, oldest first.
+  const rows = db.prepare(`
+    SELECT strftime('%Y-%m', created_at) AS ym, SUM(amount) AS total
+    FROM orders
+    WHERE status = 'paid' AND created_at >= datetime('now', 'start of month', '-5 months')
+    GROUP BY ym
+  `).all();
+  const totalsByMonth = Object.fromEntries(rows.map((r) => [r.ym, r.total]));
+  const series = [];
+  for (let i = 5; i >= 0; i--) {
+    const d = new Date();
+    d.setDate(1);
+    d.setMonth(d.getMonth() - i);
+    const ym = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
+    series.push({ month: ym, label: `${d.getMonth() + 1}月`, total: totalsByMonth[ym] || 0 });
+  }
+
+  const recentOrders = db.prepare(`
+    SELECT orders.id, orders.kind, orders.description, orders.amount, orders.created_at,
+           users.name AS user_name, users.kennel AS user_kennel
+    FROM orders LEFT JOIN users ON users.id = orders.user_id
+    WHERE orders.status = 'paid'
+    ORDER BY orders.created_at DESC, orders.id DESC
+    LIMIT 12
+  `).all();
+
+  const dealVolumeMonth = db.prepare(`
+    SELECT COALESCE(SUM(price), 0) AS s FROM deals WHERE created_at >= datetime('now', 'start of month')
+  `).get().s;
+
+  const ranking = db.prepare(`
+    SELECT users.name, users.kennel, COUNT(*) AS deal_count, SUM(deals.price) AS volume, SUM(deals.fee) AS fees
+    FROM deals JOIN users ON users.id = deals.breeder_id
+    GROUP BY deals.breeder_id
+    ORDER BY volume DESC
+    LIMIT 8
+  `).all();
+
+  res.json(200, { mrr, subsByPlan, monthTotal, last24h, byKind, series, recentOrders, dealVolumeMonth, ranking });
+}
+
+module.exports = { listBreeders, listCustomers, reviewBreeder, manageUser, requireAdmin, revenue };

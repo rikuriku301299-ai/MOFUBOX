@@ -420,36 +420,54 @@
     <section id="view-revenue" class="view">
       <div class="stat-grid">
         <div class="stat-card">
-          <div class="stat-card__top"><div class="stat-card__icon mint"><svg class="icon" viewBox="0 0 24 24" width="18" height="18"><path d="M3 3v18h18"/><path d="M7 14l4-4 3 3 5-6"/></svg></div><span class="stat-card__change up"><svg class="icon" viewBox="0 0 24 24" width="12" height="12"><polyline points="3 17 9 11 13 15 21 7"/></svg>+12%</span></div>
-          <div class="stat-card__value">¥48.2M</div>
-          <div class="stat-card__label">月間流通額</div>
+          <div class="stat-card__top"><div class="stat-card__icon mint"><svg class="icon" viewBox="0 0 24 24" width="18" height="18"><path d="M3 3v18h18"/><path d="M7 14l4-4 3 3 5-6"/></svg></div></div>
+          <div class="stat-card__value" data-rev-mrr>—</div>
+          <div class="stat-card__label">月間定期収益（MRR）</div>
         </div>
         <div class="stat-card">
-          <div class="stat-card__top"><div class="stat-card__icon coral"><svg class="icon" viewBox="0 0 24 24" width="18" height="18"><path d="M12 2 4 5v6c0 5 3.4 8.4 8 11 4.6-2.6 8-6 8-11V5l-8-3z"/></svg></div><span class="stat-card__change up"><svg class="icon" viewBox="0 0 24 24" width="12" height="12"><polyline points="3 17 9 11 13 15 21 7"/></svg>+12%</span></div>
-          <div class="stat-card__value">¥3.86M</div>
-          <div class="stat-card__label">プラットフォーム手数料収益</div>
+          <div class="stat-card__top"><div class="stat-card__icon coral"><svg class="icon" viewBox="0 0 24 24" width="18" height="18"><path d="M12 2 4 5v6c0 5 3.4 8.4 8 11 4.6-2.6 8-6 8-11V5l-8-3z"/></svg></div></div>
+          <div class="stat-card__value" data-rev-month>—</div>
+          <div class="stat-card__label">今月の自動収益</div>
         </div>
         <div class="stat-card">
-          <div class="stat-card__top"><div class="stat-card__icon mint"><svg class="icon" viewBox="0 0 24 24" width="18" height="18"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/></svg></div></div>
-          <div class="stat-card__value">¥118K</div>
-          <div class="stat-card__label">平均成約単価</div>
+          <div class="stat-card__top"><div class="stat-card__icon mint"><svg class="icon" viewBox="0 0 24 24" width="18" height="18"><path d="M18 8a6 6 0 1 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.7 21a2 2 0 0 1-3.4 0"/></svg></div></div>
+          <div class="stat-card__value" data-rev-24h>—</div>
+          <div class="stat-card__label">直近24時間の収益</div>
         </div>
         <div class="stat-card">
-          <div class="stat-card__top"><div class="stat-card__icon coral"><svg class="icon" viewBox="0 0 24 24" width="18" height="18"><path d="M12 9v4M12 17h.01"/><path d="M10.3 3.9 1.8 18a1.8 1.8 0 0 0 1.6 2.7h17.2a1.8 1.8 0 0 0 1.6-2.7L13.7 3.9a1.8 1.8 0 0 0-3.4 0z"/></svg></div><span class="stat-card__change down"><svg class="icon" viewBox="0 0 24 24" width="12" height="12"><polyline points="21 7 13 15 9 11 3 17"/></svg>-0.3pt</span></div>
-          <div class="stat-card__value">2.1%</div>
-          <div class="stat-card__label">ブリーダー解約率</div>
+          <div class="stat-card__top"><div class="stat-card__icon coral"><svg class="icon" viewBox="0 0 24 24" width="18" height="18"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20c0-3.6 2.9-6 6.5-6s6.5 2.4 6.5 6"/><path d="M16 4.5a3.5 3.5 0 0 1 0 7"/><path d="M17.5 14.3c2.4.7 4 2.6 4 5.7"/></svg></div></div>
+          <div class="stat-card__value" data-rev-subs>—</div>
+          <div class="stat-card__label">有料プラン契約数</div>
+        </div>
+      </div>
+
+      <div class="grid-2">
+        <div class="panel">
+          <div class="panel-head"><h3>自動収益の推移（直近6ヶ月）</h3></div>
+          <div class="bar-chart" data-rev-chart>
+            <div class="bar-chart__col"><div class="bar-chart__bar coral" style="height:3%;"></div><span>—</span></div>
+          </div>
+        </div>
+        <div class="panel">
+          <div class="panel-head"><h3>今月の内訳</h3></div>
+          <ul class="kv-list">
+            <li><span>サブスクリプション</span><b data-rev-kind-subscription>—</b></li>
+            <li><span>リールブースト</span><b data-rev-kind-boost>—</b></li>
+            <li><span>成約手数料</span><b data-rev-kind-deal-fee>—</b></li>
+            <li><span>成約流通額（参考）</span><b data-rev-volume>—</b></li>
+          </ul>
         </div>
       </div>
 
       <div class="panel">
-        <div class="panel-head"><h3>月間流通額の推移</h3></div>
-        <div class="bar-chart">
-          <div class="bar-chart__col"><div class="bar-chart__bar coral" style="height:48%;"></div><span>1月</span></div>
-          <div class="bar-chart__col"><div class="bar-chart__bar coral" style="height:56%;"></div><span>2月</span></div>
-          <div class="bar-chart__col"><div class="bar-chart__bar coral" style="height:62%;"></div><span>3月</span></div>
-          <div class="bar-chart__col"><div class="bar-chart__bar coral" style="height:70%;"></div><span>4月</span></div>
-          <div class="bar-chart__col"><div class="bar-chart__bar coral" style="height:80%;"></div><span>5月</span></div>
-          <div class="bar-chart__col"><div class="bar-chart__bar coral" style="height:92%;"></div><span>6月</span></div>
+        <div class="panel-head"><h3>最近の入金</h3></div>
+        <div class="table-scroll">
+        <table>
+          <thead><tr><th>日付</th><th>種別</th><th>内容</th><th>ブリーダー</th><th>金額</th></tr></thead>
+          <tbody data-rev-orders>
+            <tr><td colspan="5" style="color:var(--ink-faint);">読み込み中…</td></tr>
+          </tbody>
+        </table>
         </div>
       </div>
 
@@ -458,11 +476,8 @@
         <div class="table-scroll">
         <table>
           <thead><tr><th>#</th><th>ブリーダー</th><th>成約数</th><th>流通額</th><th>手数料収益</th></tr></thead>
-          <tbody>
-            <tr><td class="t-num">1</td><td><div class="t-row-title"><div class="avatar avatar-sm coral" style="width:32px;height:32px;font-size:12px;">も</div><strong>もふもふ・キャッテリー</strong></div></td><td class="t-num">12</td><td class="t-num">¥1,240,000</td><td class="t-num">¥99,200</td></tr>
-            <tr><td class="t-num">2</td><td><div class="t-row-title"><div class="avatar avatar-sm coral" style="width:32px;height:32px;font-size:12px;">陽</div><strong>ひなたキャッテリー</strong></div></td><td class="t-num">9</td><td class="t-num">¥980,000</td><td class="t-num">¥78,400</td></tr>
-            <tr><td class="t-num">3</td><td><div class="t-row-title"><div class="avatar avatar-sm mint" style="width:32px;height:32px;font-size:12px;">さ</div><strong>さくら ブリーダー</strong></div></td><td class="t-num">7</td><td class="t-num">¥740,000</td><td class="t-num">¥59,200</td></tr>
-            <tr><td class="t-num">4</td><td><div class="t-row-title"><div class="avatar avatar-sm gold" style="width:32px;height:32px;font-size:12px;">れ</div><strong>れおなラグドール</strong></div></td><td class="t-num">5</td><td class="t-num">¥520,000</td><td class="t-num">¥41,600</td></tr>
+          <tbody data-rev-ranking>
+            <tr><td colspan="5" style="color:var(--ink-faint);">読み込み中…</td></tr>
           </tbody>
         </table>
         </div>

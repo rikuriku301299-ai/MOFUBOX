@@ -5,6 +5,7 @@
 const crypto = require('node:crypto');
 const { db } = require('../db');
 const { currentUser } = require('../auth');
+const billing = require('../billing');
 
 const STRIPE_API = 'https://api.stripe.com/v1';
 
@@ -96,11 +97,31 @@ function webhook(req, res, rawBody) {
   }
 
   if (event.type === 'checkout.session.completed') {
-    const sessionId = event.data.object.id;
-    db.prepare("UPDATE orders SET status = 'paid' WHERE stripe_session_id = ?").run(sessionId);
+    const session = event.data.object;
+    const order = db.prepare('SELECT * FROM orders WHERE stripe_session_id = ?').get(session.id);
+    if (order && order.status !== 'paid') {
+      db.prepare("UPDATE orders SET status = 'paid' WHERE id = ?").run(order.id);
+      // Attach the Stripe subscription/customer ids so renewals can be matched.
+      if (order.kind === 'subscription' && session.subscription) {
+        let meta = {};
+        try { meta = order.meta ? JSON.parse(order.meta) : {}; } catch { /* ignore */ }
+        meta.stripe = { subscriptionId: session.subscription, customerId: session.customer || null };
+        db.prepare('UPDATE orders SET meta = ? WHERE id = ?').run(JSON.stringify(meta), order.id);
+        order.meta = JSON.stringify(meta);
+      }
+      billing.fulfillOrder(order);
+    }
+  }
+
+  if (event.type === 'invoice.paid') {
+    billing.handleInvoicePaid(event.data.object);
+  }
+
+  if (event.type === 'customer.subscription.deleted') {
+    billing.handleSubscriptionDeleted(event.data.object);
   }
 
   res.json(200, { received: true });
 }
 
-module.exports = { createCheckoutSession, webhook, stripeConfigured };
+module.exports = { createCheckoutSession, webhook, stripeConfigured, stripeRequest };
