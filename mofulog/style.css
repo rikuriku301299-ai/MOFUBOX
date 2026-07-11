@@ -1,0 +1,213 @@
+/* =========================================================
+   モフログ — MOFUBOXと同系統の配色(Mint / Cream / Coral)
+   ========================================================= */
+
+:root {
+  --mint: #3FADA8;
+  --mint-dark: #2C8C88;
+  --mint-light: #E1F3F1;
+  --cream: #FDFAF6;
+  --cream-deep: #F6EFE3;
+  --coral: #E8855A;
+  --coral-dark: #D2693C;
+  --ink: #2A3736;
+  --ink-soft: #5C6B6A;
+  --ink-faint: #93A19F;
+  --line: #E9E1D2;
+  --white: #FFFFFF;
+  --shadow-sm: 0 2px 10px rgba(42, 55, 54, 0.06);
+  --shadow-md: 0 10px 30px rgba(42, 55, 54, 0.10);
+  --radius-m: 16px;
+  --radius-full: 999px;
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  font-family: "Hiragino Maru Gothic ProN", "Hiragino Sans", "Yu Gothic", sans-serif;
+  color: var(--ink);
+  background: var(--cream);
+  line-height: 1.9;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* 広告表記(ステマ規制対応・全ページ先頭に固定表示) */
+.disclosure {
+  margin: 0;
+  padding: 6px 16px;
+  background: var(--cream-deep);
+  color: var(--ink-soft);
+  font-size: 12px;
+  text-align: center;
+}
+
+.site-header {
+  text-align: center;
+  padding: 40px 16px 8px;
+}
+
+.site-title {
+  font-size: 32px;
+  font-weight: 700;
+  color: var(--mint-dark);
+  text-decoration: none;
+  letter-spacing: 0.06em;
+}
+
+.site-tagline {
+  margin: 6px 0 0;
+  color: var(--ink-soft);
+  font-size: 14px;
+}
+
+main {
+  max-width: 720px;
+  margin: 0 auto;
+  padding: 24px 16px 64px;
+}
+
+/* --- トップの記事一覧 --- */
+.article-list {
+  display: grid;
+  gap: 16px;
+}
+
+.article-card {
+  display: block;
+  background: var(--white);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-m);
+  padding: 20px 24px;
+  text-decoration: none;
+  color: inherit;
+  box-shadow: var(--shadow-sm);
+  transition: box-shadow 0.2s ease, transform 0.2s ease;
+}
+
+.article-card:hover {
+  box-shadow: var(--shadow-md);
+  transform: translateY(-2px);
+}
+
+.article-card time,
+article time {
+  color: var(--ink-faint);
+  font-size: 13px;
+}
+
+.article-card h2 {
+  margin: 4px 0 8px;
+  font-size: 19px;
+  color: var(--ink);
+}
+
+.article-card p {
+  margin: 0;
+  color: var(--ink-soft);
+  font-size: 14px;
+}
+
+/* --- 記事本文 --- */
+article h1 {
+  font-size: 26px;
+  line-height: 1.5;
+  margin: 4px 0 24px;
+}
+
+article h2 {
+  font-size: 21px;
+  margin: 40px 0 12px;
+  padding-left: 12px;
+  border-left: 4px solid var(--mint);
+}
+
+article h3 {
+  font-size: 17px;
+  margin: 28px 0 8px;
+  color: var(--mint-dark);
+}
+
+article p { margin: 0 0 16px; }
+
+article a { color: var(--mint-dark); }
+
+article ul {
+  margin: 0 0 16px;
+  padding-left: 24px;
+}
+
+article blockquote {
+  margin: 0 0 16px;
+  padding: 12px 20px;
+  background: var(--mint-light);
+  border-radius: var(--radius-m);
+  color: var(--ink-soft);
+}
+
+article blockquote p { margin: 0; }
+
+/* --- 商品カード --- */
+.product-card {
+  background: var(--white);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-m);
+  box-shadow: var(--shadow-sm);
+  padding: 20px 24px;
+  margin: 0 0 24px;
+}
+
+.product-name {
+  margin: 0 0 6px;
+  font-weight: 700;
+  font-size: 16px;
+}
+
+.product-note {
+  margin: 0 0 6px;
+  font-size: 14px;
+  color: var(--ink-soft);
+}
+
+.product-price {
+  margin: 0 0 4px;
+  font-size: 13px;
+  color: var(--ink-faint);
+}
+
+.product-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 12px;
+}
+
+.btn {
+  display: inline-block;
+  padding: 10px 22px;
+  border-radius: var(--radius-full);
+  font-size: 14px;
+  font-weight: 700;
+  text-decoration: none;
+  color: var(--white);
+  transition: opacity 0.15s ease;
+}
+
+.btn:hover { opacity: 0.85; }
+
+.btn-amazon { background: var(--coral); }
+.btn-rakuten { background: #BF0000; }
+
+.back-link { margin-top: 40px; }
+.back-link a { color: var(--mint-dark); }
+
+/* --- フッター --- */
+.site-footer {
+  text-align: center;
+  padding: 24px 16px 40px;
+  border-top: 1px solid var(--line);
+  color: var(--ink-faint);
+  font-size: 13px;
+}
+
+.site-footer a { color: var(--mint-dark); }
