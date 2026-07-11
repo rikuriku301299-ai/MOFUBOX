@@ -65,6 +65,10 @@
         <svg class="icon" viewBox="0 0 24 24"><path d="M3 3v18h18"/><path d="M7 14l4-4 3 3 5-6"/></svg>
         <span>売上・統計</span>
       </a>
+      <a href="#" data-view-link="view-plan" data-title="収益プラン" data-sub="手数料の割引と優先表示で、成約をさらに伸ばせます">
+        <svg class="icon" viewBox="0 0 24 24"><path d="M12 2l2.6 6.3 6.8.5-5.2 4.4 1.6 6.6L12 16.2 6.2 19.8l1.6-6.6L2.6 8.8l6.8-.5z"/></svg>
+        <span>収益プラン</span>
+      </a>
       <div class="dash-nav__label">設定</div>
       <a href="#" data-view-link="view-profile" data-title="プロフィール設定" data-sub="キャッテリー情報や審査ステータスを管理します">
         <svg class="icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.9l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.9-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.6 1.7 1.7 0 0 0-1.9.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.9 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.6-1.1 1.7 1.7 0 0 0-.3-1.9l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.9.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.9-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.9V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg>
@@ -464,6 +468,27 @@
           </tbody>
         </table>
         </div>
+      </div>
+    </section>
+
+    <!-- ===================== VIEW: 収益プラン ===================== -->
+    <section id="view-plan" class="view">
+      <div class="panel">
+        <div class="panel-head"><h3>月額プラン</h3></div>
+        <p style="font-size:13.5px;color:var(--ink-soft);margin-bottom:16px;">有料プランに加入すると、成約手数料が割引になり、あなたのリールがフィードで優先表示されます。<span data-plan-current style="font-weight:700;"></span></p>
+        <div data-plan-cards style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:16px;">
+          <div style="color:var(--ink-faint);font-size:13px;">読み込んでいます…</div>
+        </div>
+        <div data-plan-result style="display:none;margin-top:16px;padding:16px 18px;background:var(--mint-light);border-radius:var(--radius-m);font-size:13.5px;"></div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-head"><h3>リールブースト（優先表示）</h3></div>
+        <p style="font-size:13.5px;color:var(--ink-soft);margin-bottom:16px;" data-boost-desc>気になるリールを7日間、フィードの最上位に表示します。</p>
+        <div data-boost-list style="display:flex;flex-direction:column;gap:10px;">
+          <div style="color:var(--ink-faint);font-size:13px;">読み込んでいます…</div>
+        </div>
+        <div data-boost-result style="display:none;margin-top:16px;padding:16px 18px;background:var(--mint-light);border-radius:var(--radius-m);font-size:13.5px;"></div>
       </div>
     </section>
 

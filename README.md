@@ -55,6 +55,20 @@ Node 22.5 以上が動く環境であれば、ビルドステップなしでそ�
 | `COOKIE_SECURE` | – | `1` を指定すると HTTPS 用に Secure クッキーを発行（HTTPS 配信時のみ設定） |
 | `STRIPE_SECRET_KEY` / `STRIPE_WEBHOOK_SECRET` | – | 設定すると決済機能が有効化。未設定の場合は決済 API が `501 stripe_not_configured` を返す |
 
+## 収益モデル（マネタイズ）
+
+3本柱の収益ストリームを実装しています。いずれも Stripe キー未設定時は「記録のみ」で安全に動作し、キー設定後は実際の決済に自動で切り替わります。
+
+| ストリーム | 内容 | 実装 |
+|---|---|---|
+| 成約手数料 | 成約額のプラン別手数料（フリー7% / スタンダード5% / プロ3.5%）を Stripe Connect でお客様の支払いから自動天引き | `POST /api/deals` |
+| 月額サブスク | ブリーダー向けプラン（スタンダード ¥3,980/月・プロ ¥9,800/月）。手数料割引とフィード優先表示が特典 | `GET /api/plans` / `POST /api/plans/subscribe` |
+| リールブースト | 1回 ¥1,480 で7日間、リールをフィード最上位に固定表示（PRバッジ付き） | `POST /api/reels/:id/boost` |
+
+- フィードの並び順は「ブースト中 → 有料プラン（プロ→スタンダード）→ 新着」の収益連動ランキングです。
+- サブスクは Stripe Checkout（subscription モード）+ Webhook（`checkout.session.completed` / `customer.subscription.deleted`）でプランの有効化・解約を自動処理します。
+- 管理者パネルの「売上管理」に、成約手数料・サブスク MRR・ブースト収益の内訳と直近の取引がライブ表示されます。
+
 ## 主要ページ
 
 | パス | 内容 |

@@ -120,6 +120,13 @@ CREATE INDEX IF NOT EXISTS idx_messages_pair ON messages(sender_id, recipient_id
 // Lightweight migrations for columns added after the initial schema.
 for (const [table, col, def] of [
   ['users', 'stripe_account_id', 'TEXT'],
+  // Monetisation: breeder subscription plan ('free' | 'standard' | 'pro')
+  ['users', 'plan', "TEXT NOT NULL DEFAULT 'free'"],
+  ['users', 'stripe_subscription_id', 'TEXT'],
+  // Paid reel boost: featured in the feed until this ISO timestamp
+  ['reels', 'boost_until', 'TEXT'],
+  // Revenue stream the order belongs to ('commission' | 'subscription' | 'boost')
+  ['orders', 'kind', "TEXT NOT NULL DEFAULT 'commission'"],
 ]) {
   const exists = db.prepare(`PRAGMA table_info(${table})`).all().some(c => c.name === col);
   if (!exists) db.exec(`ALTER TABLE ${table} ADD COLUMN ${col} ${def}`);

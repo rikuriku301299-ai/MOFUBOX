@@ -9,6 +9,7 @@ const authRoutes = require('./routes/auth');
 const reelRoutes = require('./routes/reels');
 const adminRoutes = require('./routes/admin');
 const paymentRoutes = require('./routes/payments');
+const planRoutes = require('./routes/plans');
 const notificationRoutes = require('./routes/notifications');
 const messageRoutes = require('./routes/messages');
 
@@ -87,6 +88,12 @@ async function handleApi(req, res, pathname, query) {
 
     m = pathname.match(/^\/api\/reels\/(\d+)\/like$/);
     if (m && method === 'POST') return reelRoutes.toggleLike(req, res, Number(m[1]));
+
+    if (pathname === '/api/plans' && method === 'GET') return planRoutes.list(req, res);
+    if (pathname === '/api/plans/subscribe' && method === 'POST') return planRoutes.subscribe(req, res, await readJsonBody(req));
+
+    m = pathname.match(/^\/api\/reels\/(\d+)\/boost$/);
+    if (m && method === 'POST') return planRoutes.boostReel(req, res, Number(m[1]));
 
     m = pathname.match(/^\/api\/users\/(\d+)\/follow$/);
     if (m && method === 'POST') return reelRoutes.toggleFollow(req, res, Number(m[1]));
