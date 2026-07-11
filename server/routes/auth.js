@@ -1,6 +1,6 @@
 const { db } = require('../db');
 const {
-  hashPassword, verifyPassword, createSession, destroySession,
+  hashPassword, verifyPassword, createSession, destroySession, refreshSession,
   setSessionCookie, clearSessionCookie, currentUser, publicUser, parseCookies, SESSION_COOKIE,
 } = require('../auth');
 const { notifyAdmins } = require('../notifications');
@@ -75,6 +75,15 @@ function logout(req, res) {
 
 function me(req, res) {
   const user = currentUser(req);
+  // Sliding session: every time the app checks who's logged in (on each page
+  // load), extend the session and re-issue the cookie. As long as the user
+  // opens the site at least once within the window, they stay logged in — no
+  // need to register or log in again.
+  if (user) {
+    const token = parseCookies(req)[SESSION_COOKIE];
+    refreshSession(token);
+    setSessionCookie(res, token);
+  }
   res.json(200, { user: publicUser(user) });
 }
 

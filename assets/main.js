@@ -7,6 +7,7 @@ import { initReelActions, initReelData, initLikeToggles, initReelSwipe, initReel
 import { initSegmentedControls, initMobileNav, initPhotoFallbacks } from './js/ui.js';
 import { initRegisterPage } from './js/register.js';
 import { initRegistrationFeed } from './js/admin.js';
+import { initAdminOutreach } from './js/admin-messages.js';
 import { initProfileFollow } from './js/profile.js';
 import { initNotifications } from './js/notifications.js';
 import { initMessages, initMyPage, initBreederMessages } from './js/messages.js';
@@ -26,6 +27,7 @@ initMobileNav();
 initPhotoFallbacks();
 initRegisterPage();
 initRegistrationFeed();
+initAdminOutreach();
 initProfileFollow();
 initReelUpload();
 initLogout();

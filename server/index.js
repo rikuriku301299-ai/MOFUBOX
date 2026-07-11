@@ -96,6 +96,7 @@ async function handleApi(req, res, pathname, query) {
 
     if (pathname === '/api/admin/breeders' && method === 'GET') return adminRoutes.listBreeders(req, res, query);
     if (pathname === '/api/admin/customers' && method === 'GET') return adminRoutes.listCustomers(req, res);
+    if (pathname === '/api/admin/message-breeders' && method === 'POST') return adminRoutes.messageBreeders(req, res, await readJsonBody(req));
 
     m = pathname.match(/^\/api\/admin\/breeders\/(\d+)\/(approve|reject)$/);
     if (m && method === 'POST') return adminRoutes.reviewBreeder(req, res, Number(m[1]), m[2]);

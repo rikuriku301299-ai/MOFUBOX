@@ -62,4 +62,35 @@ function manageUser(req, res, id, action) {
   return res.json(400, { error: 'unknown_action' });
 }
 
-module.exports = { listBreeders, listCustomers, reviewBreeder, manageUser, requireAdmin };
+// POST /api/admin/message-breeders — the operator contacts breeders directly.
+// target: 'approved' (default) | 'all' | a breeder id. The message lands in each
+// breeder's inbox (breeder.html → メッセージ) and as a notification. Breeders can
+// reply, and replies appear in the admin's own conversation list (/api/messages).
+function messageBreeders(req, res, body) {
+  const admin = requireAdmin(req, res);
+  if (!admin) return;
+  const text = String((body && body.body) || '').trim();
+  if (!text) return res.json(400, { error: 'empty_message', message: 'メッセージを入力してください。' });
+  if (text.length > 2000) return res.json(400, { error: 'too_long', message: '2000文字以内で入力してください。' });
+
+  const target = body && body.target != null ? body.target : 'approved';
+  let recipients;
+  if (target === 'all' || target === 'approved') {
+    const where = target === 'approved' ? "AND status = 'approved'" : '';
+    recipients = db.prepare(`SELECT id FROM users WHERE role = 'breeder' ${where}`).all().map(r => r.id);
+  } else {
+    const breeder = db.prepare("SELECT id FROM users WHERE id = ? AND role = 'breeder'").get(Number(target));
+    if (!breeder) return res.json(404, { error: 'not_found' });
+    recipients = [breeder.id];
+  }
+  if (!recipients.length) return res.json(200, { sent: 0 });
+
+  const insert = db.prepare('INSERT INTO messages (sender_id, recipient_id, body) VALUES (?, ?, ?)');
+  for (const rid of recipients) {
+    insert.run(admin.id, rid, text);
+    notify(rid, 'message', 'MOFUBOX運営からのお知らせ', text.slice(0, 60), '/breeder.html');
+  }
+  res.json(200, { sent: recipients.length });
+}
+
+module.exports = { listBreeders, listCustomers, reviewBreeder, manageUser, messageBreeders, requireAdmin };

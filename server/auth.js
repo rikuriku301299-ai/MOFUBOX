@@ -31,6 +31,15 @@ function destroySession(token) {
   db.prepare('DELETE FROM sessions WHERE token = ?').run(token);
 }
 
+// Sliding expiry: push a valid session's expiry back to the full TTL. Called on
+// each authenticated visit so an active user is never logged out (and never has
+// to register/log in again) as long as they return within the window.
+function refreshSession(token) {
+  if (!token) return;
+  const expiresAt = new Date(Date.now() + SESSION_TTL_MS).toISOString();
+  db.prepare("UPDATE sessions SET expires_at = ? WHERE token = ? AND expires_at > datetime('now')").run(expiresAt, token);
+}
+
 function getUserBySession(token) {
   if (!token) return null;
   const row = db.prepare(`
@@ -81,6 +90,7 @@ module.exports = {
   verifyPassword,
   createSession,
   destroySession,
+  refreshSession,
   parseCookies,
   setSessionCookie,
   clearSessionCookie,
