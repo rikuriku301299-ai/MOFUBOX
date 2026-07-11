@@ -1,18 +1,13 @@
-# モフログを GitHub Pages に自動デプロイするワークフロー。
-# mofulog/ 配下を push するだけでサイトが更新される(手動作業ゼロ)。
-# Pages が未有効の場合も configure-pages の enablement で自動有効化を試みる。
-# それが権限エラーになる場合のみ、Settings → Pages → Source を
-# "GitHub Actions" に手動設定する(mofulog/README.md のチェックリスト参照)。
+# 一時的なワークフロー: モフログは独立リポジトリへ移転するため、
+# 旧URL (github.io/MOFUBOX/) には案内ページだけを残す。
+# この後のコミットで MOFUBOX からモフログ関連ファイルごと削除される。
 name: Deploy mofulog to GitHub Pages
 
 on:
   push:
     branches:
-      - main
-      - claude/mofubox-landing-page-m98xnw # 現在のデフォルトブランチ
-      - claude/passive-income-system-5cp0di # モフログ開発ブランチ(マージ前から公開)
+      - claude/mofubox-landing-page-m98xnw
     paths:
-      - "mofulog/**"
       - ".github/workflows/mofulog-pages.yml"
   workflow_dispatch:
 
@@ -29,25 +24,42 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 22
-      - name: Build site
-        run: node mofulog/build.js
+      - name: Build moved notice
+        run: |
+          mkdir -p _site
+          cat > _site/index.html <<'HTML'
+          <!DOCTYPE html>
+          <html lang="ja">
+          <head>
+            <meta charset="UTF-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            <meta http-equiv="refresh" content="3; url=https://rikuriku301299-ai.github.io/mofulog/">
+            <meta name="robots" content="noindex">
+            <title>モフログはお引っ越ししました</title>
+            <style>
+              body { font-family: sans-serif; background: #FDFAF6; color: #2A3736;
+                     display: grid; place-items: center; min-height: 100vh; margin: 0; }
+              main { text-align: center; padding: 24px; }
+              a { color: #2C8C88; }
+            </style>
+          </head>
+          <body>
+            <main>
+              <h1>モフログはお引っ越ししました</h1>
+              <p>3秒後に新しいアドレスへ移動します。</p>
+              <p><a href="https://rikuriku301299-ai.github.io/mofulog/">https://rikuriku301299-ai.github.io/mofulog/</a></p>
+            </main>
+          </body>
+          </html>
+          HTML
+          touch _site/.nojekyll
       - uses: actions/configure-pages@v5
-        with:
-          enablement: true
       - uses: actions/upload-pages-artifact@v3
         with:
-          path: mofulog/dist
+          path: _site
 
   deploy:
     needs: build
-    # Pages の environment 保護ルールがデフォルトブランチ以外からの
-    # デプロイを拒否するため、デプロイはデフォルトブランチのみ。
-    # 開発ブランチの push ではビルド検証まで走る。
-    if: github.ref == 'refs/heads/claude/mofubox-landing-page-m98xnw' || github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     environment:
       name: github-pages
