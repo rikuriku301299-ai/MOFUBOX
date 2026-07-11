@@ -212,11 +212,26 @@ async function recordDeal(req, res, body) {
     }
   }
 
+  // Lowest-cost path: no card fees — the breeder pays the commission by bank
+  // transfer. We record what is owed and show the transfer details.
   db.prepare(`INSERT INTO orders (user_id, description, amount, currency, status)
     VALUES (?, ?, ?, 'jpy', 'recorded')`).run(user.id, description, commission);
-  notifyAdmins('revenue', '成約が記録されました',
-    `${user.kennel || user.name} ／ 手数料 ¥${commission.toLocaleString()}（Stripe未接続のため記録のみ）`, '/admin.html#view-revenue');
-  res.json(200, { price, commission, live: false, message: 'Stripe接続後は、お客様のお支払いから手数料が自動で天引きされます。' });
+  notifyAdmins('revenue', '成約が記録されました（振込待ち）',
+    `${user.kennel || user.name} ／ 手数料 ¥${commission.toLocaleString()}`, '/admin.html#view-revenue');
+  res.json(200, {
+    price, commission, live: false, method: 'bank_transfer',
+    bankInfo: process.env.MOFUBOX_BANK_INFO || null,
+  });
+}
+
+// POST /api/revenue/:orderId/paid — admin confirms a bank-transfer commission.
+function markOrderPaid(req, res, orderId) {
+  const user = currentUser(req);
+  if (!user || user.role !== 'admin') return res.json(403, { error: 'admin_only' });
+  const order = db.prepare("SELECT id FROM orders WHERE id = ? AND status = 'recorded'").get(orderId);
+  if (!order) return res.json(404, { error: 'not_found' });
+  db.prepare("UPDATE orders SET status = 'paid' WHERE id = ?").run(orderId);
+  res.json(200, { id: orderId, status: 'paid' });
 }
 
 // GET /api/revenue — admin summary: total commission collected + recorded.
@@ -229,11 +244,21 @@ function revenueSummary(req, res) {
     SELECT o.description, o.amount, o.status, o.created_at, u.kennel, u.name
     FROM orders o LEFT JOIN users u ON u.id = o.user_id
     ORDER BY o.created_at DESC LIMIT 20`).all();
+  // Commissions awaiting a bank transfer — admin marks these paid once received.
+  const unpaid = db.prepare(`
+    SELECT o.id, o.description, o.amount, o.created_at, u.kennel, u.name
+    FROM orders o LEFT JOIN users u ON u.id = o.user_id
+    WHERE o.status = 'recorded'
+    ORDER BY o.created_at DESC`).all();
   res.json(200, {
     paidTotal: paid.s, paidCount: paid.c,
     pendingTotal: pending.s, pendingCount: pending.c,
     commissionRate: COMMISSION_RATE,
     stripeLive: stripeConfigured(),
+    unpaid: unpaid.map(r => ({
+      id: r.id, breeder: r.kennel || r.name || '—',
+      description: r.description, amount: r.amount, at: r.created_at,
+    })),
     recent: recent.map(r => ({
       breeder: r.kennel || r.name || '—',
       description: r.description, amount: r.amount, status: r.status, at: r.created_at,
@@ -241,4 +266,4 @@ function revenueSummary(req, res) {
   });
 }
 
-module.exports = { createCheckoutSession, webhook, stripeConfigured, recordDeal, revenueSummary, connectStart, connectStatus };
+module.exports = { createCheckoutSession, webhook, stripeConfigured, recordDeal, markOrderPaid, revenueSummary, connectStart, connectStatus };

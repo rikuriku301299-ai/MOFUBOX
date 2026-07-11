@@ -105,6 +105,8 @@ async function handleApi(req, res, pathname, query) {
 
     if (pathname === '/api/deals' && method === 'POST') return paymentRoutes.recordDeal(req, res, await readJsonBody(req));
     if (pathname === '/api/revenue' && method === 'GET') return paymentRoutes.revenueSummary(req, res);
+    m = pathname.match(/^\/api\/revenue\/(\d+)\/paid$/);
+    if (m && method === 'POST') return paymentRoutes.markOrderPaid(req, res, Number(m[1]));
     if (pathname === '/api/connect/start' && method === 'POST') return paymentRoutes.connectStart(req, res);
     if (pathname === '/api/connect/status' && method === 'GET') return paymentRoutes.connectStatus(req, res);
 
