@@ -40,6 +40,15 @@ export async function initReelData() {
       followBtn.classList.toggle('followed', reel.followedByMe);
       followBtn.textContent = reel.followedByMe ? '✓' : '+';
     }
+
+    // Paid placement (boost) — mark the slide so viewers can tell it's promoted.
+    if (reel.boosted && !slide.querySelector('[data-pr-badge]')) {
+      const badge = document.createElement('span');
+      badge.setAttribute('data-pr-badge', '');
+      badge.textContent = 'PR・おすすめ';
+      badge.style.cssText = 'position:absolute;top:16px;left:16px;z-index:5;background:rgba(0,0,0,.45);color:#fff;font-size:11px;font-weight:700;padding:4px 10px;border-radius:999px;letter-spacing:.04em;backdrop-filter:blur(4px);';
+      slide.appendChild(badge);
+    }
   });
 }
 

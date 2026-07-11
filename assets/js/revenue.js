@@ -63,7 +63,7 @@ export function initBreederDeals() {
         <input type="text" readonly value="${data.url}" style="width:100%;margin-top:10px;padding:10px 12px;border:1px solid var(--line);border-radius:8px;font-size:12.5px;" onclick="this.select()">
         <a href="${data.url}" target="_blank" class="btn btn-mint btn-sm" style="margin-top:10px;">決済ページを開く →</a>`;
     } else {
-      result.innerHTML = `成約を記録しました。手数料 <strong>${yen(data.commission)}</strong>（成約額 ${yen(data.price)} の7%）。<br>
+      result.innerHTML = `成約を記録しました。手数料 <strong>${yen(data.commission)}</strong>（成約額 ${yen(data.price)} の${data.ratePct != null ? data.ratePct : 7}%）。<br>
         <span style="font-size:12.5px;color:var(--ink-soft);">Stripe接続後は、お客様のお支払いから自動で天引きされます。</span>`;
     }
     form.reset();
@@ -73,10 +73,21 @@ export function initBreederDeals() {
   document.addEventListener('gate:unlocked', refreshConnect);
 }
 
-// Admin: replace the placeholder commission figure with the live tally.
+// Admin: replace the placeholder revenue figures with the live tally —
+// total platform revenue plus the per-stream breakdown (commission /
+// subscription MRR / boosts) and the recent orders table.
 export function initAdminRevenue() {
   const el = document.querySelector('[data-rev-commission]');
   if (!el) return;
+
+  const KIND_LABEL = { commission: '成約手数料', subscription: 'サブスク', boost: 'ブースト' };
+  const STATUS_LABEL = { paid: '入金済み', pending: '決済待ち', recorded: '記録のみ' };
+
+  function esc(s) {
+    return String(s == null ? '' : s).replace(/[&<>"']/g, (c) => (
+      { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]
+    ));
+  }
 
   async function load() {
     const { ok, data } = await api('/api/revenue');
@@ -87,6 +98,29 @@ export function initAdminRevenue() {
     if (stripe) {
       stripe.textContent = data.stripeLive ? '（自動入金 稼働中）' : '（Stripe未接続）';
       stripe.style.color = data.stripeLive ? 'var(--mint-darker)' : 'var(--ink-faint)';
+    }
+
+    const byKind = data.byKind || {};
+    const set = (sel, value) => {
+      const node = document.querySelector(sel);
+      if (node) node.textContent = value;
+    };
+    set('[data-rev-kind-commission]', yen((byKind.commission || {}).total));
+    set('[data-rev-kind-boost]', yen((byKind.boost || {}).total));
+    set('[data-rev-mrr]', yen(data.mrr));
+    set('[data-rev-subscribers]', data.subscribers || 0);
+    set('[data-rev-boosts]', data.activeBoosts || 0);
+
+    const recent = document.querySelector('[data-rev-recent]');
+    if (recent && Array.isArray(data.recent) && data.recent.length) {
+      recent.innerHTML = data.recent.map((r) => `
+        <tr>
+          <td><strong>${esc(r.breeder)}</strong></td>
+          <td style="max-width:280px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${esc(r.description)}</td>
+          <td>${esc(KIND_LABEL[r.kind] || r.kind || '—')}</td>
+          <td class="t-num">${yen(r.amount)}</td>
+          <td><span class="status-dot ${r.status === 'paid' ? 'ok' : 'pending'}">${esc(STATUS_LABEL[r.status] || r.status)}</span></td>
+        </tr>`).join('');
     }
   }
 

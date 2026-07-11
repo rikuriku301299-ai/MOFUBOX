@@ -11,13 +11,25 @@ const VIDEO_EXT_BY_MIME = {
   'video/quicktime': '.mov',
 };
 
+// Feed ranking is monetised: active boosts come first, then paid-plan
+// breeders (pro above standard), then recency — the visibility these paid
+// placements buy is what the plans/boosts sell.
+const FEED_ORDER = `
+  ORDER BY
+    (reels.boost_until > datetime('now')) DESC,
+    CASE users.plan WHEN 'pro' THEN 2 WHEN 'standard' THEN 1 ELSE 0 END DESC,
+    reels.created_at DESC
+`;
+
 function list(req, res) {
   const user = currentUser(req);
   const rows = db.prepare(`
-    SELECT reels.*, users.name AS breeder_name, users.kennel AS breeder_kennel, users.id AS breeder_user_id
+    SELECT reels.*, users.name AS breeder_name, users.kennel AS breeder_kennel,
+           users.plan AS breeder_plan, users.id AS breeder_user_id,
+           (reels.boost_until > datetime('now')) AS boosted
     FROM reels
     JOIN users ON users.id = reels.breeder_id
-    ORDER BY reels.created_at DESC
+    ${FEED_ORDER}
   `).all();
 
   const likeCount = db.prepare('SELECT COUNT(*) AS c FROM likes WHERE reel_id = ?');
@@ -37,6 +49,9 @@ function list(req, res) {
     likeCount: r.seed_likes + likeCount.get(r.id).c,
     likedByMe: user ? !!likedByMe.get(r.id, user.id) : false,
     followedByMe: user ? !!followedByMe.get(r.breeder_user_id, user.id) : false,
+    boosted: !!r.boosted,
+    boostUntil: r.boost_until || null,
+    breederPlan: r.breeder_plan || 'free',
     createdAt: r.created_at,
   }));
   res.json(200, { reels: data });
@@ -49,11 +64,13 @@ function search(req, res, query) {
 
   const like = `%${q}%`;
   const rows = db.prepare(`
-    SELECT reels.*, users.name AS breeder_name, users.kennel AS breeder_kennel, users.area AS breeder_area, users.id AS breeder_user_id
+    SELECT reels.*, users.name AS breeder_name, users.kennel AS breeder_kennel, users.area AS breeder_area,
+           users.plan AS breeder_plan, users.id AS breeder_user_id,
+           (reels.boost_until > datetime('now')) AS boosted
     FROM reels
     JOIN users ON users.id = reels.breeder_id
     WHERE reels.caption LIKE ? OR reels.tags LIKE ? OR users.kennel LIKE ? OR users.name LIKE ? OR users.area LIKE ?
-    ORDER BY reels.created_at DESC
+    ${FEED_ORDER}
   `).all(like, like, like, like, like);
 
   const likeCount = db.prepare('SELECT COUNT(*) AS c FROM likes WHERE reel_id = ?');
@@ -74,6 +91,8 @@ function search(req, res, query) {
     likeCount: r.seed_likes + likeCount.get(r.id).c,
     likedByMe: user ? !!likedByMe.get(r.id, user.id) : false,
     followedByMe: user ? !!followedByMe.get(r.breeder_user_id, user.id) : false,
+    boosted: !!r.boosted,
+    breederPlan: r.breeder_plan || 'free',
     createdAt: r.created_at,
   }));
   res.json(200, { reels: data });
