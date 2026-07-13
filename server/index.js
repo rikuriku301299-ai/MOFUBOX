@@ -11,6 +11,7 @@ const adminRoutes = require('./routes/admin');
 const paymentRoutes = require('./routes/payments');
 const notificationRoutes = require('./routes/notifications');
 const messageRoutes = require('./routes/messages');
+const fxRoutes = require('./routes/fx');
 
 const ROOT_DIR = path.join(__dirname, '..');
 const PORT = process.env.PORT || 8910;
@@ -78,6 +79,9 @@ async function handleApi(req, res, pathname, query) {
     if (pathname === '/api/reels' && method === 'GET') return reelRoutes.list(req, res);
     if (pathname === '/api/reels' && method === 'POST') return reelRoutes.create(req, res, await readJsonBody(req));
     if (pathname === '/api/search' && method === 'GET') return reelRoutes.search(req, res, query);
+
+    if (pathname === '/api/fx/analyze' && method === 'POST') return fxRoutes.analyze(req, res, await readJsonBody(req));
+    if (pathname === '/api/fx/history' && method === 'GET') return fxRoutes.history(req, res);
 
     if (pathname === '/api/notifications' && method === 'GET') return notificationRoutes.list(req, res);
     if (pathname === '/api/notifications/read-all' && method === 'POST') return notificationRoutes.markAllRead(req, res);

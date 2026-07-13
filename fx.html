@@ -1,0 +1,416 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FXチャートAI分析 | MOFUBOX Tools</title>
+<meta name="robots" content="noindex, nofollow">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E%F0%9F%93%88%3C/text%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Zen+Maru+Gothic:wght@400;500;700&family=Poppins:wght@500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0e1421;
+    --panel: #171f31;
+    --panel2: #1d2740;
+    --line: #2a3653;
+    --text: #e8edf7;
+    --muted: #8fa0bf;
+    --accent: #4da3ff;
+    --up: #22c58b;
+    --down: #f0616d;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Zen Maru Gothic', 'Poppins', sans-serif;
+    min-height: 100vh;
+    padding: 24px 16px 80px;
+  }
+  .wrap { max-width: 860px; margin: 0 auto; }
+  header.tool-head { display: flex; align-items: center; gap: 12px; margin-bottom: 20px; }
+  header.tool-head h1 { font-size: 1.35rem; font-weight: 700; }
+  header.tool-head .badge {
+    font-size: .7rem; color: var(--accent); border: 1px solid var(--accent);
+    border-radius: 999px; padding: 2px 10px; letter-spacing: .05em;
+  }
+  .card {
+    background: var(--panel); border: 1px solid var(--line);
+    border-radius: 16px; padding: 20px; margin-bottom: 16px;
+  }
+  .muted { color: var(--muted); font-size: .85rem; }
+  label { display: block; font-size: .8rem; color: var(--muted); margin: 14px 0 6px; }
+  input[type="email"], input[type="password"], select, textarea {
+    width: 100%; background: var(--panel2); color: var(--text);
+    border: 1px solid var(--line); border-radius: 10px;
+    padding: 10px 12px; font-family: inherit; font-size: .95rem;
+  }
+  textarea { resize: vertical; min-height: 64px; }
+  select:focus, textarea:focus, input:focus { outline: 2px solid var(--accent); outline-offset: -1px; }
+  .btn {
+    display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+    background: var(--accent); color: #07101f; font-weight: 700;
+    border: none; border-radius: 12px; padding: 12px 22px;
+    font-size: 1rem; cursor: pointer; font-family: inherit; width: 100%;
+    transition: opacity .15s;
+  }
+  .btn:disabled { opacity: .45; cursor: not-allowed; }
+  .drop {
+    border: 2px dashed var(--line); border-radius: 14px;
+    padding: 28px 16px; text-align: center; cursor: pointer;
+    transition: border-color .15s, background .15s;
+  }
+  .drop.dragover { border-color: var(--accent); background: rgba(77,163,255,.06); }
+  .drop .icon { font-size: 2rem; display: block; margin-bottom: 8px; }
+  .drop img { max-width: 100%; max-height: 320px; border-radius: 10px; display: block; margin: 0 auto; }
+  .row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  @media (max-width: 560px) { .row { grid-template-columns: 1fr; } }
+  .error { color: var(--down); font-size: .85rem; margin-top: 10px; display: none; }
+  .spinner {
+    width: 18px; height: 18px; border-radius: 50%;
+    border: 3px solid rgba(7,16,31,.3); border-top-color: #07101f;
+    animation: spin .8s linear infinite; display: none;
+  }
+  .btn.loading .spinner { display: inline-block; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .chips { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 14px; }
+  .chip {
+    background: var(--panel2); border: 1px solid var(--line); border-radius: 999px;
+    padding: 5px 12px; font-size: .78rem; color: var(--muted);
+  }
+  .chip strong { color: var(--text); margin-left: 4px; }
+  .chip .up { color: var(--up); } .chip .down { color: var(--down); }
+  .report { line-height: 1.85; font-size: .95rem; }
+  .report h2 {
+    font-size: 1.05rem; color: var(--accent); margin: 22px 0 8px;
+    padding-bottom: 4px; border-bottom: 1px solid var(--line);
+  }
+  .report h3 { font-size: .95rem; margin: 16px 0 6px; }
+  .report ul, .report ol { padding-left: 1.4em; margin: 6px 0; }
+  .report li { margin: 3px 0; }
+  .report p { margin: 8px 0; }
+  .report strong { color: #fff; }
+  .history-item { border-top: 1px solid var(--line); padding: 12px 0; }
+  .history-item:first-of-type { border-top: none; }
+  .history-item summary {
+    cursor: pointer; display: flex; gap: 10px; align-items: baseline;
+    font-size: .9rem; list-style: none;
+  }
+  .history-item summary::-webkit-details-marker { display: none; }
+  .history-item summary .pair { font-weight: 700; color: var(--accent); }
+  .history-item .report { margin-top: 10px; }
+  .disclaimer {
+    font-size: .75rem; color: var(--muted); text-align: center; margin-top: 24px;
+    line-height: 1.7;
+  }
+  .hidden { display: none !important; }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header class="tool-head">
+    <h1>📈 FXチャートAI分析</h1>
+    <span class="badge">ADMIN TOOL</span>
+  </header>
+
+  <!-- ログインゲート -->
+  <section class="card hidden" id="login-card">
+    <p class="muted">この機能は管理者専用です。管理者アカウントでログインしてください。</p>
+    <form id="login-form">
+      <label for="login-email">メールアドレス</label>
+      <input type="email" id="login-email" autocomplete="username" required>
+      <label for="login-password">パスワード</label>
+      <input type="password" id="login-password" autocomplete="current-password" required>
+      <div class="error" id="login-error"></div>
+      <button type="submit" class="btn" style="margin-top:16px">ログイン</button>
+    </form>
+  </section>
+
+  <!-- 分析フォーム -->
+  <section class="card hidden" id="analyze-card">
+    <div class="drop" id="drop" tabindex="0" role="button" aria-label="チャート画像をアップロード">
+      <span id="drop-placeholder">
+        <span class="icon">🖼️</span>
+        チャートのスクリーンショットをここにドロップ<br>
+        <span class="muted">タップして選択 / 貼り付け(Ctrl+V)にも対応</span>
+      </span>
+      <img id="preview" class="hidden" alt="チャートプレビュー">
+    </div>
+    <input type="file" id="file" accept="image/*" class="hidden">
+
+    <div class="row">
+      <div>
+        <label for="pair">通貨ペア</label>
+        <select id="pair">
+          <option value="auto" selected>自動判定(画像から読み取る)</option>
+          <option>USD/JPY</option>
+          <option>EUR/JPY</option>
+          <option>GBP/JPY</option>
+          <option>AUD/JPY</option>
+          <option>EUR/USD</option>
+          <option>GBP/USD</option>
+          <option>AUD/USD</option>
+          <option>NZD/USD</option>
+          <option>USD/CHF</option>
+          <option>USD/CAD</option>
+          <option>EUR/GBP</option>
+        </select>
+      </div>
+      <div>
+        <label for="timeframe">時間足(任意)</label>
+        <select id="timeframe">
+          <option value="">不明・画像から判断</option>
+          <option>1分足</option>
+          <option>5分足</option>
+          <option>15分足</option>
+          <option>1時間足</option>
+          <option>4時間足</option>
+          <option>日足</option>
+          <option>週足</option>
+        </select>
+      </div>
+    </div>
+
+    <label for="notes">補足メモ(任意)</label>
+    <textarea id="notes" placeholder="例: ロング目線で見てる / 雇用統計前 / スイング前提 など"></textarea>
+
+    <div class="error" id="analyze-error"></div>
+    <button type="button" class="btn" id="analyze-btn" style="margin-top:16px" disabled>
+      <span class="spinner"></span><span id="analyze-label">分析する</span>
+    </button>
+    <p class="muted" style="margin-top:10px; text-align:center">
+      画像アップロード後、AIがチャートを読み取り、直近6ヶ月の市場データと合わせて売買タイミングを提案します(1〜2分かかることがあります)。
+    </p>
+  </section>
+
+  <!-- 結果 -->
+  <section class="card hidden" id="result-card">
+    <div class="chips" id="market-chips"></div>
+    <div class="report" id="report"></div>
+  </section>
+
+  <!-- 履歴 -->
+  <section class="card hidden" id="history-card">
+    <h2 style="font-size:1rem; margin-bottom:8px">分析履歴</h2>
+    <div id="history-list"></div>
+  </section>
+
+  <p class="disclaimer">
+    本ツールの分析はAIによる教育目的の参考情報であり、投資助言・投資勧誘ではありません。<br>
+    為替取引は元本を失うリスクがあります。売買の最終判断はご自身の責任で行ってください。
+  </p>
+</div>
+
+<script type="module">
+import { api } from './assets/js/api.js';
+
+const $ = (id) => document.getElementById(id);
+const show = (id) => $(id).classList.remove('hidden');
+const hide = (id) => $(id).classList.add('hidden');
+
+let imageDataUrl = null;
+
+// ---------- 認証 ----------
+async function init() {
+  const me = await api('/api/auth/me');
+  if (me.ok && me.data.user && me.data.user.role === 'admin') {
+    show('analyze-card');
+    loadHistory();
+  } else {
+    show('login-card');
+  }
+}
+
+$('login-form').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const err = $('login-error');
+  err.style.display = 'none';
+  const res = await api('/api/auth/login', {
+    method: 'POST',
+    body: { email: $('login-email').value, password: $('login-password').value },
+  });
+  if (!res.ok) {
+    err.textContent = res.data.message || 'ログインに失敗しました。';
+    err.style.display = 'block';
+    return;
+  }
+  if (res.data.user.role !== 'admin') {
+    err.textContent = 'このツールは管理者アカウント専用です。';
+    err.style.display = 'block';
+    return;
+  }
+  hide('login-card');
+  show('analyze-card');
+  loadHistory();
+});
+
+// ---------- 画像入力(選択 / ドロップ / 貼り付け) ----------
+const drop = $('drop');
+const fileInput = $('file');
+
+drop.addEventListener('click', () => fileInput.click());
+drop.addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === ' ') fileInput.click(); });
+fileInput.addEventListener('change', () => { if (fileInput.files[0]) loadImage(fileInput.files[0]); });
+
+['dragover', 'dragenter'].forEach((ev) => drop.addEventListener(ev, (e) => {
+  e.preventDefault();
+  drop.classList.add('dragover');
+}));
+['dragleave', 'drop'].forEach((ev) => drop.addEventListener(ev, (e) => {
+  e.preventDefault();
+  drop.classList.remove('dragover');
+}));
+drop.addEventListener('drop', (e) => {
+  const file = e.dataTransfer.files && e.dataTransfer.files[0];
+  if (file) loadImage(file);
+});
+document.addEventListener('paste', (e) => {
+  const item = [...(e.clipboardData?.items || [])].find((i) => i.type.startsWith('image/'));
+  if (item) loadImage(item.getAsFile());
+});
+
+// 長辺1600pxに縮小してJPEG化。トークン・転送量を抑えつつ十分な解像度を確保する。
+function loadImage(file) {
+  if (!file.type.startsWith('image/')) return;
+  const img = new Image();
+  img.onload = () => {
+    const MAX = 1600;
+    const scale = Math.min(1, MAX / Math.max(img.width, img.height));
+    const canvas = document.createElement('canvas');
+    canvas.width = Math.round(img.width * scale);
+    canvas.height = Math.round(img.height * scale);
+    canvas.getContext('2d').drawImage(img, 0, 0, canvas.width, canvas.height);
+    imageDataUrl = canvas.toDataURL('image/jpeg', 0.85);
+    URL.revokeObjectURL(img.src);
+
+    $('preview').src = imageDataUrl;
+    show('preview');
+    $('drop-placeholder').classList.add('hidden');
+    $('analyze-btn').disabled = false;
+  };
+  img.src = URL.createObjectURL(file);
+}
+
+// ---------- 分析 ----------
+$('analyze-btn').addEventListener('click', async () => {
+  const btn = $('analyze-btn');
+  const err = $('analyze-error');
+  err.style.display = 'none';
+  btn.disabled = true;
+  btn.classList.add('loading');
+  $('analyze-label').textContent = 'チャートを分析中…';
+
+  const res = await api('/api/fx/analyze', {
+    method: 'POST',
+    body: {
+      image: imageDataUrl,
+      pair: $('pair').value,
+      timeframe: $('timeframe').value,
+      notes: $('notes').value.trim(),
+    },
+  });
+
+  btn.disabled = false;
+  btn.classList.remove('loading');
+  $('analyze-label').textContent = '分析する';
+
+  if (!res.ok) {
+    err.textContent = res.data.message || `エラーが発生しました (${res.status})`;
+    err.style.display = 'block';
+    return;
+  }
+
+  renderResult(res.data);
+  loadHistory();
+});
+
+function renderResult({ pair, detectedPair, market, analysis }) {
+  const chips = $('market-chips');
+  chips.innerHTML = '';
+  const addChip = (label, value, cls = '') => {
+    const el = document.createElement('span');
+    el.className = 'chip';
+    el.append(label);
+    const s = document.createElement('strong');
+    if (cls) s.className = cls;
+    s.textContent = value;
+    el.append(s);
+    chips.append(el);
+  };
+  if (pair) addChip(detectedPair ? '自動判定' : '通貨ペア', pair);
+  if (market) {
+    addChip('現在値', String(market.latestRate));
+    const pctChip = (label, v) => addChip(label, `${v > 0 ? '+' : ''}${v}%`, Number(v) >= 0 ? 'up' : 'down');
+    pctChip('1週間', market.change1w);
+    pctChip('1ヶ月', market.change1m);
+    pctChip('3ヶ月', market.change3m);
+  }
+  $('report').innerHTML = renderMarkdown(analysis);
+  show('result-card');
+  $('result-card').scrollIntoView({ behavior: 'smooth' });
+}
+
+// ---------- 履歴 ----------
+async function loadHistory() {
+  const res = await api('/api/fx/history');
+  if (!res.ok || !res.data.analyses || res.data.analyses.length === 0) return;
+  const list = $('history-list');
+  list.innerHTML = '';
+  for (const a of res.data.analyses) {
+    const details = document.createElement('details');
+    details.className = 'history-item';
+    const summary = document.createElement('summary');
+    const pair = document.createElement('span');
+    pair.className = 'pair';
+    pair.textContent = a.pair || 'ペア不明';
+    const meta = document.createElement('span');
+    meta.className = 'muted';
+    meta.textContent = `${a.timeframe ? a.timeframe + ' / ' : ''}${a.createdAt} UTC`;
+    summary.append(pair, meta);
+    const body = document.createElement('div');
+    body.className = 'report';
+    body.innerHTML = renderMarkdown(a.analysis);
+    details.append(summary, body);
+    list.append(details);
+  }
+  show('history-card');
+}
+
+// ---------- 簡易Markdownレンダラ(見出し/強調/リストのみ) ----------
+function escapeHtml(s) {
+  return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+}
+function renderMarkdown(md) {
+  const lines = escapeHtml(md).split('\n');
+  const out = [];
+  let listTag = null;
+  const closeList = () => { if (listTag) { out.push(`</${listTag}>`); listTag = null; } };
+  for (const raw of lines) {
+    const line = raw.trimEnd();
+    const inline = (t) => t.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
+    let m;
+    if ((m = line.match(/^###\s+(.*)/))) { closeList(); out.push(`<h3>${inline(m[1])}</h3>`); }
+    else if ((m = line.match(/^##\s+(.*)/))) { closeList(); out.push(`<h2>${inline(m[1])}</h2>`); }
+    else if ((m = line.match(/^#\s+(.*)/))) { closeList(); out.push(`<h2>${inline(m[1])}</h2>`); }
+    else if ((m = line.match(/^\s*[-*]\s+(.*)/))) {
+      if (listTag !== 'ul') { closeList(); out.push('<ul>'); listTag = 'ul'; }
+      out.push(`<li>${inline(m[1])}</li>`);
+    }
+    else if ((m = line.match(/^\s*\d+[.)]\s+(.*)/))) {
+      if (listTag !== 'ol') { closeList(); out.push('<ol>'); listTag = 'ol'; }
+      out.push(`<li>${inline(m[1])}</li>`);
+    }
+    else if (line === '') { closeList(); }
+    else { closeList(); out.push(`<p>${inline(line)}</p>`); }
+  }
+  closeList();
+  return out.join('\n');
+}
+
+init();
+</script>
+</body>
+</html>

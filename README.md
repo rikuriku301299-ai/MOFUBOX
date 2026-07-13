@@ -10,6 +10,7 @@
 - 認証: scrypt によるパスワードハッシュ + セッションクッキー（自前実装）
 - 動画: 自前ホスティング（アップロードしたファイルをサーバーのディスクに保存し、Range リクエスト対応で配信）
 - 決済: Stripe REST API を `fetch` で直接呼び出す薄いラッパー（SDK 不使用、未設定時は安全に無効化）
+- AI: Anthropic Messages API（Claude）を `fetch` で直接呼び出す（SDK 不使用、未設定時は安全に無効化）
 
 ## ローカルで動かす
 
@@ -54,6 +55,7 @@ Node 22.5 以上が動く環境であれば、ビルドステップなしでそ�
 | `MOFUBOX_ADMIN_EMAIL` / `MOFUBOX_ADMIN_PASSWORD` | – | 初回シード時の管理者アカウント |
 | `COOKIE_SECURE` | – | `1` を指定すると HTTPS 用に Secure クッキーを発行（HTTPS 配信時のみ設定） |
 | `STRIPE_SECRET_KEY` / `STRIPE_WEBHOOK_SECRET` | – | 設定すると決済機能が有効化。未設定の場合は決済 API が `501 stripe_not_configured` を返す |
+| `ANTHROPIC_API_KEY` | – | 設定すると FX チャート AI 分析ツール（`/fx.html`）が有効化。未設定の場合は分析 API が `501 anthropic_not_configured` を返す |
 
 ## 主要ページ
 
@@ -66,6 +68,16 @@ Node 22.5 以上が動く環境であれば、ビルドステップなしでそ�
 | `/breeder.html` | ブリーダー管理画面（要ログイン・要承認） |
 | `/admin.html` | 管理者パネル（要管理者ログイン） |
 | `/register.html` | 新規登録（お客様 / ブリーダー） |
+| `/fx.html` | FX チャート AI 分析ツール（要管理者ログイン・`ANTHROPIC_API_KEY` 必須） |
+
+## FX チャート AI 分析ツール（管理者専用）
+
+`/fx.html` からチャートのスクリーンショット（撮影・スクショ・貼り付け対応）をアップロードすると、Claude（Opus 4.8）が画像を読み取り、Frankfurter API（ECB 日次参照レート）から取得した直近約6ヶ月の市場データと突き合わせて、トレンド・サポレジ・売買プラン（エントリー / 損切り / 利確の目安）を日本語レポートで返します。
+
+- 通貨ペアは画像から自動判定（手動選択も可）
+- 分析結果は SQLite に保存され、ページ下部の履歴から見返せます
+- サーバーから `api.anthropic.com` と `api.frankfurter.dev` への外向き HTTPS 通信が必要です（市場データ取得に失敗した場合は画像のみで分析を続行）
+- 分析は教育目的の参考情報であり、投資助言ではありません
 
 ## 既知の制約
 
