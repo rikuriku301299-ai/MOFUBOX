@@ -10,6 +10,12 @@ const VIDEO_EXT_BY_MIME = {
   'video/webm': '.webm',
   'video/quicktime': '.mov',
 };
+const IMAGE_EXT_BY_MIME = {
+  'image/jpeg': '.jpg',
+  'image/png': '.png',
+  'image/webp': '.webp',
+  'image/heic': '.heic',
+};
 
 const AVAIL_STATUSES = ['available', 'reserved', 'adopted'];
 
@@ -28,6 +34,7 @@ function makeReelMapper(user) {
     caption: r.caption,
     tags: r.tags ? r.tags.split(',') : [],
     videoUrl: r.video_path ? `/uploads/${r.video_path}` : null,
+    imageUrl: r.image_path ? `/uploads/${r.image_path}` : null,
     posterEmoji: r.poster_emoji,
     posterTheme: r.poster_theme,
     availStatus: r.avail_status || 'available',
@@ -164,6 +171,52 @@ function uploadVideo(req, res, reelId) {
   req.pipe(writeStream);
 }
 
+// PUT /api/reels/:id/image — attach a photo to a reel (so breeders can post
+// with just a picture, no video needed). Raw image body, same as video upload.
+function uploadImage(req, res, reelId) {
+  const user = currentUser(req);
+  if (!user || user.role !== 'breeder') return res.json(403, { error: 'breeder_only' });
+
+  const reel = db.prepare('SELECT * FROM reels WHERE id = ?').get(reelId);
+  if (!reel) return res.json(404, { error: 'not_found' });
+  if (reel.breeder_id !== user.id) return res.json(403, { error: 'not_owner' });
+
+  const contentType = (req.headers['content-type'] || '').split(';')[0].trim();
+  const ext = IMAGE_EXT_BY_MIME[contentType];
+  if (!ext) return res.json(400, { error: 'unsupported_media_type', message: 'JPEG / PNG / WebP の画像に対応しています。' });
+
+  const filename = `${reelId}-${crypto.randomBytes(6).toString('hex')}${ext}`;
+  const dest = path.join(UPLOADS_DIR, filename);
+  const writeStream = fs.createWriteStream(dest);
+
+  let bytes = 0;
+  const MAX_BYTES = 15 * 1024 * 1024; // 15MB is plenty for a phone photo
+  let aborted = false;
+
+  req.on('data', (chunk) => {
+    bytes += chunk.length;
+    if (bytes > MAX_BYTES) {
+      aborted = true;
+      writeStream.destroy();
+      fs.unlink(dest, () => {});
+      res.json(413, { error: 'file_too_large' });
+      req.destroy();
+    }
+  });
+
+  writeStream.on('close', () => {
+    if (aborted) return;
+    db.prepare('UPDATE reels SET image_path = ? WHERE id = ?').run(filename, reelId);
+    res.json(200, { imageUrl: `/uploads/${filename}` });
+  });
+
+  writeStream.on('error', () => {
+    if (!aborted) res.json(500, { error: 'upload_failed' });
+  });
+
+  req.pipe(writeStream);
+}
+
 function toggleLike(req, res, reelId) {
   const user = currentUser(req);
   if (!user) return res.json(401, { error: 'login_required' });
@@ -204,4 +257,4 @@ function toggleFollow(req, res, breederId) {
   res.json(200, { following: !existing });
 }
 
-module.exports = { list, search, create, uploadVideo, toggleLike, toggleFollow, mine, favorites, setStatus };
+module.exports = { list, search, create, uploadVideo, uploadImage, toggleLike, toggleFollow, mine, favorites, setStatus };

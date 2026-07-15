@@ -1995,3 +1995,9 @@ html { scroll-behavior: smooth; }
   text-align: center; font-size: 12.5px; color: var(--ink-faint);
   margin: 4px 0 0;
 }
+
+/* Photo/video reel media fills the slide */
+img.reel-slide__media, video.reel-slide__media {
+  position: absolute; inset: 0; width: 100%; height: 100%;
+  object-fit: cover; display: block;
+}

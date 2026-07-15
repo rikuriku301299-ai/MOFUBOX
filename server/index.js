@@ -87,6 +87,9 @@ async function handleApi(req, res, pathname, query) {
     m = pathname.match(/^\/api\/reels\/(\d+)\/video$/);
     if (m && method === 'PUT') return reelRoutes.uploadVideo(req, res, Number(m[1]));
 
+    m = pathname.match(/^\/api\/reels\/(\d+)\/image$/);
+    if (m && method === 'PUT') return reelRoutes.uploadImage(req, res, Number(m[1]));
+
     m = pathname.match(/^\/api\/reels\/(\d+)\/like$/);
     if (m && method === 'POST') return reelRoutes.toggleLike(req, res, Number(m[1]));
 

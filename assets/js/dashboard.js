@@ -82,8 +82,10 @@ export function initReelUpload() {
       const caption = captionInput ? captionInput.value.trim() : '';
       const tags = tagsInput ? tagsInput.value.split(',').map(s => s.trim()).filter(Boolean) : [];
 
-      if (!selectedFile) { showStatus('動画ファイルを選択してください', 'error'); return; }
+      if (!selectedFile) { showStatus('写真か動画のファイルを選択してください', 'error'); return; }
       if (!caption) { showStatus('タイトル・キャプションを入力してください', 'error'); return; }
+
+      const isImage = selectedFile.type.startsWith('image/');
 
       submitBtn.disabled = true;
       showStatus('投稿中…', null);
@@ -96,7 +98,9 @@ export function initReelUpload() {
           return;
         }
 
-        const uploadRes = await fetch(`/api/reels/${data.id}/video`, {
+        // Photos and videos use their own upload endpoints; pick by file type.
+        const endpoint = isImage ? `/api/reels/${data.id}/image` : `/api/reels/${data.id}/video`;
+        const uploadRes = await fetch(endpoint, {
           method: 'PUT',
           credentials: 'same-origin',
           headers: { 'Content-Type': selectedFile.type },
@@ -104,7 +108,7 @@ export function initReelUpload() {
         });
 
         if (!uploadRes.ok) {
-          let message = '動画のアップロードに失敗しました';
+          let message = (isImage ? '写真' : '動画') + 'のアップロードに失敗しました';
           try { const errData = await uploadRes.json(); if (errData.message) message = errData.message; } catch { /* no body */ }
           showStatus(message, 'error');
           submitBtn.disabled = false;

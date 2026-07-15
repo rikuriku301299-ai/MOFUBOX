@@ -26,7 +26,9 @@ export async function initReelFeed() {
     const theme = THEMES.includes(r.posterTheme) ? r.posterTheme : THEMES[i % THEMES.length];
     const kennel = r.breederKennel || r.breederName || 'ブリーダー';
     const initial = escapeHtml(kennel.charAt(0));
-    const media = r.videoUrl
+    const media = r.imageUrl
+      ? `<img class="reel-slide__media" src="${escapeHtml(r.imageUrl)}" alt="${escapeHtml(kennel + 'の子猫')}" loading="lazy">`
+      : r.videoUrl
       ? `<video class="reel-slide__media" src="${escapeHtml(r.videoUrl)}" muted loop playsinline preload="metadata"></video>`
       : `<div class="reel-slide__media illus illus-${theme}"><span class="emoji">${r.posterEmoji || '🐱'}</span></div>`;
     const tags = (r.tags || []).filter(Boolean).map(t => `<span>#${escapeHtml(t)}</span>`).join('');
