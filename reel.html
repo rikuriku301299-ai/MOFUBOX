@@ -81,6 +81,19 @@
     </div>
   </div>
 
+  <!-- きになるリスト -->
+  <div class="reel-sheet" data-fav-overlay>
+    <div class="reel-sheet__head">
+      <h3>きになる子</h3>
+      <button type="button" class="reel-sheet__icon" data-fav-close aria-label="閉じる">
+        <svg class="icon" viewBox="0 0 24 24" width="20" height="20"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+    <div class="reel-sheet__body">
+      <div class="notif-empty" data-fav-list>読み込み中…</div>
+    </div>
+  </div>
+
   <div class="reel-progress">
     <i class="now"><b></b></i>
     <i><b></b></i>
@@ -381,6 +394,10 @@
         <span class="badge" data-msg-badge style="display:none;">0</span>
       </span>
       <span>メッセージ</span>
+    </a>
+    <a href="#" data-fav-trigger>
+      <svg class="icon" viewBox="0 0 24 24" width="22" height="22"><path d="M12 21s-6.7-4.3-9.4-8.3C.8 9.7 1.9 6 5.2 5 7.4 4.3 9.6 5.2 12 7.6 14.4 5.2 16.6 4.3 18.8 5c3.3 1 4.4 4.7 2.6 7.7C18.7 16.7 12 21 12 21z"/></svg>
+      <span>きになる</span>
     </a>
     <a href="#" data-mypage-trigger>
       <svg class="icon" viewBox="0 0 24 24" width="22" height="22"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 3.6-7 8-7s8 3 8 7"/></svg>

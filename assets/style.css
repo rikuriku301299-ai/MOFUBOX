@@ -1917,3 +1917,53 @@ html { scroll-behavior: smooth; }
 .mypage .field input:focus, .mypage .field textarea:focus { outline: none; border-color: var(--mint); }
 .mypage__saved { text-align: center; color: var(--mint-darker); font-weight: 700; font-size: 13.5px; margin-top: 12px; min-height: 18px; }
 .mypage__logout { display: block; text-align: center; margin-top: 24px; color: var(--ink-faint); font-size: 13px; text-decoration: underline; }
+
+/* === Convenience features: availability badges, quick replies, favorites === */
+.reel-avail {
+  display: inline-block; font-size: 11px; font-weight: 700; line-height: 1;
+  padding: 3px 8px; border-radius: 999px; vertical-align: middle; margin-left: 4px;
+}
+.reel-avail--mint { background: rgba(47,168,138,.9); color: #fff; }
+.reel-avail--gold { background: rgba(224,168,64,.95); color: #402b00; }
+.reel-avail--muted { background: rgba(120,120,130,.85); color: #fff; }
+
+/* Quick-reply chips (customer one-tap questions / breeder canned replies) */
+.quick-replies {
+  display: flex; gap: 8px; padding: 8px 10px; overflow-x: auto; -webkit-overflow-scrolling: touch;
+  scrollbar-width: none; border-top: 1px solid var(--line);
+}
+.quick-replies::-webkit-scrollbar { display: none; }
+.quick-reply {
+  flex: 0 0 auto; border: 1px solid var(--line); background: var(--white); color: var(--ink);
+  font-size: 12.5px; padding: 7px 12px; border-radius: 999px; cursor: pointer; white-space: nowrap;
+  transition: background .15s, border-color .15s;
+}
+.quick-reply:hover { background: var(--rose-wash, #fbf1f3); border-color: var(--coral, #e8615a); }
+
+/* Search quick-filter chips */
+.reel-filter-chips { display: flex; flex-wrap: wrap; gap: 8px; margin: 12px 0 4px; }
+.reel-filter-chip {
+  border: 1px solid var(--line); background: var(--white); color: var(--ink-soft);
+  font-size: 12.5px; padding: 6px 12px; border-radius: 999px; cursor: pointer;
+}
+.reel-filter-chip:hover { background: var(--rose-wash, #fbf1f3); color: var(--ink); }
+
+/* きになるリスト rows */
+.fav-list { display: flex; flex-direction: column; }
+.fav-row {
+  display: flex; gap: 12px; align-items: center; padding: 12px 4px; border-bottom: 1px solid var(--line);
+  color: inherit; text-decoration: none;
+}
+.fav-row__thumb {
+  flex: 0 0 auto; width: 52px; height: 52px; border-radius: 12px; display: grid; place-items: center;
+  font-size: 26px; background: var(--rose-wash, #fbf1f3);
+}
+.fav-row__play { font-size: 16px; color: var(--coral, #e8615a); }
+.fav-row__body { min-width: 0; display: flex; flex-direction: column; gap: 2px; }
+.fav-row__top { font-size: 14px; }
+.fav-row__cap { font-size: 12.5px; color: var(--ink-soft); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.fav-row__tags { font-size: 11.5px; color: var(--ink-faint); }
+
+/* 6-item reel bottom nav still fits on small screens */
+.reel-bottomnav a { min-width: 0; }
+.reel-bottomnav a span:not(.wrap):not(.badge):not(.post-icon) { font-size: 10px; }

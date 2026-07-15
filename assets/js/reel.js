@@ -1,6 +1,82 @@
 import { api } from './api.js';
 import { escapeHtml, formatCount } from './utils.js';
 
+const THEMES = ['coral', 'mint', 'gold', 'rose'];
+const AVAIL = {
+  available: { label: '受付中', cls: 'mint' },
+  reserved: { label: '商談中', cls: 'gold' },
+  adopted: { label: 'お迎え決定', cls: 'muted' },
+};
+
+export function availBadge(status) {
+  const a = AVAIL[status] || AVAIL.available;
+  return `<span class="reel-avail reel-avail--${a.cls}">${a.label}</span>`;
+}
+
+// Render the live feed from real breeder posts. When there are no posts yet
+// (pre-launch), the hand-authored demo slides in reel.html are left in place so
+// the page still looks alive. Returns true when real reels were rendered.
+export async function initReelFeed() {
+  const feed = document.querySelector('.reel-feed');
+  if (!feed) return false;
+  const { ok, data } = await api('/api/reels');
+  if (!ok || !data.reels || !data.reels.length) return false;
+
+  feed.innerHTML = data.reels.map((r, i) => {
+    const theme = THEMES.includes(r.posterTheme) ? r.posterTheme : THEMES[i % THEMES.length];
+    const kennel = r.breederKennel || r.breederName || 'ブリーダー';
+    const initial = escapeHtml(kennel.charAt(0));
+    const media = r.videoUrl
+      ? `<video class="reel-slide__media" src="${escapeHtml(r.videoUrl)}" muted loop playsinline preload="metadata"></video>`
+      : `<div class="reel-slide__media illus illus-${theme}"><span class="emoji">${r.posterEmoji || '🐱'}</span></div>`;
+    const tags = (r.tags || []).filter(Boolean).map(t => `<span>#${escapeHtml(t)}</span>`).join('');
+    const liked = r.likedByMe ? ' liked' : '';
+    const base = r.likeCount - (r.likedByMe ? 1 : 0);
+    return `
+      <article class="reel-slide" data-reel-id="${r.id}" data-breeder-id="${r.breederId}">
+        ${media}
+        <div class="reel-slide__shade"></div>
+        <div class="reel-right">
+          <div class="reel-right__avatar">
+            <a href="profile.html?id=${r.breederId}" class="avatar avatar-lg ${theme}">${initial}</a>
+            <button class="plus${r.followedByMe ? ' followed' : ''}" data-toggle-follow aria-label="フォローする">${r.followedByMe ? '✓' : '+'}</button>
+          </div>
+          <div class="reel-act${liked}" data-toggle-like>
+            <button aria-label="いいねする">
+              <span class="icon-circle"><svg class="icon" viewBox="0 0 24 24" width="28" height="28"><path d="M12 21s-6.7-4.3-9.4-8.3C.8 9.7 1.9 6 5.2 5 7.4 4.3 9.6 5.2 12 7.6 14.4 5.2 16.6 4.3 18.8 5c3.3 1 4.4 4.7 2.6 7.7C18.7 16.7 12 21 12 21z"/></svg></span>
+              <span data-count data-base="${base}">${formatCount(r.likeCount)}</span>
+            </button>
+          </div>
+          <div class="reel-act" data-toggle-save>
+            <button>
+              <span class="icon-circle"><svg class="icon" viewBox="0 0 24 24" width="26" height="26"><path d="M19 21 12 16l-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg></span>
+              <span>保存</span>
+            </button>
+          </div>
+        </div>
+        <div class="reel-bottom-info">
+          <a href="profile.html?id=${r.breederId}" class="reel-bottom-info__breeder">
+            <span class="verified"><svg class="icon" viewBox="0 0 24 24" width="15" height="15" fill="currentColor" stroke="none"><path d="M12 2 4 5v6c0 5 3.4 8.4 8 11 4.6-2.6 8-6 8-11V5l-8-3z"/><path d="m9 12 2 2 4-4" stroke="#fff" stroke-width="2" fill="none"/></svg></span>
+            ${escapeHtml(kennel)} ${availBadge(r.availStatus)}
+          </a>
+          <div class="reel-bottom-info__cat">${escapeHtml(r.caption || '')}</div>
+          <div class="reel-bottom-info__tags">${tags}</div>
+          <a href="#" class="reel-bottom-info__cta" data-consult>
+            チャットで相談する
+            <svg class="icon" viewBox="0 0 24 24" width="14" height="14"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+          </a>
+        </div>
+      </article>`;
+  }).join('');
+
+  // Rebuild the progress dots to match the real number of reels.
+  const progress = document.querySelector('.reel-progress');
+  if (progress) {
+    progress.innerHTML = data.reels.map((_, i) => `<i${i === 0 ? ' class="now"' : ''}><b></b></i>`).join('');
+  }
+  return true;
+}
+
 export function initReelActions() {
   const tabs = document.querySelectorAll('.reel-topbar__tab');
   tabs.forEach(tab => {
@@ -224,6 +300,21 @@ export function initReelSearch() {
   const closeBtn = overlay.querySelector('[data-reel-search-close]');
   const results = overlay.querySelector('[data-reel-search-results]');
   let debounceTimer = null;
+
+  // Quick filter chips: tap a popular breed / area to search it instantly.
+  const FILTERS = ['スコティッシュフォールド', 'マンチカン', 'ラグドール', 'ブリティッシュショートヘア', 'ノルウェージャン', '東京', '千葉', '神奈川'];
+  if (!overlay.querySelector('.reel-filter-chips')) {
+    const bar = document.createElement('div');
+    bar.className = 'reel-filter-chips';
+    bar.innerHTML = FILTERS.map(f => `<button type="button" class="reel-filter-chip">${escapeHtml(f)}</button>`).join('');
+    input.insertAdjacentElement('afterend', bar);
+    bar.querySelectorAll('.reel-filter-chip').forEach(chip => {
+      chip.addEventListener('click', () => {
+        input.value = chip.textContent;
+        input.dispatchEvent(new Event('input'));
+      });
+    });
+  }
 
   triggers.forEach((trigger) => {
     trigger.addEventListener('click', (e) => {

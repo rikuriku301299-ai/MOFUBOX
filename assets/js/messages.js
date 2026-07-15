@@ -1,6 +1,41 @@
 import { api } from './api.js';
 import { escapeHtml } from './utils.js';
 
+// One-tap phrases. Customers ask common questions; breeders reply without typing.
+const CUSTOMER_QUICKS = [
+  'この子はまだ募集していますか？',
+  '見学はできますか？',
+  'お迎えまでの流れを教えてください',
+  '費用の詳細を教えてください',
+];
+const BREEDER_QUICKS = [
+  'お問い合わせありがとうございます！',
+  'はい、まだ募集中です🐱',
+  '見学も可能です。ご希望日を教えてください',
+  '詳しい資料をお送りしますね',
+];
+
+// Build a row of quick-reply chips and insert it before `beforeEl`. Clicking a
+// chip drops the phrase into `input` and submits `form` (reusing its send path).
+function mountQuickReplies(beforeEl, form, input, phrases) {
+  if (!beforeEl || beforeEl.previousElementSibling?.classList?.contains('quick-replies')) return;
+  const bar = document.createElement('div');
+  bar.className = 'quick-replies';
+  phrases.forEach(p => {
+    const chip = document.createElement('button');
+    chip.type = 'button';
+    chip.className = 'quick-reply';
+    chip.textContent = p;
+    chip.addEventListener('click', () => {
+      input.value = p;
+      if (form.requestSubmit) form.requestSubmit();
+      else form.dispatchEvent(new Event('submit', { cancelable: true }));
+    });
+    bar.appendChild(chip);
+  });
+  beforeEl.parentNode.insertBefore(bar, beforeEl);
+}
+
 // Escape for use inside a double-quoted HTML attribute (escapeHtml misses quotes).
 function attr(s) { return escapeHtml(s == null ? '' : String(s)).replace(/"/g, '&quot;'); }
 
@@ -144,6 +179,7 @@ export function initMessages() {
     });
   });
 
+  mountQuickReplies(form, form, input, CUSTOMER_QUICKS);
   refreshBadge();
 }
 
@@ -305,6 +341,7 @@ export function initBreederMessages() {
     loadList();
   }
 
+  mountQuickReplies(form, form, input, BREEDER_QUICKS);
   loadAll();
   document.addEventListener('gate:unlocked', loadAll);
 }

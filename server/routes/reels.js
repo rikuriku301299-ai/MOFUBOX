@@ -11,35 +11,84 @@ const VIDEO_EXT_BY_MIME = {
   'video/quicktime': '.mov',
 };
 
-function list(req, res) {
-  const user = currentUser(req);
-  const rows = db.prepare(`
-    SELECT reels.*, users.name AS breeder_name, users.kennel AS breeder_kennel, users.id AS breeder_user_id
-    FROM reels
-    JOIN users ON users.id = reels.breeder_id
-    ORDER BY reels.created_at DESC
-  `).all();
+const AVAIL_STATUSES = ['available', 'reserved', 'adopted'];
 
+// Shared row→JSON mapper so list / search / favorites / mine all return the same
+// shape (including the availability status: 受付中 / 商談中 / お迎え決定).
+function makeReelMapper(user) {
   const likeCount = db.prepare('SELECT COUNT(*) AS c FROM likes WHERE reel_id = ?');
   const likedByMe = user ? db.prepare('SELECT 1 FROM likes WHERE reel_id = ? AND user_id = ?') : null;
   const followedByMe = user ? db.prepare('SELECT 1 FROM follows WHERE breeder_id = ? AND follower_id = ?') : null;
-
-  const data = rows.map((r) => ({
+  return (r) => ({
     id: r.id,
     breederId: r.breeder_user_id,
     breederName: r.breeder_name,
     breederKennel: r.breeder_kennel,
+    breederArea: r.breeder_area,
     caption: r.caption,
     tags: r.tags ? r.tags.split(',') : [],
     videoUrl: r.video_path ? `/uploads/${r.video_path}` : null,
     posterEmoji: r.poster_emoji,
     posterTheme: r.poster_theme,
+    availStatus: r.avail_status || 'available',
     likeCount: r.seed_likes + likeCount.get(r.id).c,
     likedByMe: user ? !!likedByMe.get(r.id, user.id) : false,
     followedByMe: user ? !!followedByMe.get(r.breeder_user_id, user.id) : false,
     createdAt: r.created_at,
-  }));
-  res.json(200, { reels: data });
+  });
+}
+
+function list(req, res) {
+  const user = currentUser(req);
+  const rows = db.prepare(`
+    SELECT reels.*, users.name AS breeder_name, users.kennel AS breeder_kennel, users.area AS breeder_area, users.id AS breeder_user_id
+    FROM reels
+    JOIN users ON users.id = reels.breeder_id
+    ORDER BY reels.created_at DESC
+  `).all();
+  res.json(200, { reels: rows.map(makeReelMapper(user)) });
+}
+
+// GET /api/reels/mine — the signed-in breeder's own reels (for status manage).
+function mine(req, res) {
+  const user = currentUser(req);
+  if (!user || user.role !== 'breeder') return res.json(403, { error: 'breeder_only' });
+  const rows = db.prepare(`
+    SELECT reels.*, users.name AS breeder_name, users.kennel AS breeder_kennel, users.area AS breeder_area, users.id AS breeder_user_id
+    FROM reels
+    JOIN users ON users.id = reels.breeder_id
+    WHERE reels.breeder_id = ?
+    ORDER BY reels.created_at DESC
+  `).all(user.id);
+  res.json(200, { reels: rows.map(makeReelMapper(user)) });
+}
+
+// GET /api/favorites — the signed-in user's きになるリスト (liked reels).
+function favorites(req, res) {
+  const user = currentUser(req);
+  if (!user) return res.json(401, { error: 'login_required' });
+  const rows = db.prepare(`
+    SELECT reels.*, users.name AS breeder_name, users.kennel AS breeder_kennel, users.area AS breeder_area, users.id AS breeder_user_id
+    FROM likes
+    JOIN reels ON reels.id = likes.reel_id
+    JOIN users ON users.id = reels.breeder_id
+    WHERE likes.user_id = ?
+    ORDER BY likes.created_at DESC
+  `).all(user.id);
+  res.json(200, { reels: rows.map(makeReelMapper(user)) });
+}
+
+// POST /api/reels/:id/status — breeder updates a reel's availability.
+function setStatus(req, res, reelId, body) {
+  const user = currentUser(req);
+  if (!user || user.role !== 'breeder') return res.json(403, { error: 'breeder_only' });
+  const status = body && body.status;
+  if (!AVAIL_STATUSES.includes(status)) return res.json(400, { error: 'invalid_status' });
+  const reel = db.prepare('SELECT breeder_id FROM reels WHERE id = ?').get(reelId);
+  if (!reel) return res.json(404, { error: 'not_found' });
+  if (reel.breeder_id !== user.id) return res.json(403, { error: 'not_owner' });
+  db.prepare('UPDATE reels SET avail_status = ? WHERE id = ?').run(status, reelId);
+  res.json(200, { id: reelId, availStatus: status });
 }
 
 function search(req, res, query) {
@@ -55,28 +104,7 @@ function search(req, res, query) {
     WHERE reels.caption LIKE ? OR reels.tags LIKE ? OR users.kennel LIKE ? OR users.name LIKE ? OR users.area LIKE ?
     ORDER BY reels.created_at DESC
   `).all(like, like, like, like, like);
-
-  const likeCount = db.prepare('SELECT COUNT(*) AS c FROM likes WHERE reel_id = ?');
-  const likedByMe = user ? db.prepare('SELECT 1 FROM likes WHERE reel_id = ? AND user_id = ?') : null;
-  const followedByMe = user ? db.prepare('SELECT 1 FROM follows WHERE breeder_id = ? AND follower_id = ?') : null;
-
-  const data = rows.map((r) => ({
-    id: r.id,
-    breederId: r.breeder_user_id,
-    breederName: r.breeder_name,
-    breederKennel: r.breeder_kennel,
-    breederArea: r.breeder_area,
-    caption: r.caption,
-    tags: r.tags ? r.tags.split(',') : [],
-    videoUrl: r.video_path ? `/uploads/${r.video_path}` : null,
-    posterEmoji: r.poster_emoji,
-    posterTheme: r.poster_theme,
-    likeCount: r.seed_likes + likeCount.get(r.id).c,
-    likedByMe: user ? !!likedByMe.get(r.id, user.id) : false,
-    followedByMe: user ? !!followedByMe.get(r.breeder_user_id, user.id) : false,
-    createdAt: r.created_at,
-  }));
-  res.json(200, { reels: data });
+  res.json(200, { reels: rows.map(makeReelMapper(user)) });
 }
 
 function create(req, res, body) {
@@ -176,4 +204,4 @@ function toggleFollow(req, res, breederId) {
   res.json(200, { following: !existing });
 }
 
-module.exports = { list, search, create, uploadVideo, toggleLike, toggleFollow };
+module.exports = { list, search, create, uploadVideo, toggleLike, toggleFollow, mine, favorites, setStatus };

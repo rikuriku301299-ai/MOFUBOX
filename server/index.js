@@ -77,6 +77,8 @@ async function handleApi(req, res, pathname, query) {
 
     if (pathname === '/api/reels' && method === 'GET') return reelRoutes.list(req, res);
     if (pathname === '/api/reels' && method === 'POST') return reelRoutes.create(req, res, await readJsonBody(req));
+    if (pathname === '/api/reels/mine' && method === 'GET') return reelRoutes.mine(req, res);
+    if (pathname === '/api/favorites' && method === 'GET') return reelRoutes.favorites(req, res);
     if (pathname === '/api/search' && method === 'GET') return reelRoutes.search(req, res, query);
 
     if (pathname === '/api/notifications' && method === 'GET') return notificationRoutes.list(req, res);
@@ -87,6 +89,9 @@ async function handleApi(req, res, pathname, query) {
 
     m = pathname.match(/^\/api\/reels\/(\d+)\/like$/);
     if (m && method === 'POST') return reelRoutes.toggleLike(req, res, Number(m[1]));
+
+    m = pathname.match(/^\/api\/reels\/(\d+)\/status$/);
+    if (m && method === 'POST') return reelRoutes.setStatus(req, res, Number(m[1]), await readJsonBody(req));
 
     m = pathname.match(/^\/api\/users\/(\d+)\/follow$/);
     if (m && method === 'POST') return reelRoutes.toggleFollow(req, res, Number(m[1]));
