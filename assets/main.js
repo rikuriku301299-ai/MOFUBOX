@@ -14,6 +14,7 @@ import { initMessages, initMyPage, initBreederMessages } from './js/messages.js'
 import { initFavorites } from './js/favorites.js';
 import { initBreederDeals, initAdminRevenue } from './js/revenue.js';
 import { initBreederReels } from './js/breeder-reels.js';
+import { initShareButtons } from './js/share.js';
 
 initScrollReveal();
 initCountUp();
@@ -38,6 +39,7 @@ initFavorites();
 initBreederDeals();
 initAdminRevenue();
 initBreederReels();
+initShareButtons();
 
 // The live reel feed is rendered from real posts (falling back to the demo
 // slides when there are none). It must be in the DOM before the swipe/like/

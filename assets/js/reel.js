@@ -53,6 +53,12 @@ export async function initReelFeed() {
               <span>保存</span>
             </button>
           </div>
+          <div class="reel-act" data-share data-share-url="/profile.html?id=${r.breederId}" data-share-text="${escapeHtml('MOFUBOXで見つけた' + kennel + 'の子猫🐱')}">
+            <button aria-label="共有する">
+              <span class="icon-circle"><svg class="icon" viewBox="0 0 24 24" width="26" height="26"><path d="M4 12v7a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-7M16 6l-4-4-4 4M12 2v14"/></svg></span>
+              <span>共有</span>
+            </button>
+          </div>
         </div>
         <div class="reel-bottom-info">
           <a href="profile.html?id=${r.breederId}" class="reel-bottom-info__breeder">

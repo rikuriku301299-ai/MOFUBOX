@@ -219,6 +219,7 @@ export function initMyPage() {
         ${fields}
         <button type="submit" class="btn btn-coral btn-block">保存する</button>
         <div class="mypage__saved" data-mypage-saved></div>
+        <button type="button" class="btn btn-ghost btn-block" data-share data-share-url="/" data-share-text="MOFUBOXで気になる子猫を探せるよ🐱" style="margin-top:12px;">友達にMOFUBOXを教える</button>
         <a href="#" class="mypage__logout" data-mypage-logout>ログアウト</a>
       </form>`;
 
