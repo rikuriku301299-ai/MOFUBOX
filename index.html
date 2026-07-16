@@ -10,6 +10,16 @@
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="MOFUBOX">
+<script>
+  // When launched as an installed app (home screen, standalone), skip the
+  // marketing page and go straight into the reel feed. Normal browser visits
+  // to the landing page are unaffected. Runs in <head> to avoid a flash.
+  (function () {
+    var standalone = (window.matchMedia && window.matchMedia('(display-mode: standalone)').matches)
+      || window.navigator.standalone === true;
+    if (standalone) location.replace('/reel.html');
+  })();
+</script>
 <title>MOFUBOX | リールで出会う、猫ブリーダーマッチング</title>
 <meta name="description" content="MOFUBOXは縦型リール動画で気になる子猫とブリーダーに出会えるマッチングサービスです。審査済みブリーダーのみが出店し、チャットで安心してやり取りできます。">
 <meta name="robots" content="index, follow">
