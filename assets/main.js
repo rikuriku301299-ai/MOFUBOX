@@ -54,3 +54,10 @@ initAutoPost();
   initMessages();
   initReelSwipe();
 })();
+
+// Register the service worker so MOFUBOX is installable to the home screen (PWA).
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('/sw.js').catch(() => {});
+  });
+}
