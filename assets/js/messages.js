@@ -189,16 +189,75 @@ export function initMyPage() {
   const trigger = document.querySelector('[data-mypage-trigger]');
   const closeBtn = overlay.querySelector('[data-mypage-close]');
   const bodyEl = overlay.querySelector('[data-mypage-body]');
+  const titleEl = overlay.querySelector('[data-mypage-title]');
 
   function fieldHtml(label, name, value, opts = {}) {
     if (opts.textarea) {
-      return `<div class="field"><label>${label}</label><textarea name="${name}" rows="3">${escapeHtml(value)}</textarea></div>`;
+      return `<div class="field"><label>${label}</label><textarea name="${name}" rows="3">${escapeHtml(value || '')}</textarea></div>`;
     }
     return `<div class="field"><label>${label}</label><input type="${opts.type || 'text'}" name="${name}" value="${attr(value)}" ${opts.attr || ''}></div>`;
   }
 
-  function render(user) {
-    const initial = escapeHtml((user.kennel || user.name || '?').charAt(0));
+  function stat(num, label) {
+    return `<div class="tt-prof__stat"><strong>${num}</strong><span>${label}</span></div>`;
+  }
+
+  function tile(r) {
+    const media = r.imageUrl
+      ? `<img src="${attr(r.imageUrl)}" alt="" loading="lazy">`
+      : `<span class="tt-tile__emoji">${r.posterEmoji || '🐱'}</span>`;
+    return `<a class="tt-tile" href="profile.html?id=${r.breederId}">${media}<span class="tt-tile__cap">${escapeHtml(r.caption || '')}</span></a>`;
+  }
+
+  // TikTok-style profile view.
+  function renderProfile(user, data) {
+    const isBreeder = user.role === 'breeder';
+    const display = user.kennel || user.name || 'ユーザー';
+    const handle = '@' + (user.email ? user.email.split('@')[0] : (user.name || 'mofubox'));
+    const initial = escapeHtml(display.charAt(0));
+    const bio = user.bio || (isBreeder ? '' : (user.breed_interest ? `気になる猫種：${user.breed_interest}` : ''));
+
+    const items = isBreeder ? (data.mine || []) : (data.favs || []);
+    const tabLabel = isBreeder ? '掲載した子' : 'きになる';
+    const stats = isBreeder
+      ? stat(items.length, '掲載') + stat(data.likes || 0, 'いいね') + stat(data.convos || 0, 'メッセージ')
+      : stat(items.length, 'きになる') + stat(data.convos || 0, 'メッセージ') + stat(user.area ? '📍' : '—', user.area || 'エリア');
+
+    const grid = items.length
+      ? `<div class="tt-grid">${items.map(tile).join('')}</div>`
+      : `<div class="tt-empty">
+           <div class="tt-empty__ico">🐾</div>
+           <div class="tt-empty__t">${isBreeder ? 'まだ掲載がありません' : 'まだ「きになる」がありません'}</div>
+           <div class="tt-empty__s">${isBreeder ? 'ブリーダー管理から子猫を投稿しましょう' : 'リールで気になる子の ❤ を押すとここに集まります'}</div>
+         </div>`;
+
+    bodyEl.innerHTML = `
+      <div class="tt-prof">
+        <div class="tt-prof__avatar">${initial}</div>
+        <div class="tt-prof__name">${escapeHtml(display)}${isBreeder ? '<span class="tt-prof__verified">✔</span>' : ''}</div>
+        <div class="tt-prof__handle">${escapeHtml(handle)}</div>
+        <div class="tt-prof__stats">${stats}</div>
+        ${bio ? `<div class="tt-prof__bio">${escapeHtml(bio)}</div>` : ''}
+        <div class="tt-prof__actions">
+          <button type="button" class="tt-btn tt-btn--main" data-mypage-edit>プロフィールを編集</button>
+          <button type="button" class="tt-btn" data-share data-share-url="/" data-share-text="MOFUBOXで気になる子猫を探せるよ🐱">シェア</button>
+        </div>
+        <div class="tt-prof__tabbar"><span class="active">${tabLabel}</span></div>
+        ${grid}
+        <a href="#" class="mypage__logout" data-mypage-logout>ログアウト</a>
+      </div>`;
+
+    if (titleEl) titleEl.textContent = 'プロフィール';
+    bodyEl.querySelector('[data-mypage-edit]').addEventListener('click', () => renderEdit(user));
+    bodyEl.querySelector('[data-mypage-logout]').addEventListener('click', async (e) => {
+      e.preventDefault();
+      await api('/api/auth/logout', { method: 'POST' });
+      location.reload();
+    });
+  }
+
+  // Editable form (reached via the 編集 button).
+  function renderEdit(user) {
     const isBreeder = user.role === 'breeder';
     const fields = isBreeder
       ? fieldHtml('キャッテリー名', 'kennel', user.kennel)
@@ -214,37 +273,44 @@ export function initMyPage() {
 
     bodyEl.innerHTML = `
       <form class="mypage" data-mypage-form>
-        <div class="mypage__avatar">${initial}</div>
-        <div class="mypage__role">${isBreeder ? 'ブリーダーアカウント' : 'お客様アカウント'}</div>
+        <button type="button" class="tt-back" data-mypage-back>← プロフィールに戻る</button>
         ${fields}
         <button type="submit" class="btn btn-coral btn-block">保存する</button>
         <div class="mypage__saved" data-mypage-saved></div>
-        <button type="button" class="btn btn-ghost btn-block" data-share data-share-url="/" data-share-text="MOFUBOXで気になる子猫を探せるよ🐱" style="margin-top:12px;">友達にMOFUBOXを教える</button>
-        <a href="#" class="mypage__logout" data-mypage-logout>ログアウト</a>
       </form>`;
+    if (titleEl) titleEl.textContent = 'プロフィールを編集';
 
     const form = bodyEl.querySelector('[data-mypage-form]');
     const saved = bodyEl.querySelector('[data-mypage-saved]');
+    bodyEl.querySelector('[data-mypage-back]').addEventListener('click', () => open());
     form.addEventListener('submit', async (e) => {
       e.preventDefault();
       const payload = {};
       new FormData(form).forEach((v, k) => { if (!k.startsWith('_')) payload[k] = v; });
       const { ok } = await api('/api/auth/profile', { method: 'POST', body: payload });
       saved.textContent = ok ? '保存しました ✓' : '保存に失敗しました';
-      if (ok) setTimeout(() => { saved.textContent = ''; }, 2500);
-    });
-    bodyEl.querySelector('[data-mypage-logout]').addEventListener('click', async (e) => {
-      e.preventDefault();
-      await api('/api/auth/logout', { method: 'POST' });
-      location.reload();
+      if (ok) setTimeout(() => open(), 900);
     });
   }
 
   async function open() {
     const user = await currentUser();
     if (!user) { location.href = 'register.html'; return; }
-    render(user);
     overlay.classList.add('open');
+    bodyEl.innerHTML = '<div class="notif-empty">読み込み中…</div>';
+    // Pull stats/content in parallel.
+    const [msgs, favs, mine] = await Promise.all([
+      api('/api/messages'),
+      user.role === 'breeder' ? Promise.resolve({ data: {} }) : api('/api/favorites'),
+      user.role === 'breeder' ? api('/api/reels/mine') : Promise.resolve({ data: {} }),
+    ]);
+    const mineReels = (mine.data && mine.data.reels) || [];
+    renderProfile(user, {
+      convos: (msgs.data && msgs.data.conversations ? msgs.data.conversations.length : 0),
+      favs: (favs.data && favs.data.reels) || [],
+      mine: mineReels,
+      likes: mineReels.reduce((s, r) => s + (r.likeCount || 0), 0),
+    });
   }
   function close() { overlay.classList.remove('open'); }
 
