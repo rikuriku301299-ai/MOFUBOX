@@ -2001,3 +2001,26 @@ img.reel-slide__media, video.reel-slide__media {
   position: absolute; inset: 0; width: 100%; height: 100%;
   object-fit: cover; display: block;
 }
+
+/* "Add to home screen" hint banner (landing page) */
+.install-banner {
+  position: fixed; left: 50%; bottom: 16px; transform: translateX(-50%) translateY(140%);
+  width: min(520px, calc(100vw - 24px)); z-index: 1500;
+  display: flex; align-items: center; gap: 12px;
+  background: #fff; border: 1px solid var(--line); border-radius: 16px;
+  padding: 12px 14px; box-shadow: 0 12px 34px rgba(40,20,25,.18);
+  transition: transform .32s cubic-bezier(.2,.7,.2,1); opacity: .98;
+}
+.install-banner.show { transform: translateX(-50%) translateY(0); }
+.install-banner__icon { width: 44px; height: 44px; border-radius: 11px; flex-shrink: 0; }
+.install-banner__text { min-width: 0; flex: 1; display: flex; flex-direction: column; line-height: 1.4; }
+.install-banner__text strong { font-size: 14px; }
+.install-banner__text span { font-size: 12px; color: var(--ink-soft); }
+.install-banner__add {
+  flex-shrink: 0; border: 0; background: var(--coral, #e8615a); color: #fff;
+  font-weight: 700; font-size: 13px; padding: 9px 16px; border-radius: 999px; cursor: pointer;
+}
+.install-banner__close {
+  flex-shrink: 0; border: 0; background: none; color: var(--ink-faint);
+  font-size: 20px; line-height: 1; padding: 4px 6px; cursor: pointer;
+}

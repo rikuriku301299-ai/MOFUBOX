@@ -16,6 +16,7 @@ import { initBreederDeals, initAdminRevenue } from './js/revenue.js';
 import { initBreederReels } from './js/breeder-reels.js';
 import { initShareButtons } from './js/share.js';
 import { initAutoPost } from './js/autopost.js';
+import { initInstallPrompt } from './js/install.js';
 
 initScrollReveal();
 initCountUp();
@@ -42,6 +43,7 @@ initAdminRevenue();
 initBreederReels();
 initShareButtons();
 initAutoPost();
+initInstallPrompt();
 
 // The live reel feed is rendered from real posts (falling back to the demo
 // slides when there are none). It must be in the DOM before the swipe/like/
