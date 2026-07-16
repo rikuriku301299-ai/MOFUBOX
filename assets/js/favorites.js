@@ -1,6 +1,7 @@
 import { api } from './api.js';
 import { escapeHtml } from './utils.js';
 import { availBadge } from './reel.js';
+import { ensureAuth } from './authgate.js';
 
 // きになるリスト: the reels a customer has liked (❤), shown in one place so they
 // can come back to the cats they were interested in.
@@ -15,7 +16,7 @@ export function initFavorites() {
     listEl.className = 'notif-empty';
     listEl.textContent = '読み込み中…';
     const { ok, status, data } = await api('/api/favorites');
-    if (status === 401) { location.href = 'register.html'; return; }
+    if (status === 401) return;
     if (!ok) { listEl.textContent = '読み込めませんでした。'; return; }
     if (!data.reels.length) {
       listEl.className = 'notif-empty';
@@ -38,7 +39,11 @@ export function initFavorites() {
     }).join('');
   }
 
-  function open() { overlay.classList.add('open'); load(); }
+  async function open() {
+    if (!(await ensureAuth())) return;
+    overlay.classList.add('open');
+    load();
+  }
   function close() { overlay.classList.remove('open'); }
 
   if (trigger) trigger.addEventListener('click', (e) => { e.preventDefault(); open(); });

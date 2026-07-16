@@ -2066,3 +2066,12 @@ img.reel-slide__media, video.reel-slide__media {
 .tt-empty__t { font-weight: 700; font-size: 15px; margin-bottom: 6px; }
 .tt-empty__s { font-size: 13px; color: var(--ink-faint); }
 .tt-back { background: none; border: 0; color: var(--ink-soft); font-size: 13px; padding: 4px 0 16px; cursor: pointer; }
+
+/* In-context login sheet */
+.auth-gate { padding: 8px 4px 24px; max-width: 380px; margin: 0 auto; }
+.auth-gate__logo { font-size: 40px; text-align: center; margin: 8px 0 4px; }
+.auth-gate__lead { text-align: center; font-size: 13.5px; color: var(--ink-soft); line-height: 1.7; margin-bottom: 18px; }
+.auth-gate__form .field { margin-bottom: 12px; }
+.auth-gate__error { color: var(--coral-dark, #c0453e); font-size: 13px; margin: 4px 0 10px; }
+.auth-gate__reg { text-align: center; font-size: 13px; color: var(--ink-soft); margin-top: 16px; }
+.auth-gate__reg a { color: var(--coral, #e8615a); font-weight: 700; }

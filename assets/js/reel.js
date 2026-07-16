@@ -1,5 +1,6 @@
 import { api } from './api.js';
 import { escapeHtml, formatCount } from './utils.js';
+import { ensureAuth } from './authgate.js';
 
 const THEMES = ['coral', 'mint', 'gold', 'rose'];
 const AVAIL = {
@@ -135,7 +136,7 @@ export function initLikeToggles() {
 
       if (slide) {
         const { ok, status, data } = await api(`/api/reels/${slide.dataset.reelId}/like`, { method: 'POST' });
-        if (status === 401) { location.href = 'register.html'; return; }
+        if (status === 401) { ensureAuth(); return; }
         if (!ok) return;
         btn.classList.toggle('liked', data.liked);
         if (countEl) countEl.textContent = formatCount(data.count);
@@ -159,7 +160,7 @@ export function initLikeToggles() {
 
       if (slide) {
         const { ok, status, data } = await api(`/api/users/${slide.dataset.breederId}/follow`, { method: 'POST' });
-        if (status === 401) { location.href = 'register.html'; return; }
+        if (status === 401) { ensureAuth(); return; }
         if (!ok) return;
         btn.classList.toggle('followed', data.following);
         btn.textContent = data.following ? '✓' : '+';

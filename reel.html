@@ -94,6 +94,29 @@
     </div>
   </div>
 
+  <!-- LOGIN SHEET -->
+  <div class="reel-sheet" data-auth-overlay>
+    <div class="reel-sheet__head">
+      <h3>ログイン</h3>
+      <button type="button" class="reel-sheet__icon" data-auth-close aria-label="閉じる">
+        <svg class="icon" viewBox="0 0 24 24" width="20" height="20"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+    <div class="reel-sheet__body">
+      <div class="auth-gate">
+        <div class="auth-gate__logo">🐾</div>
+        <p class="auth-gate__lead">メッセージ・きになる・プロフィールを使うには、ログインしてください。</p>
+        <form data-auth-form class="auth-gate__form">
+          <div class="field"><label>メールアドレス</label><input type="email" data-auth-email autocomplete="email" required></div>
+          <div class="field"><label>パスワード</label><input type="password" data-auth-pw autocomplete="current-password" required></div>
+          <p class="auth-gate__error" data-auth-error style="display:none;"></p>
+          <button type="submit" class="btn btn-coral btn-block">ログイン</button>
+        </form>
+        <div class="auth-gate__reg">はじめての方は <a href="register.html">新規登録はこちら →</a></div>
+      </div>
+    </div>
+  </div>
+
   <!-- きになるリスト -->
   <div class="reel-sheet" data-fav-overlay>
     <div class="reel-sheet__head">

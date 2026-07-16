@@ -1,5 +1,6 @@
 import { api } from './api.js';
 import { escapeHtml } from './utils.js';
+import { ensureAuth } from './authgate.js';
 
 // One-tap phrases. Customers ask common questions; breeders reply without typing.
 const CUSTOMER_QUICKS = [
@@ -140,7 +141,7 @@ export function initMessages() {
   }
 
   async function open() {
-    if (!(await currentUser())) { location.href = 'register.html'; return; }
+    if (!(await ensureAuth())) return;
     showList();
     listEl.className = 'notif-empty';
     listEl.textContent = '読み込み中…';
@@ -171,7 +172,7 @@ export function initMessages() {
       const slide = cta.closest('[data-breeder-id]');
       const breederId = slide && slide.dataset.breederId;
       if (!breederId) return;
-      if (!(await currentUser())) { location.href = 'register.html'; return; }
+      if (!(await ensureAuth())) return;
       const { ok, data } = await api(`/api/messages/${breederId}`);
       if (!ok) { alert('このブリーダーにはまだ連絡できません。'); return; }
       overlay.classList.add('open');
@@ -294,8 +295,8 @@ export function initMyPage() {
   }
 
   async function open() {
-    const user = await currentUser();
-    if (!user) { location.href = 'register.html'; return; }
+    const user = await ensureAuth();
+    if (!user) return;
     overlay.classList.add('open');
     bodyEl.innerHTML = '<div class="notif-empty">読み込み中…</div>';
     // Pull stats/content in parallel.
