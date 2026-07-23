@@ -33,6 +33,20 @@ export function generateCaption({ name, breed, weeks, area, sex }) {
   return s.replace(/\s{2,}/g, ' ').replace(/・。/g, '。').replace(/。\s*$/,'。').trim();
 }
 
+// Build the text a breeder pastes into TikTok / Instagram. It ends with a
+// call-to-action + a MOFUBOX link, so viewers who see the post on SNS can jump
+// back to MOFUBOX to chat / adopt (funnel-in, not funnel-out).
+export function buildSnsText({ caption, tags, link }) {
+  const tagLine = (tags || [])
+    .map((t) => '#' + String(t).replace(/^#/, '').replace(/\s+/g, ''))
+    .filter(Boolean)
+    .join(' ');
+  const parts = [String(caption || '').trim()];
+  if (tagLine) parts.push(tagLine);
+  parts.push('👀 この子とチャット・お迎えはモフボックスから🐾\n🔗 ' + link);
+  return parts.filter(Boolean).join('\n\n');
+}
+
 export function generateTags({ breed, area }) {
   const rotating = ['子猫', '子猫のいる暮らし', '猫好きさんと繋がりたい', 'ねこすたぐらむ', 'ねこのいる生活', '子猫販売', 'ブリーダー直販'];
   const tags = [];
@@ -59,6 +73,9 @@ export function initAutoPost() {
   const previewText = form.querySelector('[data-ap-preview-text]');
   const submitBtn = form.querySelector('[data-ap-submit]');
   const status = form.querySelector('[data-ap-status]');
+  const snsBox = form.querySelector('[data-ap-sns]');
+  const snsText = form.querySelector('[data-ap-sns-text]');
+  const snsCopy = form.querySelector('[data-ap-sns-copy]');
   let file = null;
 
   const facts = () => ({
@@ -106,6 +123,13 @@ export function initAutoPost() {
         showStatus(m, 'error'); submitBtn.disabled = false; return;
       }
       showStatus('投稿しました！リールに表示されます🐱', 'ok');
+      // Offer the SNS-ready text (caption + tags + MOFUBOX link) to copy-paste
+      // into TikTok / Instagram, so SNS viewers funnel back to MOFUBOX.
+      if (snsBox && snsText) {
+        const link = `${window.location.origin}/reel.html`;
+        snsText.value = buildSnsText({ caption, tags, link });
+        snsBox.style.display = '';
+      }
       file = null; fileInput.value = ''; fileLabel.textContent = '写真・動画を選ぶ';
       nameEl.value = ''; weeksEl.value = '';
       preview.style.display = 'none';
@@ -116,4 +140,22 @@ export function initAutoPost() {
       submitBtn.disabled = false;
     }
   });
+
+  // Copy the SNS text to the clipboard so it can be pasted into TikTok / IG.
+  if (snsCopy && snsText) {
+    snsCopy.addEventListener('click', async () => {
+      snsText.focus();
+      snsText.select();
+      let done = false;
+      try {
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+          await navigator.clipboard.writeText(snsText.value);
+          done = true;
+        }
+      } catch { /* fall through to execCommand */ }
+      if (!done) { try { done = document.execCommand('copy'); } catch { done = false; } }
+      snsCopy.textContent = done ? 'コピーしました！' : '長押しでコピー';
+      setTimeout(() => { snsCopy.textContent = 'コピーする'; }, 1800);
+    });
+  }
 }

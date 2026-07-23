@@ -281,6 +281,16 @@
         <div style="display:flex;justify-content:flex-end;">
           <button type="button" class="btn btn-coral" data-ap-submit>自動で文章を作って投稿</button>
         </div>
+
+        <!-- 投稿後に出る：TikTok / Instagram に貼る用のテキスト（末尾にモフボックスのリンク付き） -->
+        <div data-ap-sns style="display:none;margin-top:20px;padding:16px;border:1px solid var(--line,#eee0de);border-radius:12px;">
+          <div style="font-weight:700;font-size:14px;margin-bottom:4px;">📣 TikTok・Instagram に貼る用</div>
+          <p style="font-size:12.5px;color:var(--ink-soft);margin:0 0 10px;">これをコピーして、TikTokやInstagramの投稿文にそのまま貼るだけ。<b>末尾のリンクから、見た人がモフボックスに飛べます。</b></p>
+          <textarea data-ap-sns-text readonly rows="8" style="width:100%;box-sizing:border-box;font-size:13px;line-height:1.7;padding:12px;border:1px solid var(--line,#eee0de);border-radius:10px;background:var(--rose-wash,#fbf1f3);resize:vertical;color:var(--ink);"></textarea>
+          <div style="display:flex;justify-content:flex-end;margin-top:10px;">
+            <button type="button" class="btn btn-coral" data-ap-sns-copy>コピーする</button>
+          </div>
+        </div>
       </div>
 
       <div class="panel" data-reel-upload-form>
