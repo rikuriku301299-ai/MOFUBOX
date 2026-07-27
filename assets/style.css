@@ -2196,3 +2196,127 @@ body.lp-editorial {
 /* ---- Emoji stickers: a touch bigger + jaunty tilt ---- */
 .lp-editorial .breed-card__emoji { font-size: 44px; }
 .lp-editorial .split__badge .ico { transform: rotate(-6deg); }
+
+/* =========================================================
+   MOFUBOX — "SIGNATURE" layer (kills the generic/AI look)
+   Editorial hairline labels, confident solid display heads,
+   film grain, a scroll-progress line, a lagging cursor ring
+   and kinetic hero type. LP-only (body.lp-editorial).
+   Loaded after the POP layer so it wins where they overlap.
+   ========================================================= */
+
+/* ---- Fine film grain over the whole page: kills flat-gradient "AI" feel --- */
+body.lp-editorial::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  opacity: 0.05;
+  mix-blend-mode: multiply;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
+/* ---- Eyebrows become quiet editorial labels, not gradient pills ----------- */
+.lp-editorial .eyebrow {
+  background: none;
+  box-shadow: none;
+  padding: 0;
+  color: var(--ink-soft);
+  font-family: var(--font-en);
+  font-weight: 600;
+  font-size: 11.5px;
+  letter-spacing: 0.32em;
+  text-transform: uppercase;
+}
+.lp-editorial .eyebrow::before {
+  content: "";
+  display: inline-block;
+  width: 26px;
+  height: 2px;
+  margin-right: 12px;
+  vertical-align: middle;
+  border-radius: 2px;
+  background: var(--pop-grad);
+}
+
+/* ---- Headings go solid + heavy + tight: reads "designed", not generated --- */
+.lp-editorial .section-head h2 {
+  background: none;
+  -webkit-text-fill-color: currentColor;
+  color: var(--ink);
+  font-weight: 900;
+  letter-spacing: -0.02em;
+  line-height: 1.16;
+}
+/* Keep one word of colour as an accent where a .nb span is present. */
+.lp-editorial .section-head h2 .nb:first-child {
+  background: var(--pop-grad);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  color: transparent;
+}
+
+/* ---- Kinetic hero title (per-glyph rise) ----------------------------------
+   Robust by construction: glyphs are VISIBLE by default, so if JS never runs
+   the headline still shows. JS adds `.kinetic-armed` (hide) then `.kinetic-in`
+   (reveal) — the reveal is the resting style, so an interrupted transition
+   still lands on "visible", never on "invisible". */
+.lp-editorial .hero-e__title .kw { display: inline-block; will-change: transform, opacity, filter; }
+.lp-editorial .hero-e__title.kinetic-armed .kw {
+  opacity: 0;
+  transform: translateY(0.5em) rotate(4deg);
+  filter: blur(6px);
+  transition: opacity 0.7s cubic-bezier(0.2, 0.85, 0.2, 1),
+              transform 0.7s cubic-bezier(0.2, 0.85, 0.2, 1),
+              filter 0.7s cubic-bezier(0.2, 0.85, 0.2, 1);
+  transition-delay: calc(var(--i) * 42ms + 120ms);
+}
+.lp-editorial .hero-e__title.kinetic-armed.kinetic-in .kw {
+  opacity: 1;
+  transform: none;
+  filter: blur(0);
+}
+
+/* ---- Scroll-progress line ------------------------------------------------- */
+.scroll-prog {
+  position: fixed;
+  top: 0; left: 0;
+  height: 3px;
+  width: 100%;
+  transform-origin: 0 50%;
+  transform: scaleX(0);
+  background: var(--pop-grad);
+  z-index: 9998;
+  pointer-events: none;
+}
+
+/* ---- Lagging cursor ring (desktop pointer only) --------------------------- */
+.cursor-ring {
+  position: fixed;
+  top: 0; left: 0;
+  width: 26px; height: 26px;
+  margin: -13px 0 0 -13px;
+  border: 2px solid var(--pop-2, #FF4E86);
+  border-radius: 50%;
+  pointer-events: none;
+  z-index: 9999;
+  mix-blend-mode: multiply;
+  transition: width 0.22s ease, height 0.22s ease, margin 0.22s ease, background 0.22s ease, opacity 0.3s ease;
+}
+.cursor-ring.is-hot {
+  width: 48px; height: 48px;
+  margin: -24px 0 0 -24px;
+  background: rgba(255, 78, 134, 0.12);
+}
+.cursor-ring.is-gone { opacity: 0; }
+
+/* Turn off the bespoke motion where it isn't wanted. */
+@media (prefers-reduced-motion: reduce) {
+  .cursor-ring, .scroll-prog { display: none !important; }
+  .lp-editorial .hero-e__title .kw { opacity: 1 !important; transform: none !important; filter: none !important; transition: none !important; }
+}
+@media (pointer: coarse) {
+  .cursor-ring { display: none !important; }
+}

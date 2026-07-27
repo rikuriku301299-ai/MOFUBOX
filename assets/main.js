@@ -18,9 +18,11 @@ import { initShareButtons } from './js/share.js';
 import { initAutoPost } from './js/autopost.js';
 import { initInstallPrompt } from './js/install.js';
 import { initAuthGate } from './js/authgate.js';
+import { initMotion } from './js/motion.js';
 
 initScrollReveal();
 initCountUp();
+initMotion();
 initPasswordGate();
 initDashboardNav();
 initReelActions();
