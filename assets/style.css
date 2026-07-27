@@ -2075,3 +2075,124 @@ img.reel-slide__media, video.reel-slide__media {
 .auth-gate__error { color: var(--coral-dark, #c0453e); font-size: 13px; margin: 4px 0 10px; }
 .auth-gate__reg { text-align: center; font-size: 13px; color: var(--ink-soft); margin-top: 16px; }
 .auth-gate__reg a { color: var(--coral, #e8615a); font-weight: 700; }
+
+/* =========================================================
+   MOFUBOX — "POP" refresh (Gen-Z / TikTok-native)
+   Scoped to the landing page (body.lp-editorial) only, so the
+   in-app screens (reel / breeder / admin) are untouched.
+   Punchier type, coral→pink gradients, chunky pills, playful
+   card motion. Tuned to feel young / app-like without losing
+   the warm cat-friendly base.
+   ========================================================= */
+body.lp-editorial {
+  --pop-1: #FF6B5A;
+  --pop-2: #FF4E86;
+  --pop-3: #FF8FC7;
+  --pop-grad: linear-gradient(105deg, #FF6B5A 0%, #FF4E86 54%, #FF8FC7 100%);
+}
+
+/* ---- Punchier headings: tighter line-height + gradient section titles ---- */
+.lp-editorial .section-head h2 {
+  font-size: clamp(29px, 4.8vw, 44px);
+  line-height: 1.22;
+  letter-spacing: -0.01em;
+  background: var(--pop-grad);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  color: transparent;
+}
+.lp-editorial .split h2,
+.lp-editorial #story h2 { line-height: 1.28; letter-spacing: -0.01em; }
+
+/* ---- Eyebrows: solid gradient sticker pills ---- */
+.lp-editorial .eyebrow {
+  background: var(--pop-grad);
+  color: #fff;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  box-shadow: 0 6px 16px rgba(255, 78, 134, 0.28);
+}
+
+/* ---- Buttons: gradient fill, chunkier, springy hover ---- */
+.lp-editorial .btn { font-weight: 800; letter-spacing: 0.02em; }
+.lp-editorial .btn-coral {
+  background: var(--pop-grad);
+  box-shadow: 0 10px 24px rgba(255, 78, 134, 0.34);
+}
+.lp-editorial .btn-coral:hover {
+  box-shadow: 0 16px 32px rgba(255, 78, 134, 0.46);
+  transform: translateY(-3px) scale(1.02);
+}
+.lp-editorial .btn-hero { font-size: 17px; padding: 17px 34px; }
+
+/* ---- Hero: bigger, tighter, more confident ---- */
+.lp-editorial .hero-e__title {
+  font-size: clamp(32px, 5vw, 52px);
+  line-height: 1.2;
+  letter-spacing: -0.01em;
+}
+.lp-editorial .hero-e__kicker {
+  background: #fff;
+  color: var(--pop-2);
+  font-weight: 800;
+  box-shadow: 0 6px 18px rgba(120, 30, 50, 0.18);
+}
+@media (max-width: 860px) {
+  .lp-editorial .hero-e__title { font-size: 30px; line-height: 1.22; }
+}
+
+/* ---- Breed marquee: bold gradient ticker bar ---- */
+.lp-editorial .lp-marquee {
+  background: var(--pop-grad);
+  border-top: none;
+  border-bottom: none;
+  padding: 15px 0;
+}
+.lp-editorial .lp-marquee__track { color: #fff; }
+.lp-editorial .lp-marquee__track .dot { color: rgba(255, 255, 255, 0.75); }
+
+/* ---- Cards: rounder + playful lift/tilt on hover ---- */
+.lp-editorial .breed-card,
+.lp-editorial .cat-card,
+.lp-editorial .feature-card,
+.lp-editorial .step-card { border-radius: 22px; }
+.lp-editorial .breed-card:hover { transform: translateY(-6px) rotate(-1.5deg); }
+.lp-editorial .cat-card:hover { transform: translateY(-6px) rotate(1deg); }
+.lp-editorial .feature-card { transition: transform 0.2s ease, box-shadow 0.2s ease; }
+.lp-editorial .feature-card:hover {
+  transform: translateY(-6px);
+  box-shadow: 0 18px 38px rgba(255, 78, 134, 0.14);
+}
+
+/* ---- Feature icons: gradient chips ---- */
+.lp-editorial .feature-card .feature-card__icon,
+.lp-editorial .feature-card:nth-child(1) .feature-card__icon,
+.lp-editorial .feature-card:nth-child(2) .feature-card__icon,
+.lp-editorial .feature-card:nth-child(3) .feature-card__icon,
+.lp-editorial .feature-card:nth-child(4) .feature-card__icon {
+  background: var(--pop-grad);
+  color: #fff;
+  box-shadow: 0 8px 18px rgba(255, 78, 134, 0.28);
+}
+
+/* ---- Step numbers: big gradient numerals ---- */
+.lp-editorial .step-card__num {
+  font-size: 48px;
+  background: var(--pop-grad);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  color: transparent;
+}
+
+/* ---- CTA + notify bands: pop gradient ---- */
+.lp-editorial .cta-band,
+.lp-editorial .notify-band {
+  background: var(--pop-grad);
+  box-shadow: 0 24px 50px rgba(255, 78, 134, 0.22);
+}
+
+/* ---- Emoji stickers: a touch bigger + jaunty tilt ---- */
+.lp-editorial .breed-card__emoji { font-size: 44px; }
+.lp-editorial .split__badge .ico { transform: rotate(-6deg); }
