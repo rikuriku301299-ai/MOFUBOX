@@ -1,0 +1,87 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "MOFUBOX content-engine daily brief",
+  "description": "1件のSNSコンテンツアイデア(=ブリーフ)のデータ構造。briefs/<date>/ideas.json は、この形式のオブジェクトを40件含む配列 { \"date\": \"YYYY-MM-DD\", \"ideas\": [ ...この形式... ] } を持つ。",
+  "type": "object",
+  "required": [
+    "id",
+    "pillar",
+    "platform_fit",
+    "hook",
+    "concept",
+    "video_prompt",
+    "caption",
+    "hashtags",
+    "source_asset",
+    "needs_breeder_consent",
+    "status"
+  ],
+  "properties": {
+    "id": {
+      "type": "string",
+      "description": "例: 2026-07-30-014 (日付-連番)"
+    },
+    "pillar": {
+      "type": "string",
+      "enum": ["cute_moment", "breed_profile", "breeder_spotlight", "before_you_adopt", "qna_engagement"]
+    },
+    "platform_fit": {
+      "type": "array",
+      "items": { "type": "string", "enum": ["instagram_reels", "tiktok", "x", "youtube_shorts"] },
+      "description": "このネタが特に刺さるプラットフォーム。複数可"
+    },
+    "hook": {
+      "type": "string",
+      "description": "動画冒頭1-2秒で使う掴みのセリフ・テキスト"
+    },
+    "concept": {
+      "type": "string",
+      "description": "何を見せる動画か、1-2文の要約"
+    },
+    "video_prompt": {
+      "type": "string",
+      "description": "Phase2の実写編集(または将来のAI動画生成)に渡す具体的な絵コンテ指示。カット割り・使う素材の種類・尺の目安を含む"
+    },
+    "voiceover_script": {
+      "type": ["string", "null"],
+      "description": "ナレーション原稿。Phase1では字幕のみ運用のためnull可。TTS導入後に使う"
+    },
+    "on_screen_text": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "字幕・テロップとして画面に出すテキストを時系列で並べたもの"
+    },
+    "caption": {
+      "type": "object",
+      "description": "プラットフォームごとの投稿本文。共通で使う場合はcommonのみでも可",
+      "properties": {
+        "common": { "type": "string" },
+        "instagram_reels": { "type": "string" },
+        "tiktok": { "type": "string" },
+        "x": { "type": "string" },
+        "youtube_shorts": { "type": "string" }
+      }
+    },
+    "hashtags": {
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "source_asset": {
+      "type": "string",
+      "description": "使う実写素材の指定。例: 'breeder_id=xxx の子猫動画', '既存reel #5の写真', '新規撮影が必要'"
+    },
+    "needs_breeder_consent": {
+      "type": "boolean",
+      "description": "特定ブリーダーの実写素材を使う場合はtrue。同意確認が取れるまで制作フェーズに進めない"
+    },
+    "cta": {
+      "type": "string",
+      "description": "動画末尾で促す行動。例: 'プロフィールのリンクからMOFUBOXへ', 'コメントで品種名当ててね'"
+    },
+    "status": {
+      "type": "string",
+      "enum": ["backlog", "selected", "in_production", "produced", "posted", "rejected"],
+      "default": "backlog"
+    }
+  }
+}
